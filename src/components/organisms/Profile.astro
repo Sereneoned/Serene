@@ -6,8 +6,6 @@ import Avatar from "@components/atoms/display/Avatar.svelte";
 import Card from "@components/atoms/display/Card.svelte";
 import Tooltip from "@components/atoms/overlay/Tooltip.svelte";
 import UmamiStats from "@components/organisms/UmamiStats.astro";
-import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { resolveImageAsset } from "@utils/asset-utils";
 import { url } from "@utils/url-utils";
@@ -64,12 +62,7 @@ if (typeof avatarAsset !== "string") {
 ---
 <div class={className} style={style}>
 	<Card color="var(--card-bg)" radius="l" class="m3-profile p-3">
-    <a aria-label={i18n(I18nKey.goToAboutPage)} data-ui-i18n-aria-label={I18nKey.goToAboutPage} href={url('/about/')}
-       class="m3-profile__avatar-link group">
-        <div class="m3-profile__avatar-overlay">
-            <Icon icon="fa7-solid:address-card"
-                  class="m3-profile__avatar-icon" />
-        </div>
+    <div class="m3-profile__avatar-frame">
         <Avatar
             src={avatarUrl}
 			srcset={avatarSrcset}
@@ -83,7 +76,7 @@ if (typeof avatarAsset !== "string") {
             shape="rounded"
             class="mx-auto lg:!w-full"
         />
-    </a>
+    </div>
     <div class="m3-profile__info px-2">
         <div class="m3-profile__name">{config.name}</div>
         <div class="m3-profile__accent"></div>
@@ -109,48 +102,24 @@ if (typeof avatarAsset !== "string") {
 
 <style lang="stylus">
 .m3-profile
-	&__avatar-link
+	&__avatar-frame
 		display: block
-		position: relative
+		width: fit-content
 		margin: var(--m3e-space-1) auto var(--m3e-space-3)
 		max-width: 12rem
 		border-radius: var(--shape-corner-m)
 		overflow: hidden
+		will-change: transform
 		transition:
-			transform var(--m3e-duration-short) var(--m3e-easing-standard),
-			box-shadow var(--m3e-duration-short) var(--m3e-easing-standard)
-		&:focus-visible
-			outline: 2px solid var(--primary)
-			outline-offset: 2px
+			transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1)
+		&:hover
+			transform: scale(1.05)
+			box-shadow: var(--m3e-elevation-2)
 		@media (min-width: 1024px)
+			width: 100%
 			max-width: none
 			margin-top: 0
-
-	&__avatar-overlay
-		position: absolute
-		inset: 0
-		z-index: 10
-		display: flex
-		align-items: center
-		justify-content: center
-		pointer-events: none
-		transition: background-color var(--m3e-duration-medium) var(--m3e-easing-standard)
-		.group:hover &
-			background-color: rgba(0, 0, 0, 0.3)
-		.group:active &
-			background-color: rgba(0, 0, 0, 0.5)
-
-	&__avatar-icon
-		color: #fff
-		font-size: 3rem
-		opacity: 0
-		transform: scale(0.9)
-		transition:
-			opacity var(--m3e-duration-medium) var(--m3e-easing-emphasized-decelerate),
-			transform var(--m3e-duration-medium) var(--m3e-easing-emphasized-decelerate)
-		.group:hover &
-			opacity: 1
-			transform: scale(1)
 
 	&__name
 		font: var(--m3e-type-title-large)
@@ -175,4 +144,15 @@ if (typeof avatarAsset !== "string") {
 		margin: 0 0 var(--m3e-space-3)
 		line-height: 1.5
 		transition: color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+:global(html.motion-reduced) .m3-profile__avatar-frame,
+:global(html.motion-reduced) .m3-profile__avatar-frame:hover
+	transition: none
+	transform: none
+
+@media (prefers-reduced-motion: reduce)
+	.m3-profile__avatar-frame,
+	.m3-profile__avatar-frame:hover
+		transition: none
+		transform: none
 </style>
