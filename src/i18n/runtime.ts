@@ -55,8 +55,13 @@ function formatCopy(
 export function applyUiLanguage(): void {
 	if (typeof document === "undefined") return;
 	const language = get(uiLocale);
-	document.documentElement.dataset.uiLocale = language;
-	document.documentElement.lang = language.replaceAll("_", "-");
+	const nextLang = language.replaceAll("_", "-");
+	if (document.documentElement.dataset.uiLocale !== language) {
+		document.documentElement.dataset.uiLocale = language;
+	}
+	if (document.documentElement.lang !== nextLang) {
+		document.documentElement.lang = nextLang;
+	}
 	for (const element of document.querySelectorAll<HTMLElement>(selector)) {
 		const key = element.dataset.uiI18n;
 		if (key && validKeys.has(key)) {
@@ -66,10 +71,10 @@ export function applyUiLanguage(): void {
 		for (const attribute of attributes) {
 			const attributeKey = element.getAttribute(`data-ui-i18n-${attribute}`);
 			if (attributeKey && validKeys.has(attributeKey)) {
-				element.setAttribute(
-					attribute,
-					formatCopy(element, attributeKey, language),
-				);
+				const nextValue = formatCopy(element, attributeKey, language);
+				if (element.getAttribute(attribute) !== nextValue) {
+					element.setAttribute(attribute, nextValue);
+				}
 			}
 		}
 	}
@@ -78,13 +83,18 @@ export function applyUiLanguage(): void {
 		? I18nKey.uiLanguageEnglish
 		: I18nKey.uiLanguageChinese;
 	const actionKey = chinese ? I18nKey.switchToEnglish : I18nKey.switchToChinese;
+	const nextPressed = String(chinese);
+	const nextTitle = i18n(actionKey, language);
+	const nextLabel = i18n(labelKey, language);
 	for (const button of document.querySelectorAll<HTMLButtonElement>(
 		"#ui-language-switch",
 	)) {
-		button.setAttribute("aria-pressed", String(chinese));
-		button.title = i18n(actionKey, language);
+		if (button.getAttribute("aria-pressed") !== nextPressed) {
+			button.setAttribute("aria-pressed", nextPressed);
+		}
+		if (button.title !== nextTitle) button.title = nextTitle;
 		const label = button.querySelector<HTMLElement>("[data-ui-language-label]");
-		if (label) label.textContent = i18n(labelKey, language);
+		if (label && label.textContent !== nextLabel) label.textContent = nextLabel;
 	}
 }
 

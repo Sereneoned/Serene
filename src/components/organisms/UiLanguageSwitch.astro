@@ -2,17 +2,28 @@
 import Icon from "@components/atoms/display/Icon.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import { siteConfig } from "@/config";
+
+const isChineseDefault =
+	siteConfig.lang.toLowerCase().replaceAll("-", "_") === "zh_cn";
+const initialActionKey = isChineseDefault
+	? I18nKey.switchToEnglish
+	: I18nKey.switchToChinese;
+const initialLabelKey = isChineseDefault
+	? I18nKey.uiLanguageEnglish
+	: I18nKey.uiLanguageChinese;
 ---
 
 <button
 	id="ui-language-switch"
 	type="button"
-	class="ui-language-switch m3-state-layer shrink-0"
-	aria-pressed="false"
-	title={i18n(I18nKey.switchToChinese)}
+	class="ui-language-switch m3-state-layer shrink-0 notranslate"
+	translate="no"
+	aria-pressed={isChineseDefault ? "true" : "false"}
+	title={i18n(initialActionKey)}
 >
 	<Icon icon="material-symbols:translate-rounded" class="ui-language-switch__icon" />
-	<span data-ui-language-label>{i18n(I18nKey.uiLanguageChinese)}</span>
+	<span data-ui-language-label>{i18n(initialLabelKey)}</span>
 </button>
 
 <script>

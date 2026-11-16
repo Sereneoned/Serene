@@ -114,7 +114,7 @@ let drawerEl: HTMLElement | undefined = $state();
 		aria-label={siteConfig.title}
 	>
 		<div class="site-drawer__brand">
-			<div class="site-drawer__title">{siteConfig.title}</div>
+			<div class="site-drawer__title notranslate" translate="no">{siteConfig.title}</div>
 			<div class="site-drawer__subtitle">{siteConfig.subtitle}</div>
 		</div>
 

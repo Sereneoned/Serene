@@ -50,7 +50,7 @@ function isActive(link: (typeof links)[number]): boolean {
 			class="group flex h-10 min-w-0 shrink items-center gap-2 overflow-hidden px-2 text-[var(--on-surface)] transition whitespace-nowrap"
 		>
 			<span class="h-5 w-1 rounded-full bg-[var(--primary)] transition-all group-hover:h-7"></span>
-			<span class="truncate text-lg font-bold group-hover:text-[var(--primary)]">{siteConfig.title}</span>
+			<span class="truncate text-lg font-bold group-hover:text-[var(--primary)] notranslate" translate="no">{siteConfig.title}</span>
 		</a>
 		<nav class:list={["top-app-bar__nav hidden h-full items-center gap-1 whitespace-nowrap xl:flex", siteConfig.topAppBar.contentAlign === "center" ? "xl:absolute xl:left-1/2 xl:-translate-x-1/2" : "ml-4"]} aria-label={i18n(I18nKey.mainNavigation)} data-ui-i18n-aria-label={I18nKey.mainNavigation}>
 			{links.map((link) => {
