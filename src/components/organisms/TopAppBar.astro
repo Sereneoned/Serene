@@ -251,17 +251,30 @@ document.addEventListener('swup:content:replace', bindSearchTriggers);
 			background: transparent;
 			box-shadow: none;
 			backdrop-filter: none;
+			color: #15325b;
+			--on-surface: #15325b;
+			--on-surface-variant: #23456f;
+			--primary: #1d4ed8;
+			text-shadow: 0 1px 10px rgba(255, 255, 255, 0.94);
+		}
+
+		:global(html.dark) .top-app-bar--transparent {
 			color: white;
 			--on-surface: white;
 			--on-surface-variant: rgba(255, 255, 255, 0.9);
 			--primary: white;
+			text-shadow: none;
+		}
+
+		:global(html.dark) .top-app-bar--transparent .top-app-bar__nav-link--active::after {
+			background: white;
 		}
 
 			:global(.top-app-bar--transparent .top-app-bar__search-shell--expanded) {
 				--on-surface: var(--mc-on-surface);
 				--on-surface-variant: var(--mc-on-surface-variant);
 				--primary: var(--mc-primary);
-				color: var(--mc-on-surface);
+				color: var(--mc-on-surface); text-shadow: none;
 			}
 
 			:global(.top-app-bar--transparent .top-app-bar__search-shell--expanded input) {
@@ -281,11 +294,11 @@ document.addEventListener('swup:content:replace', bindSearchTriggers);
 			--on-surface: var(--mc-on-surface);
 			--on-surface-variant: var(--mc-on-surface-variant);
 			--primary: var(--mc-primary);
-			color: var(--mc-on-surface);
+			color: var(--mc-on-surface); text-shadow: none;
 		}
 
 		.top-app-bar--transparent .top-app-bar__nav-link--active::after {
-		background: white;
+		background: var(--primary);
 	}
 
 	.top-app-bar__nav-link--active {

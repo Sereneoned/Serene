@@ -1,0 +1,52 @@
+/* GitHub Invertocat-style Husky custom cursor across the site */
+:root {
+	--cursor-husky-default: url("../assets/cursors/husky-default.svg") 8 3, auto;
+	--cursor-husky-pointer: url("../assets/cursors/husky-pointer.svg") 8 3, pointer;
+}
+
+html,
+body,
+.m3-list-item,
+.calendar-cell--disabled {
+	cursor: var(--cursor-husky-default);
+}
+
+a[href],
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary,
+label[for],
+select:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="range"]:not(:disabled),
+input[type="file"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="button"]:not(:disabled),
+.m3-button:not([disabled]),
+.m3-icon-button:not([disabled]),
+.m3-chip:not([disabled]),
+.m3-fab:not([disabled]),
+.m3-card--interactive:not(.m3-card--disabled),
+.top-app-bar__submenu-item,
+.site-drawer__item,
+.site-drawer__group-head,
+.cursor-pointer {
+	cursor: var(--cursor-husky-pointer) !important;
+}
+
+input[type="text"],
+input[type="search"],
+input[type="url"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+[contenteditable="true"] {
+	cursor: text !important;
+}
+
+:disabled,
+[aria-disabled="true"] {
+	cursor: not-allowed !important;
+}

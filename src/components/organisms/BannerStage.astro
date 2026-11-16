@@ -1049,7 +1049,7 @@ const initialMobileBanner = page === "home";
 
 		.banner-stage__scrim
 			z-index: 1
-			background: unquote("rgb(0 0 0 / calc(var(--banner-dim-opacity) * 0.55))")
+			background: transparent
 			pointer-events: none
 
 		:global(html.dark) .banner-stage__scrim
@@ -1062,8 +1062,13 @@ const initialMobileBanner = page === "home";
 			align-items: center
 			justify-content: center
 			padding: 4rem 1.5rem 2rem
-			color: white
+			color: #15325b
 			text-align: center
+			text-shadow: 0 2px 18px rgba(255, 255, 255, 0.96), 0 0 8px rgba(255, 255, 255, 0.92)
+			pointer-events: none
+
+		:global(html.dark) .banner-stage__copy
+			color: white
 			text-shadow: 0 2px 12px rgba(0, 0, 0, 0.48)
 			pointer-events: none
 
@@ -1127,6 +1132,8 @@ const initialMobileBanner = page === "home";
 		.banner-stage__context-divider
 			width: var(--m3e-space-12)
 			height: 1px
+			background: rgba(21, 50, 91, 0.42)
+		:global(html.dark) .banner-stage__context-divider
 			background: rgba(255, 255, 255, 0.72)
 
 		.banner-stage__copy--context p

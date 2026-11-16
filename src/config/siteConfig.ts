@@ -12,7 +12,7 @@ import { withUserConfig } from "../utils/config-overlay.ts";
 export const siteConfig: SiteConfig = withUserConfig("site", {
 	site: "https://sereneoned.github.io/Serene/",
 	base: "/Serene/",
-	title: "Shirone",
+	title: "Serene",
 	subtitle: "A Material 3 anime blog",
 	// 电脑端顶栏标题与导航内容区域："left" 左对齐，"center" 居中。
 	topAppBar: {
@@ -63,21 +63,15 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		// 图片裁切焦点："top"、"center" 或 "bottom"。
 		position: "center",
 		dim: {
-			// 在图片上覆盖黑色遮罩以提高标题和顶部栏的对比度；opacity 范围为 0-1。
+			// 在图片上覆盖遮罩以提高标题和顶部栏的对比度（暗色模式下生效）；opacity 范围为 0-1。
 			enable: true,
-			opacity: 0.24,
+			opacity: 0.42,
 		},
 		homeText: {
 			// 仅在首页 Banner 中显示，标题与副标题会上下居中排列。
 			enable: true,
-			title: "Shirone",
-			subtitle: [
-				"特別なことはないけど、君がいると十分です",
-				"今でもあなたは私の光",
-				"君ってさ、知らないうちに私の毎日になってたよ",
-				"君と話すと、なんか毎日がちょっと楽しくなるんだ",
-				"今日はなんでもない日。でも、ちょっとだけいい日",
-			],
+			title: "Serene",
+			subtitle: ["Welcome my friends"],
 			typewriter: {
 				// 副标题逐字显示；关闭后直接显示完整副标题。
 				enable: true,
@@ -87,8 +81,8 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 				deleteSpeed: 50,
 				// 打字完成后停顿时间，单位为毫秒。
 				pauseTime: 2000,
-				// 完成后是否循环播放；关闭表示只播放一次。
-				loop: true,
+				// 完成后是否循环播放；关闭表示只播放一次，出现后不再消失。
+				loop: false,
 			},
 		},
 		carousel: {
