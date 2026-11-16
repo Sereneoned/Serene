@@ -28,7 +28,7 @@ const pageDescriptionKey = resolveI18nKey(
 const animes = await getAnimeList();
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="anime">
+<MainGridLayout title={pageTitle} titleKey={pageTitleKey} description={pageDescription} descriptionKey={pageDescriptionKey} page="anime">
 	<AnimeSection
 		animes={animes}
 		title={pageTitle} titleKey={pageTitleKey}

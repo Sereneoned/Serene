@@ -24,6 +24,6 @@ const pageDescriptionKey = resolveI18nKey(
 const albums = scanVisibleAlbums().map(toAlbumIndexItem);
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="albums">
+<MainGridLayout title={pageTitle} titleKey={pageTitleKey} description={pageDescription} descriptionKey={pageDescriptionKey} page="albums">
 	<AlbumSection {albums} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible />
 </MainGridLayout>

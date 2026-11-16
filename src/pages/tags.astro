@@ -29,7 +29,7 @@ const totalPosts = tags.reduce((sum, tag) => sum + tag.count, 0);
 const tagSummary = `${tags.length} ${i18n(I18nKey.tagsCount)} · ${totalPosts} ${i18n(I18nKey.postsCount)}`;
 ---
 
-<MainGridLayout title={i18n(I18nKey.tags)} description={tagSummary} page="tags">
+<MainGridLayout title={i18n(I18nKey.tags)} titleKey={I18nKey.tags} description={tagSummary} page="tags">
 	<Card color="var(--card-bg)" radius="l" class="tag-index px-8 py-6">
 		<PageHeader
 			icon="material-symbols:tag-rounded"

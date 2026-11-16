@@ -1,6 +1,7 @@
 ---
 import { getImage } from "astro:assets";
 import BannerWaves from "@components/molecules/BannerWaves.astro";
+import type I18nKey from "@i18n/i18nKey";
 import Icon from "@iconify/svelte";
 import { resolveImageAsset } from "@utils/asset-utils";
 import { url } from "@utils/url-utils";
@@ -10,11 +11,20 @@ import type { SidebarPage } from "@/types/sidebarConfig";
 interface Props {
 	page?: SidebarPage;
 	title?: string;
+	titleKey?: I18nKey;
 	description?: string;
+	descriptionKey?: I18nKey;
 	date?: string;
 }
 
-const { page, title = "", description = "", date = "" } = Astro.props;
+const {
+	page,
+	title = "",
+	titleKey,
+	description = "",
+	descriptionKey,
+	date = "",
+} = Astro.props;
 const normalizedTitle = title.trim();
 const normalizedDescription = description.trim();
 const initialSupportingText =
@@ -245,7 +255,7 @@ const initialMobileBanner = page === "home";
 		</div>
 	)}
 	<div class="banner-stage__copy banner-stage__copy--context" data-banner-context>
-		<div class="banner-stage__context-title" data-banner-context-title>
+		<div class="banner-stage__context-title" data-banner-context-title data-ui-i18n={titleKey}>
 			{normalizedTitle}
 		</div>
 		<div
@@ -254,7 +264,7 @@ const initialMobileBanner = page === "home";
 			hidden={!initialSupportingText && !initialDate}
 		>
 			<span class="banner-stage__context-divider" aria-hidden="true"></span>
-			<p data-banner-context-description hidden={!initialSupportingText}>
+			<p data-banner-context-description data-ui-i18n={initialSupportingText ? descriptionKey : undefined} hidden={!initialSupportingText}>
 				{initialSupportingText}
 			</p>
 			<div class="banner-stage__context-meta" data-banner-context-meta hidden={!initialDate}>
@@ -280,6 +290,8 @@ const initialMobileBanner = page === "home";
 	} from "@utils/motion";
 	import { getStoredWallpaperMode } from "@utils/setting-utils";
 	import { WALLPAPER_MODE_CHANGE_EVENT, THEME_CHANGE_EVENT } from "@constants/constants";
+	import type I18nKey from "@i18n/i18nKey";
+	import { i18n } from "@i18n/translation";
 	import type { SidebarPage } from "@/types/sidebarConfig";
 
 	interface BannerRuntime {
@@ -859,7 +871,9 @@ const initialMobileBanner = page === "home";
 
 	interface BannerContext {
 		title: string;
+		titleKey: string;
 		description: string;
+		descriptionKey: string;
 		date: string;
 	}
 
@@ -867,7 +881,9 @@ const initialMobileBanner = page === "home";
 		const container = document.getElementById("swup-container");
 		return {
 			title: container?.dataset.bannerTitle?.trim() || "",
+			titleKey: container?.dataset.bannerTitleKey?.trim() || "",
 			description: container?.dataset.bannerDescription?.trim() || "",
+			descriptionKey: container?.dataset.bannerDescriptionKey?.trim() || "",
 			date: container?.dataset.bannerDate?.trim() || "",
 		};
 	}
@@ -882,11 +898,23 @@ const initialMobileBanner = page === "home";
 			!contextDate
 		)
 			return false;
-		const title = context.title;
-		const description = context.description !== title ? context.description : "";
+		const title = context.titleKey
+			? i18n(context.titleKey as I18nKey)
+			: context.title;
+		const rawDesc = context.descriptionKey
+			? i18n(context.descriptionKey as I18nKey)
+			: context.description;
+		const description = rawDesc !== title ? rawDesc : "";
 		const date = context.date;
 		contextTitle.style.removeProperty("font-size");
 		contextTitle.dataset.titleFit = "full";
+		if (context.titleKey) contextTitle.dataset.uiI18n = context.titleKey;
+		else delete contextTitle.dataset.uiI18n;
+		if (description && context.descriptionKey) {
+			contextDescription.dataset.uiI18n = context.descriptionKey;
+		} else {
+			delete contextDescription.dataset.uiI18n;
+		}
 		contextTitle.textContent = title;
 		contextDescription.textContent = description;
 		contextDescription.hidden = !description;
@@ -1012,6 +1040,15 @@ const initialMobileBanner = page === "home";
 				scheduleNavigationSync(true);
 			});
 			document.fonts?.ready.then(scheduleContextTitleFit);
+			new MutationObserver(() => {
+				if (stage.dataset.copyMode === "context") {
+					stage.setAttribute("aria-label", contextTitle?.textContent || "");
+					scheduleContextTitleFit();
+				}
+			}).observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ["data-ui-locale"],
+			});
 		}
 	}
 </script>

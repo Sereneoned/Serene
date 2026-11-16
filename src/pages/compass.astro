@@ -26,6 +26,6 @@ const pageDescriptionKey = resolveI18nKey(
 );
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="compass">
+<MainGridLayout title={pageTitle} titleKey={pageTitleKey} description={pageDescription} descriptionKey={pageDescriptionKey} page="compass">
     <CompassSection shelves={compassData} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible></CompassSection>
 </MainGridLayout>

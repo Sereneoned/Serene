@@ -22,7 +22,7 @@ const pageDescriptionKey = resolveI18nKey(
 );
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="friends">
+<MainGridLayout title={pageTitle} titleKey={pageTitleKey} description={pageDescription} descriptionKey={pageDescriptionKey} page="friends">
 	<FriendSection
 		friends={getFriendsList()}
 		title={pageTitle} titleKey={pageTitleKey}

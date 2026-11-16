@@ -5,6 +5,6 @@ import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 ---
 
-<MainGridLayout title={i18n(I18nKey.rss)} description={i18n(I18nKey.rssSubtitle)} page="rss">
+<MainGridLayout title={i18n(I18nKey.rss)} titleKey={I18nKey.rss} description={i18n(I18nKey.rssSubtitle)} descriptionKey={I18nKey.rssSubtitle} page="rss">
 	<FeedGuide type="rss" />
 </MainGridLayout>

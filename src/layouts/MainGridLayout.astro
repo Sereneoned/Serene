@@ -8,6 +8,7 @@ import RouteProgress from "@components/organisms/RouteProgress.svelte";
 import SideBar from "@components/organisms/SideBar.astro";
 import SiteNavigationDrawer from "@components/organisms/SiteNavigationDrawer.svelte";
 import TopAppBar from "@components/organisms/TopAppBar.astro";
+import type I18nKey from "@i18n/i18nKey";
 import {
 	generateGridClasses,
 	generateMainContentClasses,
@@ -23,9 +24,11 @@ import Layout from "./Layout.astro";
 
 interface Props {
 	title?: string;
+	titleKey?: I18nKey;
 	banner?: string;
 	ogImage?: string;
 	description?: string;
+	descriptionKey?: I18nKey;
 	/** Banner 可选日期，使用 YYYY-MM-DD 等可直接写入 time[datetime] 的值。 */
 	bannerDate?: string;
 	lang?: string;
@@ -42,9 +45,11 @@ interface Props {
 
 const {
 	title,
+	titleKey,
 	banner,
 	ogImage,
 	description,
+	descriptionKey,
 	bannerDate,
 	lang,
 	setOGTypeArticle,
@@ -105,7 +110,7 @@ const showCategoryBar = hasCategoriesWidget || hasArchiveNav;
 </header>
 
 <!-- Banner -->
-<BannerStage page={page} title={title} description={description} date={bannerDate} />
+<BannerStage page={page} title={title} titleKey={titleKey} description={description} descriptionKey={descriptionKey} date={bannerDate} />
 
 <!-- Main content -->
 <div id="main-layout" class="absolute w-full z-30 pointer-events-none">
@@ -127,7 +132,9 @@ const showCategoryBar = hasCategoriesWidget || hasArchiveNav;
                     data-current-page={page}
                     data-has-comments={hasComments ? "true" : "false"}
                     data-banner-title={title || ""}
+                    data-banner-title-key={titleKey || ""}
                     data-banner-description={description || ""}
+                    data-banner-description-key={descriptionKey || ""}
                     data-banner-date={bannerDate || ""}
                     class="transition-swup-fade"
                 >

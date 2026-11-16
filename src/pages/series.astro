@@ -67,7 +67,7 @@ const pageDescription = seriesConfig.description
 	: seriesSummary;
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="series">
+<MainGridLayout title={pageTitle} titleKey={resolveI18nKey(seriesConfig.title, I18nKey.series)} description={pageDescription} descriptionKey={seriesConfig.description ? resolveI18nKey(seriesConfig.description) : undefined} page="series">
 	<Card color="var(--card-bg)" radius="l" class="series-index px-8 py-6">
 		<PageHeader
 			icon="material-symbols:auto-stories-rounded"

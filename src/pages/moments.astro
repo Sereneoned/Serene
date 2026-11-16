@@ -64,6 +64,6 @@ const author = {
 };
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="moments">
+<MainGridLayout title={pageTitle} titleKey={pageTitleKey} description={pageDescription} descriptionKey={pageDescriptionKey} page="moments">
     <MomentSection {moments} {author} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible></MomentSection>
 </MainGridLayout>
