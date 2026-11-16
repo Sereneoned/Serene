@@ -1,0 +1,62 @@
+---
+import Icon from "@components/atoms/display/Icon.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+---
+
+<button
+	id="ui-language-switch"
+	type="button"
+	class="ui-language-switch m3-state-layer shrink-0"
+	aria-pressed="false"
+	title={i18n(I18nKey.switchToChinese)}
+>
+	<Icon icon="material-symbols:translate-rounded" class="ui-language-switch__icon" />
+	<span data-ui-language-label>{i18n(I18nKey.uiLanguageChinese)}</span>
+</button>
+
+<script>
+	import { initializeUiLanguage } from "@i18n/runtime.ts";
+	initializeUiLanguage();
+</script>
+
+<style>
+	.ui-language-switch {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		min-height: 2.5rem;
+		padding-inline: 0.625rem;
+		border: 0;
+		border-radius: var(--shape-corner-m);
+		background: transparent;
+		color: inherit;
+		font: var(--m3e-type-label-large);
+		white-space: nowrap;
+		cursor: pointer;
+	}
+
+	.ui-language-switch:focus-visible {
+		outline: 2px solid var(--primary);
+		outline-offset: 2px;
+	}
+
+	.ui-language-switch[aria-pressed="true"] {
+		background: color-mix(in oklab, currentColor 8%, transparent);
+	}
+
+	.ui-language-switch :global(.ui-language-switch__icon) {
+		font-size: 1.125rem;
+	}
+
+	@media (max-width: 767px) {
+		.ui-language-switch {
+			padding-inline: 0.375rem;
+			font: var(--m3e-type-label-medium);
+		}
+		.ui-language-switch :global(.ui-language-switch__icon) {
+			display: none;
+		}
+	}
+</style>

@@ -42,7 +42,7 @@ const tocHeadings = headings.map((h) => ({
 	class="m3-floating-toc-panel"
 	role="dialog"
 	aria-modal="true"
-	aria-label={i18n(I18nKey.tableOfContents)}
+	aria-label={i18n(I18nKey.tableOfContents)} data-ui-i18n-aria-label={I18nKey.tableOfContents}
 	aria-hidden="true"
 	tabindex="-1"
 	data-toc-close-on-select={closeOnSelect ? "true" : "false"}
@@ -53,15 +53,15 @@ const tocHeadings = headings.map((h) => ({
 	<div class="m3-floating-toc-panel__header">
 		<div class="flex items-center gap-2">
 			<Icon icon="material-symbols:format-list-bulleted-rounded" class="text-xl text-[var(--primary)]" />
-			<h3 class="m3-floating-toc-panel__title">
-				{i18n(I18nKey.tableOfContents)}
+			<h3 class="m3-floating-toc-panel__title" data-ui-i18n={I18nKey.tableOfContents}>
+				<span data-ui-i18n={I18nKey.tableOfContents}>{i18n(I18nKey.tableOfContents)}</span>
 			</h3>
 		</div>
 		<button
 			id="floating-toc-close-btn"
 			type="button"
 			class="m3-floating-toc-close m3-state-layer"
-			aria-label={i18n(I18nKey.close)}
+			aria-label={i18n(I18nKey.close)} data-ui-i18n-aria-label={I18nKey.close}
 		>
 			<Icon icon="material-symbols:close-rounded" class="text-lg" />
 		</button>
@@ -73,8 +73,8 @@ const tocHeadings = headings.map((h) => ({
 			{tocHeadings.length > 0 ? (
 				<TocList headings={tocHeadings} maxDepth={maxDepth} />
 			) : (
-				<div class="py-6 text-center text-xs text-[var(--on-surface-variant)]">
-					{i18n(I18nKey.noData)}
+				<div class="py-6 text-center text-xs text-[var(--on-surface-variant)]" data-ui-i18n={I18nKey.noData}>
+					<span data-ui-i18n={I18nKey.noData}>{i18n(I18nKey.noData)}</span>
 				</div>
 			)}
 		</div>

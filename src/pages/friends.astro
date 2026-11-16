@@ -2,7 +2,7 @@
 import FriendSection from "@components/organisms/FriendSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { friendsConfig } from "@/config/friendsConfig";
 import { getFriendsList } from "../data/friends";
 
@@ -11,7 +11,12 @@ if (!friendsConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(friendsConfig.title, I18nKey.friends);
+const pageTitleKey = resolveI18nKey(friendsConfig.title, I18nKey.friends);
 const pageDescription = resolveI18nText(
+	friendsConfig.description,
+	I18nKey.friendsBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	friendsConfig.description,
 	I18nKey.friendsBanner,
 );
@@ -20,8 +25,8 @@ const pageDescription = resolveI18nText(
 <MainGridLayout title={pageTitle} description={pageDescription} page="friends">
 	<FriendSection
 		friends={getFriendsList()}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		pageSize={friendsConfig.pageSize}
 		client:visible
 	/>

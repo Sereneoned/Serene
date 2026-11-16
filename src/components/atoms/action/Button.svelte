@@ -1,4 +1,6 @@
 <script lang="ts">
+import type I18nKey from "@i18n/i18nKey";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 
 /**
@@ -18,12 +20,14 @@ import Icon from "@iconify/svelte";
 let {
 	children,
 	label = "",
+	labelKey,
 	icon = "",
 	variant = "filled",
 	size = "small",
 	full = false,
 	align = "center",
 	ariaLabel = "",
+	ariaLabelKey,
 	disabled = false,
 	type = "button",
 	href = undefined,
@@ -38,6 +42,8 @@ let {
 	children?: import("svelte").Snippet;
 	/** 按钮文本（label-large） */
 	label?: string;
+	/** Optional system UI text key; author-provided labels stay literal. */
+	labelKey?: I18nKey;
 	/** 可选 leading 图标（Iconify 名） */
 	icon?: string;
 	/** 变体：filled（默认）/ elevated / tonal / outlined / text */
@@ -50,6 +56,8 @@ let {
 	align?: "center" | "start" | "between";
 	/** 无障碍标签（children 有可见文字但需完整无障碍名时使用） */
 	ariaLabel?: string;
+	/** Optional system UI accessible-name key. */
+	ariaLabelKey?: I18nKey;
 	disabled?: boolean;
 	/** 原生 type：button（默认）/ submit / reset */
 	type?: "button" | "submit" | "reset";
@@ -65,6 +73,9 @@ let {
 	radius?: string;
 	style?: string;
 } = $props();
+
+const resolvedLabel = $derived(labelKey ? $t(labelKey) : label);
+const resolvedAriaLabel = $derived(ariaLabelKey ? $t(ariaLabelKey) : ariaLabel);
 
 /** 圆角 token 名 → 设计令牌；其他值按 CSS 原样传入 */
 const RADIUS_TOKENS: Record<string, string> = {
@@ -84,7 +95,8 @@ const radiusVar = (r: string) => RADIUS_TOKENS[r] ?? r;
 		class="m3-button m3-button--{variant} m3-button--{size} m3-button--{align} m3-state-layer {className}"
 		class:m3-button--full={full}
 		style={radius ? `--m3-button-radius: ${radiusVar(radius)}; ${style}` : style}
-		aria-label={ariaLabel || undefined}
+		aria-label={resolvedAriaLabel || undefined}
+		data-ui-i18n-aria-label={ariaLabelKey}
 		onclick={onclick}
 	>
 		{#if icon}
@@ -92,8 +104,8 @@ const radiusVar = (r: string) => RADIUS_TOKENS[r] ?? r;
 		{/if}
 		{#if children}
 			<span class="m3-button__content">{@render children()}</span>
-		{:else if label}
-			<span class="m3-button__label">{label}</span>
+		{:else if resolvedLabel}
+			<span class="m3-button__label" data-ui-i18n={labelKey}>{resolvedLabel}</span>
 		{/if}
 	</a>
 {:else}
@@ -103,7 +115,8 @@ const radiusVar = (r: string) => RADIUS_TOKENS[r] ?? r;
 		class:m3-button--full={full}
 		class:m3-button--disabled={disabled}
 		style={radius ? `--m3-button-radius: ${radiusVar(radius)}; ${style}` : style}
-		aria-label={ariaLabel || undefined}
+		aria-label={resolvedAriaLabel || undefined}
+		data-ui-i18n-aria-label={ariaLabelKey}
 		disabled={disabled}
 		onclick={onclick}
 	>
@@ -112,8 +125,8 @@ const radiusVar = (r: string) => RADIUS_TOKENS[r] ?? r;
 		{/if}
 		{#if children}
 			<span class="m3-button__content">{@render children()}</span>
-		{:else if label}
-			<span class="m3-button__label">{label}</span>
+		{:else if resolvedLabel}
+			<span class="m3-button__label" data-ui-i18n={labelKey}>{resolvedLabel}</span>
 		{/if}
 	</button>
 {/if}

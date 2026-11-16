@@ -6,16 +6,26 @@
  * 本组件用 Icon 原子（构建期内联的 SVG），供纯 SSR 页面直接使用。
  */
 import Icon from "@iconify/svelte";
+import type I18nKey from "@i18n/i18nKey";
 
 interface Props {
 	title: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 	subtitle?: string;
 	/** 标题左侧装饰图标（Iconify 名） */
 	icon?: string;
 	class?: string;
 }
 
-const { title, subtitle = "", icon, class: className } = Astro.props;
+const {
+	title,
+	titleKey,
+	subtitle = "",
+	subtitleKey,
+	icon,
+	class: className,
+} = Astro.props;
 ---
 
 <div class:list={["page-header", className]}>
@@ -25,9 +35,9 @@ const { title, subtitle = "", icon, class: className } = Astro.props;
 				<Icon icon={icon} />
 			</span>
 		)}
-		<h1 class="page-header__title">{title}</h1>
+		<h1 class="page-header__title" data-ui-i18n={titleKey}>{title}</h1>
 	</div>
-	{subtitle && <p class="page-header__subtitle">{subtitle}</p>}
+	{(subtitle || Astro.slots.has("subtitle")) && <p class="page-header__subtitle" data-ui-i18n={subtitleKey}><slot name="subtitle">{subtitle}</slot></p>}
 </div>
 
 <style lang="stylus">

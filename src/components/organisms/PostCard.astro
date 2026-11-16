@@ -138,6 +138,7 @@ const excerpt =
 	href={url}
 	title={title}
 	description={excerpt}
+	descriptionKey={isEncrypted && entry.data.hideHomeContent ? I18nKey.postEncryptedSummary : undefined}
 	image={coverUrl}
 	imageSrcset={coverSrcset}
 	imageAvifSrcset={coverAvifSrcset}
@@ -151,4 +152,6 @@ const excerpt =
 	category={categoryLink}
 	tags={tagLinks}
 	wordCount={wordCount}
+	wordCountValue={words}
+	wordCountKey={words === 1 ? I18nKey.wordCount : I18nKey.wordsCount}
 />

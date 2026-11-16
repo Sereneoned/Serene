@@ -1,10 +1,16 @@
 <script lang="ts">
+import Button from "@components/atoms/action/Button.svelte";
 import IconButton from "@components/atoms/action/IconButton.svelte";
 import ProgressIndicator from "@components/atoms/feedback/ProgressIndicator.svelte";
 import Tooltip from "@components/atoms/overlay/Tooltip.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
+import { getAdminSession, onAdminSessionChange } from "@utils/admin/session";
 import { collapse } from "@utils/motion";
+import { url } from "@utils/url-utils";
 import { onMount } from "svelte";
+import { adminConfig } from "@/config/adminConfig";
 import type { ResolvedMusicOptions } from "@/config/musicConfig";
 import type {
 	MusicErrorCode,
@@ -35,12 +41,30 @@ interface Labels {
 	errors: Record<MusicErrorCode, string>;
 }
 
+type LabelKeys = {
+	[K in Exclude<keyof Labels, "errors">]: I18nKey;
+} & { errors: Record<MusicErrorCode, I18nKey> };
+
 interface Props {
 	options: ResolvedMusicOptions;
 	labels: Labels;
+	/** System label keys opt into runtime language changes; custom labels stay literal. */
+	labelKeys?: LabelKeys;
 }
 
-let { options, labels }: Props = $props();
+let { options, labels: initialLabels, labelKeys }: Props = $props();
+const labels: Labels = $derived.by(() => {
+	if (!labelKeys) return initialLabels;
+	const translated = { ...initialLabels, errors: { ...initialLabels.errors } };
+	for (const key of Object.keys(labelKeys) as (keyof LabelKeys)[]) {
+		if (key === "errors") continue;
+		translated[key] = $t(labelKeys[key]);
+	}
+	for (const code of Object.keys(labelKeys.errors) as MusicErrorCode[]) {
+		translated.errors[code] = $t(labelKeys.errors[code]);
+	}
+	return translated;
+});
 let runtime = $state<MusicRuntime | null>(null);
 const hasInitialTracks = options.playlist.length > 0;
 const hasMeting =
@@ -63,11 +87,11 @@ let playlistOpen = $state(false);
 let playerEl = $state<HTMLElement | null>(null);
 const playlistId = "sidebar-music-playlist";
 
-const modeLabels: Record<PlaybackMode, string> = {
+const modeLabels: Record<PlaybackMode, string> = $derived({
 	sequence: labels.modeSequence,
 	"repeat-one": labels.modeRepeatOne,
 	shuffle: labels.modeShuffle,
-};
+});
 const modeIcons: Record<PlaybackMode, string> = {
 	sequence: "material-symbols:repeat-rounded",
 	"repeat-one": "material-symbols:repeat-one-rounded",
@@ -102,6 +126,7 @@ const modeIcon = $derived(modeIcons[snapshot.mode]);
 const duration = $derived(Math.max(0, snapshot.duration));
 let draggingSeek = $state(false);
 let dragTime = $state<number | null>(null);
+let isAdmin = $state(false);
 
 const currentEffectiveTime = $derived(
 	draggingSeek && dragTime !== null ? dragTime : snapshot.currentTime,
@@ -132,6 +157,13 @@ const liveMessage = $derived.by(() => {
 
 onMount(() => {
 	let unsubscribe = () => {};
+	let stopAdmin = () => {};
+	if (adminConfig.enable) {
+		isAdmin = getAdminSession() !== null;
+		stopAdmin = onAdminSessionChange((s) => {
+			isAdmin = s !== null;
+		});
+	}
 	let active = true;
 	let viewportObserver: IntersectionObserver | null = null;
 	void import("@utils/music").then(({ getMusicRuntime }) => {
@@ -169,6 +201,7 @@ onMount(() => {
 		viewportObserver?.disconnect();
 		viewportObserver = null;
 		unsubscribe();
+		stopAdmin();
 	};
 });
 
@@ -405,6 +438,17 @@ function setVolume(event: Event): void {
 
 	{#if snapshot.error && snapshot.status === "error"}
 		<p class="music-player__error">{labels.errors[snapshot.error]}</p>
+	{/if}
+	{#if adminConfig.enable && isAdmin}
+		<div class="mt-2 flex justify-end">
+			<Button
+				variant="text"
+				size="xsmall"
+				icon="material-symbols:library-music-outline-rounded"
+				label={$t(I18nKey.adminQuickManageMusic)}
+				href={url("/admin/?tab=music")}
+			/>
+		</div>
 	{/if}
 	<p class="sr-only" aria-live="polite" aria-atomic="true">{liveMessage}</p>
 </div>

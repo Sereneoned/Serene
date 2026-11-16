@@ -107,7 +107,7 @@ const hasVisibleTop = topWidgets.some(isVisible);
 const hasVisibleSticky = stickyWidgets.some(isVisible);
 ---
 
-<aside id={id} aria-label={ariaLabel} class:list={[className, "w-full lg:h-full"]}>
+<aside id={id} aria-label={ariaLabel} data-ui-i18n-aria-label={column === "secondary" ? I18nKey.sidebarSecondary : I18nKey.sidebar} class:list={[className, "w-full lg:h-full"]}>
 	{topWidgets.length > 0 && (
 		<div
 			data-sidebar-group

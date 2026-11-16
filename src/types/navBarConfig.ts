@@ -1,3 +1,5 @@
+import type I18nKey from "../i18n/i18nKey";
+
 /**
  * 导航配置类型。
  * pageKey：预设的页面标识，配合 nav-utils 的 resolvePageKey 统一驱动
@@ -5,6 +7,8 @@
  */
 export type NavBarLink = {
 	name: string;
+	/** 系统文案来源；自定义字面量名称不设置。 */
+	nameKey?: I18nKey;
 	url?: string;
 	icon?: string;
 	/** 页面标识（home/archive/categories/tags/about/github…），驱动高亮 */
@@ -33,6 +37,8 @@ export type NavBarLinkOverride = {
 	/** 引用 `LinkPresets` 中的预设名（如 "Home"、"GitHub"） */
 	preset?: string;
 	name?: string;
+	/** 已解析条目的系统文案元数据；声明式配置请使用 $t:<key>。 */
+	nameKey?: I18nKey;
 	url?: string;
 	icon?: string;
 	pageKey?: string;

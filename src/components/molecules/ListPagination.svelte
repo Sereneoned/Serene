@@ -1,7 +1,7 @@
 <script lang="ts">
 import Icon from "@components/atoms/display/Icon.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import { paginationPages } from "@utils/pagination";
 import { onMount, tick } from "svelte";
 
@@ -22,7 +22,7 @@ let draft = $state("");
 let input = $state<HTMLInputElement>();
 let jumpButton = $state<HTMLButtonElement>();
 const pageLabel = (page: number) =>
-	i18n(I18nKey.paginationPage).replace("{page}", String(page));
+	$t(I18nKey.paginationPage).replace("{page}", String(page));
 onMount(() => {
 	mounted = true;
 });
@@ -56,7 +56,7 @@ function commit() {
 </script>
 
 {#if mounted && totalPages > 1}
-	<nav class="m3-blog-pagination" aria-label={i18n(I18nKey.paginationLabel)}>
+	<nav class="m3-blog-pagination" aria-label={$t(I18nKey.paginationLabel)}>
 		<span class="sr-only" aria-live="polite" aria-atomic="true">
 			{pageLabel(currentPage)}
 		</span>
@@ -68,7 +68,7 @@ function commit() {
 					type="text"
 					inputmode="numeric"
 					maxlength={String(totalPages).length}
-					aria-label={i18n(I18nKey.paginationJump)}
+					aria-label={$t(I18nKey.paginationJump)}
 					bind:value={draft}
 					bind:this={input}
 					onblur={() => (editing = false)}
@@ -87,7 +87,7 @@ function commit() {
 				<button
 					type="button"
 					class="m3-blog-pagination__jump m3-state-layer"
-					aria-label={`${i18n(I18nKey.paginationJump)} ${currentPage} / ${totalPages}`}
+					aria-label={`${$t(I18nKey.paginationJump)} ${currentPage} / ${totalPages}`}
 					bind:this={jumpButton}
 					onclick={edit}
 				>
@@ -126,7 +126,7 @@ function commit() {
 	<button
 		type="button"
 		class="m3-blog-pagination__arrow m3-state-layer"
-		aria-label={i18n(direction < 0 ? I18nKey.paginationPrev : I18nKey.paginationNext)}
+		aria-label={$t(direction < 0 ? I18nKey.paginationPrev : I18nKey.paginationNext)}
 		disabled={direction < 0 ? currentPage <= 1 : currentPage >= totalPages}
 		onclick={() => onpagechange(currentPage + direction)}
 	>

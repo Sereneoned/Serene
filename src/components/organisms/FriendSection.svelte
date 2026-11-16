@@ -7,7 +7,7 @@ import FriendCard from "@components/molecules/FriendCard.svelte";
 import ListPagination from "@components/molecules/ListPagination.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import { createListHistory } from "@utils/list-history";
 import { reveal } from "@utils/motion";
 import { normalizePage, normalizePageSize } from "@utils/pagination";
@@ -16,15 +16,25 @@ import type { FriendItem } from "../../data/friends";
 
 let {
 	friends = [] as FriendItem[],
-	title = i18n(I18nKey.friends),
-	subtitle = i18n(I18nKey.friendsBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 	pageSize = 12,
 }: {
 	friends?: FriendItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 	pageSize?: number;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.friends)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.friendsBanner)),
+);
 
 let query = $state("");
 let selectedTag = $state("");
@@ -67,7 +77,7 @@ const visibleItems = $derived(
 const visibleCount = $derived(filtered.length);
 
 function countLabel(count: number) {
-	return `${count} ${i18n(count === 1 ? I18nKey.friendsCount : I18nKey.friendsCounts)}`;
+	return `${count} ${$t(count === 1 ? I18nKey.friendsCount : I18nKey.friendsCounts)}`;
 }
 
 const listHistory = createListHistory({
@@ -113,8 +123,8 @@ onMount(() => {
 <Card color="var(--card-bg)" radius="l" class="friend-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:handshake-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if friends.length > 0}
@@ -123,8 +133,8 @@ onMount(() => {
 				<TextField
 					type="search"
 					bind:value={() => query, setQuery}
-					placeholder={i18n(I18nKey.search)}
-					label={i18n(I18nKey.search)}
+					placeholder={$t(I18nKey.search)}
+					label={$t(I18nKey.search)}
 					hideLabel
 					variant="outlined"
 					class="!rounded-(--shape-corner-l)"
@@ -135,7 +145,7 @@ onMount(() => {
 					<button
 						type="button"
 						class="friend-section__search-clear"
-						aria-label={i18n(I18nKey.clear)}
+						aria-label={$t(I18nKey.clear)}
 						onclick={() => setQuery("")}
 					>
 						<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -176,7 +186,7 @@ onMount(() => {
 	{:else}
 		<div class="friend-section__empty">
 			<Icon icon="material-symbols:search-off-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.friendsNoResults)}</span>
+			<span>{$t(I18nKey.friendsNoResults)}</span>
 		</div>
 	{/if}
 	{#if totalPages > 1}

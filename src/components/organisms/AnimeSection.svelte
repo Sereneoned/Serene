@@ -15,7 +15,7 @@ import AnimeCard from "@components/molecules/AnimeCard.svelte";
 import ListPagination from "@components/molecules/ListPagination.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import { ANIME_STATUS_META } from "@utils/anime/status";
 import { createListHistory } from "@utils/list-history";
 import { flipFromRect } from "@utils/motion";
@@ -27,15 +27,25 @@ export type AnimeLayoutMode = "grid" | "list";
 
 let {
 	animes = [] as AnimeItem[],
-	title = i18n(I18nKey.anime),
-	subtitle = i18n(I18nKey.animeBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 	pageSize = 12,
 }: {
 	animes?: AnimeItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 	pageSize?: number;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.anime)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.animeBanner)),
+);
 
 const ANIME_LAYOUT_KEY = "shirone:anime-layout-mode";
 
@@ -58,7 +68,7 @@ const LIST_MODE_CLASS: Record<AnimeLayoutMode, string> = {
 const statusItems = $derived(
 	Array.from(new Set(animes.map((anime) => anime.status))).map((status) => ({
 		value: status,
-		label: i18n(ANIME_STATUS_META[status].key),
+		label: $t(ANIME_STATUS_META[status].key),
 		leadingIcon: ANIME_STATUS_META[status].icon,
 	})),
 );
@@ -86,7 +96,7 @@ const visibleItems = $derived(
 );
 
 function countLabel(count: number) {
-	return `${count} ${i18n(I18nKey.animeCounts)}`;
+	return `${count} ${$t(I18nKey.animeCounts)}`;
 }
 
 const listHistory = createListHistory({
@@ -163,8 +173,8 @@ onMount(() => {
 <Card color="var(--card-bg)" radius="l" class="anime-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:live-tv-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if animes.length > 0}
@@ -174,8 +184,8 @@ onMount(() => {
 					<TextField
 						type="search"
 						bind:value={() => query, setQuery}
-						placeholder={i18n(I18nKey.search)}
-						label={i18n(I18nKey.search)}
+						placeholder={$t(I18nKey.search)}
+						label={$t(I18nKey.search)}
 						hideLabel
 						variant="outlined"
 						class="!rounded-(--shape-corner-l)"
@@ -186,7 +196,7 @@ onMount(() => {
 						<button
 							type="button"
 							class="anime-section__search-clear"
-							aria-label={i18n(I18nKey.clear)}
+							aria-label={$t(I18nKey.clear)}
 							onclick={() => setQuery("")}
 						>
 							<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -194,13 +204,13 @@ onMount(() => {
 					{/if}
 				</div>
 
-				<div class="anime-section__layout-switch" role="group" aria-label={i18n(I18nKey.layoutMode)}>
+				<div class="anime-section__layout-switch" role="group" aria-label={$t(I18nKey.layoutMode)}>
 					<button
 						type="button"
 						class="anime-section__layout-btn"
 						class:anime-section__layout-btn--active={listMode === "grid"}
-						aria-label={i18n(I18nKey.layoutGrid)}
-						title={i18n(I18nKey.layoutGrid)}
+						aria-label={$t(I18nKey.layoutGrid)}
+						title={$t(I18nKey.layoutGrid)}
 						aria-pressed={listMode === "grid"}
 						onclick={() => switchLayoutMode("grid")}
 					>
@@ -210,8 +220,8 @@ onMount(() => {
 						type="button"
 						class="anime-section__layout-btn"
 						class:anime-section__layout-btn--active={listMode === "list"}
-						aria-label={i18n(I18nKey.layoutList)}
-						title={i18n(I18nKey.layoutList)}
+						aria-label={$t(I18nKey.layoutList)}
+						title={$t(I18nKey.layoutList)}
 						aria-pressed={listMode === "list"}
 						onclick={() => switchLayoutMode("list")}
 					>
@@ -259,10 +269,10 @@ onMount(() => {
 		<div class="anime-section__empty">
 			{#if animes.length === 0}
 				<Icon icon="material-symbols:tv-off-outline-rounded" aria-hidden="true" />
-				<span>{i18n(I18nKey.animeSyncEmpty)}</span>
+				<span>{$t(I18nKey.animeSyncEmpty)}</span>
 			{:else}
 				<Icon icon="material-symbols:search-off-outline-rounded" aria-hidden="true" />
-				<span>{i18n(I18nKey.animeNoResults)}</span>
+				<span>{$t(I18nKey.animeNoResults)}</span>
 			{/if}
 		</div>
 	{/if}

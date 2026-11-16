@@ -1,0 +1,87 @@
+---
+import AdminStudio from "@components/organisms/admin/AdminStudio.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { url } from "@utils/url-utils";
+import {
+	aboutConfig,
+	adminConfig,
+	albumsConfig,
+	animeConfig,
+	announcementConfig,
+	compassConfig,
+	devicesConfig,
+	friendsConfig,
+	gamesConfig,
+	momentsConfig,
+	profileConfig,
+	projectsConfig,
+	seriesConfig,
+	siteConfig,
+	skillsConfig,
+	timelineConfig,
+} from "@/config";
+
+if (!adminConfig.enable) {
+	return Astro.redirect(url("/404/"));
+}
+
+const pageTitle = i18n(I18nKey.adminStudio);
+const pageDescription = i18n(I18nKey.adminStudioSubtitle);
+
+const githubLink = profileConfig.links.find((link) =>
+	/github\.com/i.test(link.url),
+);
+
+const initialConfigSnapshot = {
+	siteUrl: siteConfig.site,
+	basePath: siteConfig.base ?? "/",
+	title: siteConfig.title,
+	subtitle: siteConfig.subtitle,
+	hue: siteConfig.themeColor.hue,
+	style: siteConfig.themeColor.style,
+	homeSubtitles: Array.isArray(siteConfig.banner.homeText.subtitle)
+		? siteConfig.banner.homeText.subtitle
+		: [siteConfig.banner.homeText.subtitle],
+	profileName: profileConfig.name,
+	profileBio: profileConfig.bio ?? "",
+	profileAvatar: profileConfig.avatar ?? "",
+	profileLinks: profileConfig.links.map((link) => ({
+		name: link.name,
+		icon: link.icon,
+		url: link.url,
+	})),
+	announcementTitle: announcementConfig.title ?? "",
+	announcementContent: announcementConfig.content,
+	announcementClosable: announcementConfig.closable ?? true,
+	announcementLinkEnable: announcementConfig.link?.enable ?? false,
+	announcementLinkText: announcementConfig.link?.text ?? "",
+	announcementLinkUrl: announcementConfig.link?.url ?? "",
+	features: {
+		moments: momentsConfig.enable !== false,
+		albums: albumsConfig.enable !== false,
+		friends: friendsConfig.enable !== false,
+		anime: animeConfig.enable !== false,
+		compass: compassConfig.enable !== false,
+		timeline: timelineConfig.enable !== false,
+		projects: projectsConfig.enable !== false,
+		devices: devicesConfig.enable !== false,
+		games: gamesConfig.enable !== false,
+		skills: skillsConfig.enable !== false,
+		series: seriesConfig.enable !== false,
+		about: aboutConfig.enable !== false,
+	},
+};
+---
+
+<MainGridLayout title={pageTitle} description={pageDescription} page="admin">
+	<AdminStudio
+		defaultRepo={adminConfig.defaultRepo}
+		defaultBranch={adminConfig.defaultBranch}
+		defaultContentPrefix={adminConfig.contentPrefix}
+		githubProfileUrl={githubLink?.url ?? ""}
+		initialConfigSnapshot={initialConfigSnapshot}
+		client:load
+	/>
+</MainGridLayout>

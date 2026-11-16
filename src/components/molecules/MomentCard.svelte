@@ -9,7 +9,7 @@ import Avatar from "@components/atoms/display/Avatar.svelte";
 import Icon from "@components/atoms/display/Icon.svelte";
 import MomentGallery from "@components/molecules/MomentGallery.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import type { MomentItem } from "@utils/content-utils";
 import { formatDateToYYYYMMDDHHmm } from "@utils/date-utils";
 import { reveal } from "@utils/motion";
@@ -64,7 +64,7 @@ const timeText = $derived(formatDateToYYYYMMDDHHmm(publishedAt));
 			{#if moment.encrypted}
 				<span class="moment-card__badge moment-card__badge--encrypted">
 					<Icon icon="material-symbols:lock-rounded" aria-hidden="true" />
-					{i18n(I18nKey.postEncryptedBadge)}
+					{$t(I18nKey.postEncryptedBadge)}
 				</span>
 			{/if}
 			{#if moment.mood}
@@ -75,7 +75,7 @@ const timeText = $derived(formatDateToYYYYMMDDHHmm(publishedAt));
 			{#if moment.pinned}
 				<span class="moment-card__badge moment-card__badge--pinned">
 					<Icon icon="material-symbols:keep-rounded" aria-hidden="true" />
-					{i18n(I18nKey.pinned)}
+					{$t(I18nKey.pinned)}
 				</span>
 			{/if}
 		</div>

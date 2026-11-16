@@ -9,6 +9,7 @@ import Icon from "@iconify/svelte";
 interface Props {
 	id: string;
 	name?: string;
+	nameKey?: I18nKey;
 	isCollapsed?: boolean;
 	collapsedHeight?: string;
 	class?: string;
@@ -21,6 +22,7 @@ interface Props {
 const {
 	id,
 	name,
+	nameKey,
 	isCollapsed,
 	collapsedHeight,
 	style,
@@ -33,7 +35,7 @@ const className = Astro.props.class;
     <Card color="var(--card-bg)" radius="l" class="pb-4">
     <div class="widget-layout__header">
         <AccentBar size="small" />
-        <span>{name}</span>
+        <span data-ui-i18n={nameKey}>{name}</span>
     </div>
     <div id={id} class:list={["collapse-wrapper px-4 overflow-hidden", {"collapsed": isCollapsed, "widget-layout__scroll-content": scrollContent, "widget-layout__flex-scroll": flexScroll}]}>
         <slot></slot>
@@ -42,7 +44,7 @@ const className = Astro.props.class;
         <Button variant="text" full radius="m" class="!h-9">
             <div class="flex items-center justify-center gap-2">
                 <Icon icon="material-symbols:more-horiz" class="text-[1.75rem]" />
-                <span>{i18n(I18nKey.more)}</span>
+                <span data-ui-i18n={I18nKey.more}>{i18n(I18nKey.more)}</span>
             </div>
         </Button>
     </div>}

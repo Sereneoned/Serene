@@ -8,7 +8,7 @@
  */
 import IconButton from "@components/atoms/action/IconButton.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t, uiLocale } from "@i18n/runtime.ts";
 import type { CalendarPost } from "@utils/calendar-data";
 import { createGregorianDateFormatter } from "@utils/locale-utils";
 import { collapse, reveal } from "@utils/motion";
@@ -24,6 +24,9 @@ interface Props {
 	backTodayLabel: string;
 	prevMonthLabel: string;
 	nextMonthLabel: string;
+	backTodayLabelKey?: I18nKey;
+	prevMonthLabelKey?: I18nKey;
+	nextMonthLabelKey?: I18nKey;
 }
 
 let {
@@ -34,7 +37,21 @@ let {
 	backTodayLabel,
 	prevMonthLabel,
 	nextMonthLabel,
+	backTodayLabelKey,
+	prevMonthLabelKey,
+	nextMonthLabelKey,
 }: Props = $props();
+
+const calendarLocale = $derived($uiLocale.replaceAll("_", "-") || locale);
+const resolvedBackTodayLabel = $derived(
+	backTodayLabelKey ? $t(backTodayLabelKey) : backTodayLabel,
+);
+const resolvedPrevMonthLabel = $derived(
+	prevMonthLabelKey ? $t(prevMonthLabelKey) : prevMonthLabel,
+);
+const resolvedNextMonthLabel = $derived(
+	nextMonthLabelKey ? $t(nextMonthLabelKey) : nextMonthLabel,
+);
 
 const today = new Date();
 let year = $state(today.getFullYear());
@@ -42,14 +59,14 @@ let month = $state(today.getMonth());
 let selectedDate = $state<string | null>(null);
 
 const monthTitle = $derived(
-	createGregorianDateFormatter(locale, {
+	createGregorianDateFormatter(calendarLocale, {
 		year: "numeric",
 		month: "long",
 	}).format(new Date(year, month, 1)),
 );
 
 const dateLabelFormatter = $derived(
-	createGregorianDateFormatter(locale, { dateStyle: "full" }),
+	createGregorianDateFormatter(calendarLocale, { dateStyle: "full" }),
 );
 
 function formatDateLabel(key: string): string {
@@ -62,9 +79,9 @@ const weekStartOffset = $derived(startOfWeek === "mon" ? 1 : 0);
 const weekdays = $derived(
 	Array.from({ length: 7 }, (_, i) => {
 		const day = (i + weekStartOffset) % 7;
-		return createGregorianDateFormatter(locale, { weekday: "short" }).format(
-			new Date(2021, 0, 3 + day),
-		);
+		return createGregorianDateFormatter(calendarLocale, {
+			weekday: "short",
+		}).format(new Date(2021, 0, 3 + day));
 	}),
 );
 
@@ -83,7 +100,7 @@ function formatDayAccessibleName(cell: DayCell): string {
 	if (cell.posts.length > 0) {
 		const countLabel =
 			cell.posts.length === 1 ? I18nKey.postCount : I18nKey.postsCount;
-		parts.push(`${cell.posts.length} ${i18n(countLabel)}`);
+		parts.push(`${cell.posts.length} ${$t(countLabel)}`);
 	}
 	return parts.join(", ");
 }
@@ -174,7 +191,7 @@ function toggleDay(cell: DayCell) {
 			variant="standard"
 			size="xsmall"
 			icon="material-symbols:chevron-left-rounded"
-			label={prevMonthLabel}
+			label={resolvedPrevMonthLabel}
 			disabled={!canPrev}
 			onclick={() => shiftMonth(-1)}
 		/>
@@ -182,8 +199,8 @@ function toggleDay(cell: DayCell) {
 			type="button"
 			class="m3-calendar__title"
 			class:m3-calendar__title--clickable={!isCurrentMonth}
-			title={isCurrentMonth ? undefined : backTodayLabel}
-			aria-label={isCurrentMonth ? monthTitle : `${monthTitle}（${backTodayLabel}）`}
+			title={isCurrentMonth ? undefined : resolvedBackTodayLabel}
+			aria-label={isCurrentMonth ? monthTitle : `${monthTitle}（${resolvedBackTodayLabel}）`}
 			onclick={() => {
 				if (!isCurrentMonth) backToToday();
 			}}
@@ -194,7 +211,7 @@ function toggleDay(cell: DayCell) {
 			variant="standard"
 			size="xsmall"
 			icon="material-symbols:chevron-right-rounded"
-			label={nextMonthLabel}
+			label={resolvedNextMonthLabel}
 			disabled={!canNext}
 			onclick={() => shiftMonth(1)}
 		/>

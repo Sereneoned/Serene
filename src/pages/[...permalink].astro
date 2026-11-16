@@ -230,13 +230,13 @@ const jsonLd = {
 					<div class="transition h-6 w-6 rounded-[var(--shape-corner-xs)] bg-[var(--surface-container-high)] text-[var(--on-surface-variant)] flex items-center justify-center mr-2">
 						<Icon icon="material-symbols:notes-rounded"></Icon>
 					</div>
-					<div class="text-sm">{remarkPluginFrontmatter.words} {" " + i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}</div>
+					<div class="text-sm">{remarkPluginFrontmatter.words} {" "}<span data-ui-i18n={remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount}>{i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}</span></div>
 				</div>
 				<div class="flex flex-row items-center">
 					<div class="transition h-6 w-6 rounded-[var(--shape-corner-xs)] bg-[var(--surface-container-high)] text-[var(--on-surface-variant)] flex items-center justify-center mr-2">
 						<Icon icon="material-symbols:schedule-outline-rounded"></Icon>
 					</div>
-					<div class="text-sm">{remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}</div>
+					<div class="text-sm">{remarkPluginFrontmatter.minutes} {" "}<span data-ui-i18n={remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount}>{i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}</span></div>
 				</div>
 				{umamiEnabled && (
 					<div class="flex flex-row items-center">
@@ -260,7 +260,7 @@ const jsonLd = {
 					</div>
 					<IconButton
 						id="copy-post-link"
-						label={i18n(I18nKey.copyLink)}
+						label={i18n(I18nKey.copyLink)} labelKey={I18nKey.copyLink}
 						class="ml-auto shrink-0"
 					>
 						<Icon icon="material-symbols:link-rounded" class="text-[1.25rem]" />
@@ -274,7 +274,7 @@ const jsonLd = {
 					<div class="flex flex-wrap items-center gap-2 mb-5">
 						<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--surface-container-highest)] text-xs font-semibold text-[var(--primary)]">
 							<Icon icon="material-symbols:lock-rounded" class="text-sm" />
-							<span>{i18n(I18nKey.postEncryptedBadge)}</span>
+							<span data-ui-i18n={I18nKey.postEncryptedBadge}>{i18n(I18nKey.postEncryptedBadge)}</span>
 						</div>
 					</div>
 				) : (

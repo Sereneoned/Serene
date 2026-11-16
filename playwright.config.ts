@@ -1,4 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { siteConfig } from "./src/config/siteConfig";
+
+const normalizedBase = (siteConfig.base || "/").replace(/\/+$/, "");
+const devReadyUrl = `http://localhost:4321${normalizedBase}/`;
 
 /**
  * 组件质量专项 — Playwright 配置
@@ -27,7 +31,7 @@ export default defineConfig({
 			process.platform === "win32"
 				? "pnpm.cmd astro dev --port 4321 --host"
 				: "pnpm astro dev --port 4321 --host",
-		url: "http://localhost:4321",
+		url: devReadyUrl,
 		reuseExistingServer: true,
 		timeout: 120_000,
 		env: {

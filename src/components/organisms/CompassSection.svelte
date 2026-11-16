@@ -18,20 +18,30 @@ import CompassTile from "@components/molecules/CompassTile.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import SectionTitle from "@components/molecules/SectionTitle.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
 import type { CompassShelf } from "../../data/compass";
 
 let {
 	shelves = [] as CompassShelf[],
-	title = i18n(I18nKey.compass),
-	subtitle = i18n(I18nKey.compassBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	shelves?: CompassShelf[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.compass)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.compassBanner)),
+);
 
 let query = $state("");
 let selectedGroup = $state("");
@@ -121,8 +131,8 @@ onMount(() => {
 <Card color="var(--card-bg)" radius="l" class="compass-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:explore-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if shelves.length > 0}
@@ -131,8 +141,8 @@ onMount(() => {
 				<TextField
 					type="search"
 					bind:value={query}
-					placeholder={i18n(I18nKey.search)}
-					label={i18n(I18nKey.search)}
+					placeholder={$t(I18nKey.search)}
+					label={$t(I18nKey.search)}
 					hideLabel
 					variant="outlined"
 					class="!rounded-(--shape-corner-l)"
@@ -143,7 +153,7 @@ onMount(() => {
 					<button
 						type="button"
 						class="compass-section__search-clear"
-						aria-label={i18n(I18nKey.clear)}
+						aria-label={$t(I18nKey.clear)}
 						onclick={() => (query = "")}
 					>
 						<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -162,7 +172,7 @@ onMount(() => {
 				</div>
 			{/if}
 			{#if totalCount > 1}
-				<p class="compass-section__count">{totalCount} {i18n(I18nKey.compassCounts)}</p>
+				<p class="compass-section__count">{totalCount} {$t(I18nKey.compassCounts)}</p>
 			{/if}
 		</div>
 	{/if}
@@ -191,7 +201,7 @@ onMount(() => {
 	{:else}
 		<div class="compass-section__empty">
 			<Icon icon="material-symbols:search-off-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.compassNoResults)}</span>
+			<span>{$t(I18nKey.compassNoResults)}</span>
 		</div>
 	{/if}
 </Card>

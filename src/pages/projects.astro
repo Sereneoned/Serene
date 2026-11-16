@@ -3,7 +3,7 @@
 import ProjectSection from "@components/organisms/ProjectSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { projectsConfig } from "@/config/projectsConfig";
 import { resolveProjectsData } from "@/utils/feature-data";
 
@@ -12,7 +12,12 @@ if (!projectsConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(projectsConfig.title, I18nKey.projects);
+const pageTitleKey = resolveI18nKey(projectsConfig.title, I18nKey.projects);
 const pageDescription = resolveI18nText(
+	projectsConfig.description,
+	I18nKey.projectsBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	projectsConfig.description,
 	I18nKey.projectsBanner,
 );
@@ -28,8 +33,8 @@ const items = resolveProjectsData(projectsConfig);
 	<ProjectSection
 		categories={projectsConfig.categories}
 		items={items}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		client:visible
 	/>
 </MainGridLayout>

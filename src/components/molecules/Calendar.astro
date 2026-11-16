@@ -30,7 +30,7 @@ const locale = siteConfig.lang.replace("_", "-");
 const { postsByDate, activeMonths } = await getCalendarData();
 ---
 
-<WidgetLayout name={i18n(I18nKey.calendar)} id="calendar" class={className} style={style}>
+<WidgetLayout name={i18n(I18nKey.calendar)} nameKey={I18nKey.calendar} id="calendar" class={className} style={style}>
 	<CalendarView
 		client:visible
 		{locale}
@@ -38,7 +38,10 @@ const { postsByDate, activeMonths } = await getCalendarData();
 		{postsByDate}
 		{activeMonths}
 		backTodayLabel={i18n(I18nKey.calendarBackToday)}
+		backTodayLabelKey={I18nKey.calendarBackToday}
 		prevMonthLabel={i18n(I18nKey.calendarPrevMonth)}
+		prevMonthLabelKey={I18nKey.calendarPrevMonth}
 		nextMonthLabel={i18n(I18nKey.calendarNextMonth)}
+		nextMonthLabelKey={I18nKey.calendarNextMonth}
 	/>
 </WidgetLayout>

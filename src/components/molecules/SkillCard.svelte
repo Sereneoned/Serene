@@ -2,7 +2,7 @@
 /** 技能展示卡（分子）：图标、名称、说明与离散熟练度。 */
 
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
 import type { SkillItem, SkillLevel } from "@/types/skillsConfig";
@@ -17,7 +17,7 @@ const levelMeta: Record<SkillLevel, { value: number; key: I18nKey }> = {
 };
 
 const meta = $derived(levelMeta[skill.level]);
-const levelLabel = $derived(i18n(meta.key));
+const levelLabel = $derived($t(meta.key));
 const fallback = $derived((skill.name.charAt(0) || "?").toUpperCase());
 </script>
 
@@ -43,7 +43,7 @@ const fallback = $derived((skill.name.charAt(0) || "?").toUpperCase());
 	<div
 		class="skill-card__meter"
 		role="meter"
-		aria-label={`${i18n(I18nKey.skillLevel)}: ${levelLabel}`}
+		aria-label={`${$t(I18nKey.skillLevel)}: ${levelLabel}`}
 		aria-valuemin="1"
 		aria-valuemax="4"
 		aria-valuenow={meta.value}

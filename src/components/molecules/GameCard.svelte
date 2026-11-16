@@ -14,7 +14,7 @@
  *   hover 升级描边与 elevation-2），与项目/友链卡片保持一致。
  */
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
 import type { GameItem, GameStatus } from "@/types/gamesConfig";
@@ -60,7 +60,7 @@ const showCover = $derived(Boolean(game.cover) && !coverFailed);
 const ratingLabel = $derived(
 	game.rating === undefined
 		? ""
-		: `${i18n(I18nKey.gamesRating)} ${game.rating.toFixed(1)}`,
+		: `${$t(I18nKey.gamesRating)} ${game.rating.toFixed(1)}`,
 );
 </script>
 
@@ -91,13 +91,13 @@ const ratingLabel = $derived(
 		{#if game.featured}
 			<span class="game-card__featured">
 				<Icon icon="material-symbols:star-rounded" aria-hidden="true" />
-				{i18n(I18nKey.gamesFeatured)}
+				{$t(I18nKey.gamesFeatured)}
 			</span>
 		{/if}
 
-		<span class="game-card__status" data-status={game.status} aria-label={i18n(meta.key)}>
+		<span class="game-card__status" data-status={game.status} aria-label={$t(meta.key)}>
 			<Icon icon={meta.icon} aria-hidden="true" />
-			{i18n(meta.key)}
+			{$t(meta.key)}
 		</span>
 
 		<div class="game-card__caption">
@@ -118,7 +118,7 @@ const ratingLabel = $derived(
 				<span class="game-card__hours">
 					<Icon icon="material-symbols:timer-outline-rounded" aria-hidden="true" />
 					{game.hours}
-					{i18n(I18nKey.gamesHours)}
+					{$t(I18nKey.gamesHours)}
 				</span>
 			{/if}
 			{#if game.platform}
@@ -151,7 +151,7 @@ const ratingLabel = $derived(
 					rel="noopener noreferrer"
 				>
 					<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
-					{i18n(I18nKey.gamesViewDetails)}
+					{$t(I18nKey.gamesViewDetails)}
 				</a>
 			{/if}
 		</div>

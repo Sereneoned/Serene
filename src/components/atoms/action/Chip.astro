@@ -10,6 +10,8 @@
  *  - tonal:  站内风格药丸（无边框、surface-container 层叠、12px 圆角），
  *            与原 .btn-regular 视觉一致
  */
+import type I18nKey from "@i18n/i18nKey";
+
 interface Props {
 	variant?: "assist" | "filter" | "suggestion" | "input" | "tonal";
 	selected?: boolean;
@@ -20,6 +22,7 @@ interface Props {
 	href?: string;
 	target?: string;
 	label?: string;
+	labelKey?: I18nKey;
 	class?: string;
 }
 
@@ -31,6 +34,7 @@ const {
 	href,
 	target,
 	label,
+	labelKey,
 	class: className,
 } = Astro.props;
 ---
@@ -40,7 +44,7 @@ const {
 		<a
 			href={href}
 			target={target}
-			aria-label={label}
+			aria-label={label} data-ui-i18n-aria-label={labelKey}
 			class:list={[
 				"m3-chip",
 				"m3-state-layer",
@@ -56,7 +60,7 @@ const {
 		<button
 			type="button"
 			disabled={disabled}
-			aria-label={label}
+			aria-label={label} data-ui-i18n-aria-label={labelKey}
 			aria-pressed={variant === "filter" ? selected : undefined}
 			class:list={[
 				"m3-chip",

@@ -8,7 +8,7 @@
  */
 
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
 import type { TimelineItem } from "@/types/timelineConfig";
@@ -105,7 +105,7 @@ const markerIcon = $derived(
 
 		<!-- 技术栈 / 关联标签 -->
 		{#if item.tags && item.tags.length > 0}
-			<ul class="timeline-card__tags" aria-label={i18n(I18nKey.tags)}>
+			<ul class="timeline-card__tags" aria-label={$t(I18nKey.tags)}>
 				{#each item.tags as tag (tag)}
 					<li>{tag}</li>
 				{/each}

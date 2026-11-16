@@ -27,6 +27,7 @@ const closeDuration = Number(config.closeDuration ?? 86400);
 {contentText && (
 	<WidgetLayout
 		name={config.title || i18n(I18nKey.announcement)}
+		nameKey={config.title ? undefined : I18nKey.announcement}
 		id="announcement"
 		class={className}
 		style={style}
@@ -63,8 +64,8 @@ const closeDuration = Number(config.closeDuration ?? 86400);
 							type="button"
 							class="announcement-close-btn m3-state-layer"
 							onclick="closeAnnouncement()"
-							aria-label={i18n(I18nKey.announcementClose)}
-							title={i18n(I18nKey.announcementClose)}
+							aria-label={i18n(I18nKey.announcementClose)} data-ui-i18n-aria-label={I18nKey.announcementClose}
+							title={i18n(I18nKey.announcementClose)} data-ui-i18n-title={I18nKey.announcementClose}
 						>
 							<Icon icon="material-symbols:close-rounded" class="announcement-close-btn__icon" />
 						</button>

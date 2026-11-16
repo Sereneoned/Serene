@@ -27,7 +27,12 @@ const priority = Astro.props.priority ?? false;
 
 const config = profileConfig;
 const avatarAsset = await resolveImageAsset(config.avatar ?? "");
-let avatarUrl = typeof avatarAsset === "string" ? avatarAsset : avatarAsset.src;
+let avatarUrl =
+	typeof avatarAsset === "string"
+		? avatarAsset.startsWith("/")
+			? url(avatarAsset)
+			: avatarAsset
+		: avatarAsset.src;
 let avatarSrcset: string | undefined;
 let avatarWidth: number | undefined;
 let avatarHeight: number | undefined;
@@ -59,7 +64,7 @@ if (typeof avatarAsset !== "string") {
 ---
 <div class={className} style={style}>
 	<Card color="var(--card-bg)" radius="l" class="m3-profile p-3">
-    <a aria-label={i18n(I18nKey.goToAboutPage)} href={url('/about/')}
+    <a aria-label={i18n(I18nKey.goToAboutPage)} data-ui-i18n-aria-label={I18nKey.goToAboutPage} href={url('/about/')}
        class="m3-profile__avatar-link group">
         <div class="m3-profile__avatar-overlay">
             <Icon icon="fa7-solid:address-card"

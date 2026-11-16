@@ -5,8 +5,9 @@ import SegmentedButton from "@components/atoms/selection/SegmentedButton.svelte"
 import Slider from "@components/atoms/selection/Slider.svelte";
 import Switch from "@components/atoms/selection/Switch.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
+import { getAdminSession, requestAdminLoginDialog } from "@utils/admin/session";
 import {
 	defaultMode,
 	flipToMode,
@@ -37,8 +38,10 @@ import {
 	setWallpaperMode,
 } from "@utils/setting-utils";
 import { getSpec, getStyle, setSpec, setStyle } from "@utils/theme-utils";
+import { url } from "@utils/url-utils";
 import { onMount } from "svelte";
 import {
+	adminConfig,
 	getDefaultSpec,
 	getDefaultStyle,
 	resolveDisplaySettings,
@@ -252,7 +255,7 @@ const currentColor = $derived(
 const stylePreviews = $derived(
 	MC_STYLES.map((s) => ({
 		style: s,
-		label: i18n(styleKey(s)),
+		label: $t(styleKey(s)),
 		colors: panelOpened ? styleColors(s, hue, dark, spec) : null,
 	})),
 );
@@ -265,30 +268,30 @@ const stylePreviews = $derived(
             <div class="flex flex-row gap-2 items-center justify-between">
                 <div class="flex gap-2 font-bold text-lg text-[var(--on-surface)] transition relative ml-3">
                     <AccentBar size="small" class="absolute -left-3 top-[0.33rem]" />
-                    {i18n(I18nKey.themeColor)}
-                    <button aria-label={i18n(I18nKey.resetToDefault)} class="float-control w-7 h-7 rounded-md active:scale-90 will-change-transform flex items-center justify-center"
+                    {$t(I18nKey.themeColor)}
+                    <button aria-label={$t(I18nKey.resetToDefault)} class="float-control w-7 h-7 rounded-md active:scale-90 will-change-transform flex items-center justify-center"
                             class:opacity-0={!isDirty} class:pointer-events-none={!isDirty} onclick={confirmReset}>
                         <Icon icon="fa7-solid:arrow-rotate-left" class="text-[0.875rem]"></Icon>
                     </button>
                 </div>
                 <div class="flex gap-1 items-center">
                     <!-- 当前色相值展示（段内用低一级容器色保持对比） -->
-                    <div title={i18n(I18nKey.themeColor)}
+                    <div title={$t(I18nKey.themeColor)}
                          class="h-7 min-w-16 px-1 rounded-(--shape-corner-m) flex items-center justify-center
                                 bg-(--surface-container) text-sm font-bold text-(--on-surface)">
                         {hue}
                     </div>
                     <!-- 当前主色实时预览 -->
-                    <div class="h-7 w-7 rounded-full" title={i18n(I18nKey.themeColor)}
+                    <div class="h-7 w-7 rounded-full" title={$t(I18nKey.themeColor)}
                          style={`background: ${currentColor}; box-shadow: inset 0 0 0 1px var(--outline-variant)`}></div>
                 </div>
             </div>
-            <Slider bind:value={hue} min={0} max={360} step={5} label={i18n(I18nKey.themeColor)} />
+            <Slider bind:value={hue} min={0} max={360} step={5} label={$t(I18nKey.themeColor)} />
 
             {#if displayConfig.colorStyle}
                 <div class="flex flex-col gap-2 pt-1">
-                    <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.colorStyle)}</span>
-                    <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label={i18n(I18nKey.colorStyle)}>
+                    <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{$t(I18nKey.colorStyle)}</span>
+                    <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label={$t(I18nKey.colorStyle)}>
                         {#each stylePreviews as p (p.style)}
                             <button
                                 type="button"
@@ -314,14 +317,14 @@ const stylePreviews = $derived(
 
             {#if displayConfig.colorSpec}
                 <div class="flex flex-col gap-1.5 pt-1">
-                    <span class="display-settings__section-label">{i18n(I18nKey.colorSpec)}</span>
+                    <span class="display-settings__section-label">{$t(I18nKey.colorSpec)}</span>
                     <SegmentedButton
                         options={MC_SPECS.map((s) => ({
                             value: s,
-                            label: s === "2021" ? i18n(I18nKey.spec2021) : i18n(I18nKey.spec2025),
+                            label: s === "2021" ? $t(I18nKey.spec2021) : $t(I18nKey.spec2025),
                         }))}
                         bind:value={spec}
-                        label={i18n(I18nKey.colorSpec)}
+                        label={$t(I18nKey.colorSpec)}
                     />
                 </div>
             {/if}
@@ -332,49 +335,49 @@ const stylePreviews = $derived(
             <div class="p-4 flex flex-col gap-3">
                 {#if displayConfig.wallpaperMode}
                     <div class="flex flex-col gap-1.5">
-                        <span class="display-settings__section-label">{i18n(I18nKey.wallpaperMode)}</span>
+                        <span class="display-settings__section-label">{$t(I18nKey.wallpaperMode)}</span>
                         <SegmentedButton
                             options={[
-                                { value: "none", label: i18n(I18nKey.wallpaperModeNone) },
-                                { value: "banner", label: i18n(I18nKey.wallpaperModeBanner) },
+                                { value: "none", label: $t(I18nKey.wallpaperModeNone) },
+                                { value: "banner", label: $t(I18nKey.wallpaperModeBanner) },
                             ]}
                             bind:value={wallpaperMode}
-                            label={i18n(I18nKey.wallpaperMode)}
+                            label={$t(I18nKey.wallpaperMode)}
                         />
                     </div>
                 {/if}
 
                 {#if displayConfig.layoutMode}
                     <div class="flex flex-col gap-1.5">
-                        <span class="display-settings__section-label">{i18n(I18nKey.layoutMode)}</span>
+                        <span class="display-settings__section-label">{$t(I18nKey.layoutMode)}</span>
                         <SegmentedButton
                             options={[
-                                { value: "list", label: i18n(I18nKey.layoutList) },
-                                { value: "grid", label: i18n(I18nKey.layoutGrid) },
+                                { value: "list", label: $t(I18nKey.layoutList) },
+                                { value: "grid", label: $t(I18nKey.layoutGrid) },
                             ]}
                             bind:value={postListMode}
-                            label={i18n(I18nKey.layoutMode)}
+                            label={$t(I18nKey.layoutMode)}
                         />
                     </div>
                 {/if}
 
                 {#if displayConfig.texture}
                     <div class="flex flex-col gap-2 pt-1">
-                        <span class="display-settings__section-label">{i18n(I18nKey.texturePreset)}</span>
-                        <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label={i18n(I18nKey.texturePreset)}>
+                        <span class="display-settings__section-label">{$t(I18nKey.texturePreset)}</span>
+                        <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label={$t(I18nKey.texturePreset)}>
                             {#each textureOptions as opt (opt.value)}
                                 <button
                                     type="button"
                                     role="radio"
                                     aria-checked={texturePreset === opt.value}
-                                    title={i18n(opt.labelKey)}
-                                    aria-label={i18n(opt.labelKey)}
+                                    title={$t(opt.labelKey)}
+                                    aria-label={$t(opt.labelKey)}
                                     class="m3-style-cell"
                                     class:selected={texturePreset === opt.value}
                                     onclick={() => (texturePreset = opt.value)}
                                 >
                                     <Icon icon={opt.icon} class="text-lg" />
-                                    <span class="m3-style-cell__name">{i18n(opt.labelKey)}</span>
+                                    <span class="m3-style-cell__name">{$t(opt.labelKey)}</span>
                                 </button>
                             {/each}
                         </div>
@@ -388,9 +391,38 @@ const stylePreviews = $derived(
             <div class="p-4 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <Icon icon="material-symbols:motion-photos-off" class="text-lg text-[var(--primary)]" />
-                    <span class="text-sm font-bold text-[var(--on-surface)]">{i18n(I18nKey.reduceMotion)}</span>
+                    <span class="text-sm font-bold text-[var(--on-surface)]">{$t(I18nKey.reduceMotion)}</span>
                 </div>
-                <Switch bind:checked={motionReduced} label={i18n(I18nKey.reduceMotion)} icons />
+                <Switch bind:checked={motionReduced} label={$t(I18nKey.reduceMotion)} icons />
+            </div>
+        {/if}
+
+        {#if adminConfig.enable}
+            <div class="px-4 py-3 flex items-center justify-between">
+                <button
+                    type="button"
+                    class="flex items-center gap-2 text-xs font-medium text-[var(--on-surface-variant)] hover:text-[var(--primary)] transition cursor-pointer bg-transparent border-0 p-0"
+                    onclick={() => {
+                        document.getElementById("display-setting")?.classList.add("float-panel-closed");
+                        if (getAdminSession()) {
+                            window.location.href = url("/admin/");
+                        } else {
+                            requestAdminLoginDialog();
+                        }
+                    }}
+                >
+                    <Icon icon="material-symbols:admin-panel-settings-outline-rounded" class="text-base" />
+                    <span data-ui-i18n={I18nKey.adminStudio}>{$t(I18nKey.adminStudio)}</span>
+                </button>
+                <a
+                    href={url("/admin/")}
+                    class="text-xs font-bold text-[var(--primary)] hover:underline"
+                    onclick={() => {
+                        document.getElementById("display-setting")?.classList.add("float-panel-closed");
+                    }}
+                >
+                    Ctrl+Shift+A
+                </a>
             </div>
         {/if}
     </PanelStack>

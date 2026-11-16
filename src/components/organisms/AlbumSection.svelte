@@ -1,4 +1,5 @@
 <script lang="ts">
+import Button from "@components/atoms/action/Button.svelte";
 import Chips from "@components/atoms/action/Chips.svelte";
 import Card from "@components/atoms/display/Card.svelte";
 import LoadingIndicator from "@components/atoms/feedback/LoadingIndicator.svelte";
@@ -6,26 +7,41 @@ import TextField from "@components/atoms/input/TextField.svelte";
 import AlbumCard from "@components/molecules/AlbumCard.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
+import { getAdminSession, onAdminSessionChange } from "@utils/admin/session";
+import { url } from "@utils/url-utils";
 import { onMount } from "svelte";
+import { adminConfig } from "@/config";
 import type { AlbumIndexItem } from "@/types/album";
 
 let {
 	albums = [] as AlbumIndexItem[],
-	title = i18n(I18nKey.albums),
-	subtitle = i18n(I18nKey.albumsBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	albums?: AlbumIndexItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.albums)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.albumsBanner)),
+);
+
 let query = $state("");
 let selectedTag = $state("");
 let initialized = false;
 type FilterPhase = "idle" | "loading" | "out";
 let phase = $state<FilterPhase>("idle");
 let phaseTimers: ReturnType<typeof setTimeout>[] = [];
+let isAdmin = $state(false);
 
 const tagItems = $derived(
 	Array.from(new Set(albums.flatMap((album) => album.tags)))
@@ -74,16 +90,45 @@ onMount(() => {
 	query = params.get("q") || "";
 	selectedTag = params.get("albumTag") || "";
 	initialized = true;
-	return () => phaseTimers.forEach(clearTimeout);
+	let stopAdmin = () => {};
+	if (adminConfig.enable) {
+		isAdmin = getAdminSession() !== null;
+		stopAdmin = onAdminSessionChange((s) => {
+			isAdmin = s !== null;
+		});
+	}
+	return () => {
+		phaseTimers.forEach(clearTimeout);
+		stopAdmin();
+	};
 });
 </script>
 
 <Card color="var(--card-bg)" radius="l" class="album-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:photo-library-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
+
+	{#if adminConfig.enable && isAdmin}
+		<div class="album-section__admin-bar">
+			<Button
+				variant="tonal"
+				size="small"
+				icon="material-symbols:add-rounded"
+				label={$t(I18nKey.adminQuickNewAlbum)}
+				href={url("/admin/?tab=albums")}
+			/>
+			<Button
+				variant="outlined"
+				size="small"
+				icon="material-symbols:cloud-upload-outline-rounded"
+				label={$t(I18nKey.adminQuickUploadPhotos)}
+				href={url("/admin/?tab=albums")}
+			/>
+		</div>
+	{/if}
 
 	{#if albums.length > 0}
 		<div class="album-section__tools">
@@ -91,8 +136,8 @@ onMount(() => {
 				<TextField
 					type="search"
 					bind:value={query}
-					placeholder={i18n(I18nKey.search)}
-					label={i18n(I18nKey.search)}
+					placeholder={$t(I18nKey.search)}
+					label={$t(I18nKey.search)}
 					hideLabel
 					variant="outlined"
 					class="!rounded-(--shape-corner-l)"
@@ -103,7 +148,7 @@ onMount(() => {
 					<button
 						type="button"
 						class="album-section__clear"
-						aria-label={i18n(I18nKey.clear)}
+						aria-label={$t(I18nKey.clear)}
 						onclick={() => (query = "")}
 					>
 						<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -114,7 +159,7 @@ onMount(() => {
 				<Chips items={tagItems} variant="filter" bind:value={selectedTag} onchange={onTagChange} />
 			{/if}
 			<p class="album-section__count" aria-live="polite">
-				{filtered.length} {i18n(I18nKey.albumsCounts)}
+				{filtered.length} {$t(I18nKey.albumsCounts)}
 			</p>
 		</div>
 	{/if}
@@ -134,7 +179,7 @@ onMount(() => {
 	{:else}
 		<div class="album-section__empty">
 			<Icon icon="material-symbols:search-off-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.albumsNoResults)}</span>
+			<span>{$t(I18nKey.albumsNoResults)}</span>
 		</div>
 	{/if}
 </Card>
@@ -147,6 +192,11 @@ onMount(() => {
 		gap: 0.875rem
 		padding-bottom: 1.5rem
 		border-bottom: 1px solid var(--outline-variant)
+	&__admin-bar
+		display: flex
+		flex-wrap: wrap
+		gap: 0.625rem
+		margin-bottom: 1rem
 	&__search
 		position: relative
 		width: 100%

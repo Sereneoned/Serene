@@ -25,7 +25,7 @@ const hasRandom = random.length > 0;
 		aria-labelledby="article-discovery-title"
 	>
 		<header class="article-discovery__header">
-			<h2 id="article-discovery-title">{i18n(I18nKey.continueReading)}</h2>
+			<h2 id="article-discovery-title" data-ui-i18n={I18nKey.continueReading}>{i18n(I18nKey.continueReading)}</h2>
 		</header>
 
 		<div class={`article-discovery__lanes${hasRelated && hasRandom ? "" : " article-discovery__lanes--single"}`}>
@@ -34,9 +34,9 @@ const hasRandom = random.length > 0;
 					<div class="article-discovery__lane-heading">
 						<div class="article-discovery__lane-title">
 							<Icon icon="material-symbols:hub-outline-rounded" />
-							<h3>{i18n(I18nKey.relatedReading)}</h3>
+							<h3 data-ui-i18n={I18nKey.relatedReading}>{i18n(I18nKey.relatedReading)}</h3>
 						</div>
-						<p>{i18n(I18nKey.relatedReadingSubtitle)}</p>
+						<p data-ui-i18n={I18nKey.relatedReadingSubtitle}>{i18n(I18nKey.relatedReadingSubtitle)}</p>
 					</div>
 					<ul class="article-discovery__list">
 						{related.map((article) => (
@@ -57,9 +57,9 @@ const hasRandom = random.length > 0;
 					<div class="article-discovery__lane-heading">
 						<div class="article-discovery__lane-title">
 							<Icon icon="material-symbols:explore-outline-rounded" />
-							<h3>{i18n(I18nKey.randomReading)}</h3>
+							<h3 data-ui-i18n={I18nKey.randomReading}>{i18n(I18nKey.randomReading)}</h3>
 						</div>
-						<p>{i18n(I18nKey.randomReadingSubtitle)}</p>
+						<p data-ui-i18n={I18nKey.randomReadingSubtitle}>{i18n(I18nKey.randomReadingSubtitle)}</p>
 					</div>
 					<ul class="article-discovery__list">
 						{random.map((article) => (

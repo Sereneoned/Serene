@@ -1,6 +1,7 @@
 ---
 import PageHeader from "@components/atoms/display/PageHeader.astro";
 import AlbumGallery from "@components/organisms/AlbumGallery.svelte";
+import AlbumDetailAdminBar from "@components/organisms/admin/AlbumDetailAdminBar.svelte";
 import ProtectedAlbum from "@components/organisms/ProtectedAlbum.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
@@ -9,6 +10,7 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { findAlbum, scanAllAlbums } from "@utils/album-scanner";
 import { encryptProtectedContent } from "@utils/password-protection";
 import { url } from "@utils/url-utils";
+import { adminConfig } from "@/config";
 import type { AlbumGroup } from "@/types/album";
 import type { ProtectedPayload } from "@/types/protectedContent";
 
@@ -56,7 +58,7 @@ if (resolvedAlbum.password) {
 			/>
 			<a class="album-detail__back" href={url("/albums/")}>
 				<Icon icon="material-symbols:arrow-back-rounded" aria-hidden="true" />
-				<span>{i18n(I18nKey.albumsBack)}</span>
+				<span data-ui-i18n={I18nKey.albumsBack}>{i18n(I18nKey.albumsBack)}</span>
 			</a>
 			<div class="album-detail__hero-content">
 				<PageHeader
@@ -78,14 +80,15 @@ if (resolvedAlbum.password) {
 						)}
 						<span>
 							<Icon icon="material-symbols:photo-library-outline-rounded" aria-hidden="true" />
-							<span>{resolvedAlbum.photos.length} {i18n(I18nKey.albumsPhotos)}</span>
+							<span>{resolvedAlbum.photos.length} <span data-ui-i18n={I18nKey.albumsPhotos}>{i18n(I18nKey.albumsPhotos)}</span></span>
 						</span>
 					</div>
 				{resolvedAlbum.tags.length > 0 && (
-					<div class="album-detail__tags" aria-label={i18n(I18nKey.tags)}>
+					<div class="album-detail__tags" aria-label={i18n(I18nKey.tags)} data-ui-i18n-aria-label={I18nKey.tags}>
 						{resolvedAlbum.tags.map((tag) => <span>#{tag}</span>)}
 					</div>
 				)}
+				{adminConfig.enable && <AlbumDetailAdminBar albumId={resolvedAlbum.id} client:load />}
 			</div>
 		</div>
 

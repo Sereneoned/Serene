@@ -3,7 +3,7 @@ import Button from "@components/atoms/action/Button.svelte";
 import ProgressIndicator from "@components/atoms/feedback/ProgressIndicator.svelte";
 import Dialog from "@components/atoms/overlay/Dialog.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import {
 	generateSharePoster,
@@ -113,7 +113,7 @@ async function copyPostLink() {
 	const url = getAbsolutePostUrl();
 	try {
 		await navigator.clipboard.writeText(url);
-		showSnackbar(i18n(I18nKey.copySuccess), {
+		showSnackbar($t(I18nKey.copySuccess), {
 			icon: "material-symbols:link-rounded",
 		});
 		copied = true;
@@ -122,7 +122,7 @@ async function copyPostLink() {
 			copied = false;
 		}, 2000);
 	} catch {
-		showSnackbar(i18n(I18nKey.copyFailed), {
+		showSnackbar($t(I18nKey.copyFailed), {
 			icon: "material-symbols:error-outline-rounded",
 		});
 	}
@@ -164,8 +164,8 @@ async function startGeneratePoster() {
 			coverUrl,
 			avatarUrl,
 			labels: {
-				author: i18n(I18nKey.author),
-				scanToRead: i18n(I18nKey.scanToRead),
+				author: $t(I18nKey.author),
+				scanToRead: $t(I18nKey.scanToRead),
 			},
 			palette,
 			signal: posterAbortController.signal,
@@ -221,10 +221,10 @@ function downloadPoster() {
 			</div>
 			<div class="flex flex-col min-w-0">
 				<h2 id="article-share-title" class="font-bold text-[var(--on-surface)] text-base m-0 leading-snug truncate">
-					{i18n(I18nKey.shareArticle)}
+					{$t(I18nKey.shareArticle)}
 				</h2>
 				<p class="text-[var(--on-surface-variant)] text-sm m-0 mt-0.5 leading-snug line-clamp-2">
-					{i18n(I18nKey.shareArticleDescription)}
+					{$t(I18nKey.shareArticleDescription)}
 				</p>
 			</div>
 		</div>
@@ -234,7 +234,7 @@ function downloadPoster() {
 				variant="filled"
 				size="small"
 				icon="material-symbols:share-outline-rounded"
-				label={i18n(I18nKey.shareArticle)}
+				label={$t(I18nKey.shareArticle)}
 				onclick={openShareDialog}
 			/>
 		</div>
@@ -246,18 +246,18 @@ function downloadPoster() {
 
 	<!-- Share Dialog -->
 	{#if shareDialogOpen}
-		<Dialog bind:open={shareDialogOpen} title={i18n(I18nKey.shareArticle)} class="article-share-dialog">
+		<Dialog bind:open={shareDialogOpen} title={$t(I18nKey.shareArticle)} class="article-share-dialog">
 			<div class="share-dialog-content">
 				{#if posterState === "generating"}
 					<div class="share-poster-status share-poster-status--loading">
-						<ProgressIndicator variant="circular" label={i18n(I18nKey.generatingSharePoster)} />
-						<p>{i18n(I18nKey.generatingSharePoster)}</p>
+						<ProgressIndicator variant="circular" label={$t(I18nKey.generatingSharePoster)} />
+						<p>{$t(I18nKey.generatingSharePoster)}</p>
 					</div>
 				{:else if posterState === "ready" && posterBlobUrl}
 					<div class="share-poster-preview">
 						<img
 							src={posterBlobUrl}
-							alt={formatString(i18n(I18nKey.sharePosterPreviewAlt), { title })}
+							alt={formatString($t(I18nKey.sharePosterPreviewAlt), { title })}
 							class="share-poster-preview__img"
 						/>
 					</div>
@@ -266,7 +266,7 @@ function downloadPoster() {
 						<span class="share-poster-status__icon" aria-hidden="true">
 							<Icon icon="material-symbols:error-outline-rounded" />
 						</span>
-						<p>{i18n(I18nKey.sharePosterFailed)}</p>
+						<p>{$t(I18nKey.sharePosterFailed)}</p>
 					</div>
 				{/if}
 			</div>
@@ -278,7 +278,7 @@ function downloadPoster() {
 						size="medium"
 						full
 						icon={copied ? "material-symbols:check-rounded" : "material-symbols:link-rounded"}
-						label={copied ? i18n(I18nKey.copySuccess) : i18n(I18nKey.copyLink)}
+						label={copied ? $t(I18nKey.copySuccess) : $t(I18nKey.copyLink)}
 						onclick={copyPostLink}
 					/>
 
@@ -288,7 +288,7 @@ function downloadPoster() {
 							size="medium"
 							full
 							icon="material-symbols:refresh-rounded"
-							label={i18n(I18nKey.retry)}
+							label={$t(I18nKey.retry)}
 							onclick={startGeneratePoster}
 						/>
 					{:else}
@@ -297,7 +297,7 @@ function downloadPoster() {
 							size="medium"
 							full
 							icon="material-symbols:download-rounded"
-							label={i18n(I18nKey.downloadSharePoster)}
+							label={$t(I18nKey.downloadSharePoster)}
 							disabled={posterState !== "ready"}
 							onclick={downloadPoster}
 						/>

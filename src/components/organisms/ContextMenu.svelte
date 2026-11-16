@@ -2,7 +2,7 @@
 import Icon from "@components/atoms/display/Icon.svelte";
 import Menu from "@components/atoms/navigation/Menu.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import { copyPageLink } from "@utils/copy-page-link";
 import { prefersReducedMotion } from "@utils/motion";
 import { tick } from "svelte";
@@ -21,11 +21,11 @@ let menuRoot = $state<HTMLDivElement>();
 let selectionText = $state("");
 let openedFromKeyboard = $state(false);
 
-const labels: Record<ContextMenuAction, string> = {
-	copySelection: i18n(I18nKey.copySelection),
-	backToTop: i18n(I18nKey.backToTop),
-	sharePageLink: i18n(I18nKey.copyLink),
-};
+const labels: Record<ContextMenuAction, string> = $derived({
+	copySelection: $t(I18nKey.copySelection),
+	backToTop: $t(I18nKey.backToTop),
+	sharePageLink: $t(I18nKey.copyLink),
+});
 
 const icons: Record<ContextMenuAction, string> = {
 	copySelection: "material-symbols:content-copy-rounded",
@@ -200,7 +200,7 @@ $effect(() => {
 		style={`--context-menu-x: ${x}px; --context-menu-y: ${y}px`}
 		onkeydown={onMenuKeydown}
 	>
-		<Menu bind:open label={i18n(I18nKey.more)} class="context-menu">
+		<Menu bind:open label={$t(I18nKey.more)} class="context-menu">
 			{#each visibleActions as action}
 				<button
 					class="m3-menu-item m3-state-layer"

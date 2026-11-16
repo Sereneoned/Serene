@@ -25,9 +25,11 @@ const categorySummary = `${categories.length} ${i18n(I18nKey.categoriesCount)} Â
 	<Card color="var(--card-bg)" radius="l" class="category-index px-8 py-6">
 		<PageHeader
 			icon="material-symbols:folder-outline-rounded"
-			title={i18n(I18nKey.categories)}
+			title={i18n(I18nKey.categories)} titleKey={I18nKey.categories}
 				subtitle={categorySummary}
-		/>
+		>
+			<span slot="subtitle">{categories.length} <span data-ui-i18n={I18nKey.categoriesCount}>{i18n(I18nKey.categoriesCount)}</span> Â· {totalPosts} <span data-ui-i18n={I18nKey.postsCount}>{i18n(I18nKey.postsCount)}</span></span>
+		</PageHeader>
 		{categories.length > 0 && (
 			<ul class="category-index__list">
 				{categories.map((category) => (
@@ -44,7 +46,7 @@ const categorySummary = `${categories.length} ${i18n(I18nKey.categoriesCount)} Â
 		)}
 		{categories.length === 0 && (
 			<div class="category-index__empty">
-				<span>{i18n(I18nKey.noData)}</span>
+				<span data-ui-i18n={I18nKey.noData}>{i18n(I18nKey.noData)}</span>
 			</div>
 		)}
 	</Card>

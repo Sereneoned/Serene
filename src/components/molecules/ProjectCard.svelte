@@ -17,7 +17,7 @@
  * - 封面加载失败自动回退到图标形态，不破版。
  */
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
 import type { ProjectItem, ProjectPhase } from "@/types/projectsConfig";
@@ -63,7 +63,7 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 	{#if project.featured}
 		<span class="project-card__featured-badge" aria-hidden="true">
 			<Icon icon="material-symbols:star-rounded" />
-			<span>{i18n(I18nKey.pinned)}</span>
+			<span>{$t(I18nKey.pinned)}</span>
 		</span>
 	{/if}
 {/snippet}
@@ -81,7 +81,7 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 				href={project.website}
 				target="_blank"
 				rel="noopener noreferrer"
-				aria-label={`${project.title} · ${i18n(I18nKey.projectVisit)}`}
+				aria-label={`${project.title} · ${$t(I18nKey.projectVisit)}`}
 			>
 				{@render coverImage()}
 			</a>
@@ -109,7 +109,7 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 				</div>
 				<span class="project-card__phase" data-phase={project.phase}>
 					<Icon icon={phase.icon} aria-hidden="true" />
-					{i18n(phase.key)}
+					{$t(phase.key)}
 				</span>
 			</div>
 		</div>
@@ -119,7 +119,7 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 		{#if project.technologies.length > 0}
 			<ul
 				class="project-card__technologies"
-				aria-label={i18n(I18nKey.projectTechnologies)}
+				aria-label={$t(I18nKey.projectTechnologies)}
 			>
 				{#each project.technologies as technology (technology)}
 					<li>{technology}</li>
@@ -132,13 +132,13 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 				{#if project.website}
 					<a href={project.website} target="_blank" rel="noopener noreferrer">
 						<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
-						{i18n(I18nKey.projectVisit)}
+						{$t(I18nKey.projectVisit)}
 					</a>
 				{/if}
 				{#if project.repository}
 					<a href={project.repository} target="_blank" rel="noopener noreferrer">
 						<Icon icon="fa7-brands:github" aria-hidden="true" />
-						{i18n(I18nKey.projectSource)}
+						{$t(I18nKey.projectSource)}
 					</a>
 				{/if}
 			</div>

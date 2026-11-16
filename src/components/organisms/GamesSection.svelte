@@ -14,7 +14,7 @@ import TextField from "@components/atoms/input/TextField.svelte";
 import GameCard from "@components/molecules/GameCard.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
 import type { GameCategory, GameItem } from "@/types/gamesConfig";
@@ -22,14 +22,24 @@ import type { GameCategory, GameItem } from "@/types/gamesConfig";
 let {
 	categories = [] as GameCategory[],
 	items = [] as GameItem[],
-	title = i18n(I18nKey.games),
-	subtitle = i18n(I18nKey.gamesBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	categories?: GameCategory[];
 	items?: GameItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.games)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.gamesBanner)),
+);
 
 let query = $state("");
 let selectedCategory = $state("");
@@ -117,8 +127,8 @@ onMount(() => {
 <Card color="var(--card-bg)" radius="l" class="games-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:sports-esports-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if enabledItems.length > 0}
@@ -128,8 +138,8 @@ onMount(() => {
 					<TextField
 						type="search"
 						bind:value={query}
-						placeholder={i18n(I18nKey.gamesSearchPlaceholder)}
-						label={i18n(I18nKey.search)}
+						placeholder={$t(I18nKey.gamesSearchPlaceholder)}
+						label={$t(I18nKey.search)}
 						hideLabel
 						variant="outlined"
 						class="!rounded-(--shape-corner-l)"
@@ -140,7 +150,7 @@ onMount(() => {
 						<button
 							type="button"
 							class="games-section__search-clear"
-							aria-label={i18n(I18nKey.clear)}
+							aria-label={$t(I18nKey.clear)}
 							onclick={() => (query = "")}
 						>
 							<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -150,7 +160,7 @@ onMount(() => {
 			</div>
 
 			<div class="games-section__filter-row">
-				<div class="games-section__chips" aria-label={i18n(I18nKey.gamesCategoryLabel)}>
+				<div class="games-section__chips" aria-label={$t(I18nKey.gamesCategoryLabel)}>
 					<Chips
 						items={categoryChipItems}
 						variant="filter"
@@ -160,7 +170,7 @@ onMount(() => {
 				</div>
 				{#if filteredItems.length > 0}
 					<p class="games-section__count" aria-live="polite">
-						{filteredItems.length} {i18n(I18nKey.gamesCounts)}
+						{filteredItems.length} {$t(I18nKey.gamesCounts)}
 					</p>
 				{/if}
 			</div>
@@ -186,7 +196,7 @@ onMount(() => {
 	{:else}
 		<div class="games-section__empty">
 			<Icon icon="material-symbols:sports-esports-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.gamesNoResults)}</span>
+			<span>{$t(I18nKey.gamesNoResults)}</span>
 		</div>
 	{/if}
 </Card>

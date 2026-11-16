@@ -5,7 +5,7 @@ import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { resolveImageAsset } from "@utils/asset-utils";
 import { getSortedMoments } from "@utils/content-utils";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { url } from "@utils/url-utils";
 import { momentsConfig, profileConfig } from "@/config";
 
@@ -14,14 +14,24 @@ if (!momentsConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(momentsConfig.title, I18nKey.moments);
+const pageTitleKey = resolveI18nKey(momentsConfig.title, I18nKey.moments);
 const pageDescription = resolveI18nText(
+	momentsConfig.description,
+	I18nKey.momentsBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	momentsConfig.description,
 	I18nKey.momentsBanner,
 );
 
 const moments = await getSortedMoments();
 const avatarAsset = await resolveImageAsset(profileConfig.avatar ?? "");
-let avatar = typeof avatarAsset === "string" ? avatarAsset : avatarAsset.src;
+let avatar =
+	typeof avatarAsset === "string"
+		? avatarAsset.startsWith("/")
+			? url(avatarAsset)
+			: avatarAsset
+		: avatarAsset.src;
 let avatarSrcset: string | undefined;
 let avatarWidth: number | undefined;
 let avatarHeight: number | undefined;
@@ -55,5 +65,5 @@ const author = {
 ---
 
 <MainGridLayout title={pageTitle} description={pageDescription} page="moments">
-    <MomentSection {moments} {author} title={pageTitle} subtitle={pageDescription} client:visible></MomentSection>
+    <MomentSection {moments} {author} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible></MomentSection>
 </MainGridLayout>

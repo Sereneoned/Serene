@@ -45,7 +45,7 @@ const isHomeItemVisible = homeItem
 
 <aside
 	id="floating-controls"
-	aria-label={i18n(I18nKey.more)}
+	aria-label={i18n(I18nKey.more)} data-ui-i18n-aria-label={I18nKey.more}
 	class:list={[
 		"m3-floating-controls-container",
 		{ "m3-floating-controls-container--start": fabConfig.align === "start" },
@@ -71,7 +71,7 @@ const isHomeItemVisible = homeItem
 			<FloatingActionButton
 				id="fab-toc-btn"
 				type="toc"
-				ariaLabel={i18n(I18nKey.tableOfContents)}
+				ariaLabel={i18n(I18nKey.tableOfContents)} ariaLabelKey={I18nKey.tableOfContents}
 				devices={tocItem.devices}
 				pages={tocItem.pages ?? ["post"]}
 				size={fabConfig.size}
@@ -87,7 +87,7 @@ const isHomeItemVisible = homeItem
 		<FloatingActionButton
 			id="fab-comment-btn"
 			type="comment"
-			ariaLabel={i18n(I18nKey.backToComment)}
+			ariaLabel={i18n(I18nKey.backToComment)} ariaLabelKey={I18nKey.backToComment}
 			devices={commentItem.devices}
 			pages={commentItem.pages ?? ["post"]}
 			size={fabConfig.size}
@@ -104,7 +104,7 @@ const isHomeItemVisible = homeItem
 		<FloatingActionButton
 			id="fab-home-btn"
 			type="home"
-			ariaLabel={i18n(I18nKey.backToHome)}
+			ariaLabel={i18n(I18nKey.backToHome)} ariaLabelKey={I18nKey.backToHome}
 			devices={homeItem.devices}
 			pages={homeItem.pages}
 			size={fabConfig.size}
@@ -121,7 +121,7 @@ const isHomeItemVisible = homeItem
 		<FloatingActionButton
 			id="fab-top-btn"
 			type="top"
-			ariaLabel={i18n(I18nKey.backToTop)}
+			ariaLabel={i18n(I18nKey.backToTop)} ariaLabelKey={I18nKey.backToTop}
 			devices={topItem.devices}
 			pages={topItem.pages}
 			size={fabConfig.size}

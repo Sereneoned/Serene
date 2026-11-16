@@ -69,12 +69,12 @@ const hasOverflow = seriesItems.length > DISPLAY_LIMIT;
 ---
 
 {seriesItems.length > 0 && (
-	<WidgetLayout name={i18n(I18nKey.series)} id="series" class={className} style={style}>
+	<WidgetLayout name={i18n(I18nKey.series)} nameKey={I18nKey.series} id="series" class={className} style={style}>
 		<CategoryList categories={visibleItems} />
 		{hasOverflow && (
 			<div slot="footer" class="widget-index-link">
 				<a href={url("/series/")} class="m3-state-layer">
-					{i18n(I18nKey.seriesViewAll)}
+					<span data-ui-i18n={I18nKey.seriesViewAll}>{i18n(I18nKey.seriesViewAll)}</span>
 					<Icon icon="material-symbols:chevron-right-rounded" />
 				</a>
 			</div>

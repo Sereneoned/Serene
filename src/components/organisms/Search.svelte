@@ -3,7 +3,7 @@ import IconButton from "@components/atoms/action/IconButton.svelte";
 import SearchPanel from "@components/atoms/blog/SearchPanel.svelte";
 import SearchBar from "@components/molecules/SearchBar.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { url } from "@utils/url-utils.ts";
 import { onMount } from "svelte";
@@ -158,7 +158,7 @@ $: if (initialized) {
     bind:value={keywordDesktop}
     id="search-input-desktop"
     name="search-desktop"
-    placeholder={i18n(I18nKey.search)}
+    placeholder={$t(I18nKey.search)}
     onfocus={() => search(keywordDesktop, true)}
     oncollapse={() => setPanelVisibility(false, true)}
 />
@@ -166,7 +166,7 @@ $: if (initialized) {
 <!-- toggle btn for phone/tablet view -->
 <IconButton
     icon="material-symbols:search"
-    label={i18n(I18nKey.searchPanel)}
+    label={$t(I18nKey.searchPanel)}
     id="search-switch"
     size="small"
     shape="round"
@@ -180,6 +180,6 @@ $: if (initialized) {
     class="float-panel float-panel-closed absolute md:w-[30rem] top-20 left-4 md:left-[unset] right-4"
     bind:query={keywordMobile}
     results={panelResults}
-    placeholder={i18n(I18nKey.search)}
+    placeholder={$t(I18nKey.search)}
     hideInputOnDesktop
 />

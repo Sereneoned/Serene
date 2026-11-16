@@ -38,9 +38,9 @@ test.describe("top app bar content alignment", () => {
 		const nav = content.locator(":scope > nav");
 
 		await expect(title).toHaveText("Shirone");
-		await expect(title).not.toHaveClass(/lg:absolute/);
+		await expect(title).not.toHaveCSS("position", "absolute");
 		await expect(nav).toBeVisible();
-		await expect(nav).toHaveClass(/lg:absolute/);
+		await expect(nav).toHaveCSS("position", "absolute");
 
 		const geometry = await Promise.all([
 			content.boundingBox(),
@@ -72,7 +72,7 @@ test.describe("navigation feature gating", () => {
 	test("keeps the mobile drawer free of dead feature links", async ({
 		page,
 	}) => {
-		// 抽屉只在窄屏出现（`lg:!hidden`），分组子项展开后才进入 DOM。
+		// 抽屉用于小于 1280px 的视口（`xl:!hidden`），分组子项展开后才进入 DOM。
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await page.locator("#nav-drawer-switch").click();

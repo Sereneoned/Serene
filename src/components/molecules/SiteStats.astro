@@ -39,21 +39,25 @@ const rows = [
 	{
 		icon: "material-symbols:article-outline-rounded",
 		label: i18n(I18nKey.statsPosts),
+		labelKey: I18nKey.statsPosts,
 		value: fmt(stats.posts),
 	},
 	{
 		icon: "material-symbols:forum-outline-rounded",
 		label: i18n(I18nKey.moments),
+		labelKey: I18nKey.moments,
 		value: fmt(stats.moments),
 	},
 	{
 		icon: "material-symbols:folder-outline-rounded",
 		label: i18n(I18nKey.categories),
+		labelKey: I18nKey.categories,
 		value: fmt(stats.categories),
 	},
 	{
 		icon: "material-symbols:tag-rounded",
 		label: i18n(I18nKey.tags),
+		labelKey: I18nKey.tags,
 		value: fmt(stats.tags),
 	},
 	// 系列功能关闭时不产出统计行（零额外负担）
@@ -62,6 +66,7 @@ const rows = [
 				{
 					icon: "material-symbols:auto-stories-outline-rounded",
 					label: i18n(I18nKey.series),
+					labelKey: I18nKey.series,
 					value: fmt(stats.series),
 				},
 			]
@@ -69,28 +74,31 @@ const rows = [
 	{
 		icon: "material-symbols:edit-note-outline-rounded",
 		label: i18n(I18nKey.statsWords),
+		labelKey: I18nKey.statsWords,
 		value: fmt(stats.words),
 	},
 	{
 		icon: "material-symbols:calendar-month-outline-rounded",
 		label: i18n(I18nKey.statsDays),
+		labelKey: I18nKey.statsDays,
 		value: fmt(stats.days),
 	},
 	{
 		icon: "material-symbols:update-rounded",
 		label: i18n(I18nKey.statsUpdated),
+		labelKey: I18nKey.statsUpdated,
 		value: lastActivityText,
 		relative: true,
 	},
 ];
 ---
 
-<WidgetLayout name={i18n(I18nKey.stats)} id="site-stats" class={className} style={style}>
+<WidgetLayout name={i18n(I18nKey.stats)} nameKey={I18nKey.stats} id="site-stats" class={className} style={style}>
 	<ul class="m3-site-stats">
 		{rows.map((row) => (
 			<li class="m3-site-stats__row">
 				<MetaIcon icon={row.icon} />
-				<span class="m3-site-stats__label">{row.label}</span>
+				<span class="m3-site-stats__label" data-ui-i18n={row.labelKey}>{row.label}</span>
 				<span class="m3-site-stats__rule" aria-hidden="true"></span>
 				<span
 					class="m3-site-stats__value"
@@ -138,7 +146,7 @@ const rows = [
 		white-space: nowrap
 </style>
 
-<script is:inline define:vars={{ lastActivityISO: stats.lastActivity, todayText, yesterdayText, daysAgoText }}>
+<script is:inline define:vars={{ lastActivityISO: stats.lastActivity, todayText, yesterdayText, daysAgoText, todayKey: I18nKey.statsToday, yesterdayKey: I18nKey.statsYesterday, daysAgoKey: I18nKey.statsDaysAgo }}>
 	// 最近更新相对化：按本地时区取日界，差值恒为整天数；
 	// 无文章或脚本禁用时保留 SSR 的绝对日期
 	(() => {
@@ -150,8 +158,16 @@ const rows = [
 		const diffDays = Math.round(
 			(dayStart(new Date()) - dayStart(new Date(lastActivityISO))) / DAY_MS,
 		);
-		if (diffDays <= 0) el.textContent = todayText;
-		else if (diffDays === 1) el.textContent = yesterdayText;
-		else el.textContent = daysAgoText.replace("{days}", String(diffDays));
+		if (diffDays <= 0) {
+			el.textContent = todayText;
+			el.dataset.uiI18n = todayKey;
+		} else if (diffDays === 1) {
+			el.textContent = yesterdayText;
+			el.dataset.uiI18n = yesterdayKey;
+		} else {
+			el.textContent = daysAgoText.replace("{days}", String(diffDays));
+			el.dataset.uiI18n = daysAgoKey;
+			el.dataset.uiI18nParams = JSON.stringify({ days: diffDays });
+		}
 	})();
 </script>

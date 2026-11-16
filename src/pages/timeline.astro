@@ -3,7 +3,7 @@
 import TimelineSection from "@components/organisms/TimelineSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { timelineConfig } from "@/config/timelineConfig";
 import { resolveTimelineData } from "@/utils/feature-data";
 
@@ -12,7 +12,12 @@ if (!timelineConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(timelineConfig.title, I18nKey.timeline);
+const pageTitleKey = resolveI18nKey(timelineConfig.title, I18nKey.timeline);
 const pageDescription = resolveI18nText(
+	timelineConfig.description,
+	I18nKey.timelineBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	timelineConfig.description,
 	I18nKey.timelineBanner,
 );
@@ -28,8 +33,8 @@ const items = resolveTimelineData(timelineConfig);
 	<TimelineSection
 		categories={timelineConfig.categories}
 		items={items}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		client:visible
 	/>
 </MainGridLayout>

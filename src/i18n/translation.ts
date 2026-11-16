@@ -42,11 +42,19 @@ const map: { [key: string]: Translation } = {
 };
 
 export function getTranslation(lang: string): Translation {
-	return map[lang.toLowerCase()] || defaultTranslation;
+	return map[lang.toLowerCase().replaceAll("-", "_")] || defaultTranslation;
 }
 
-export function i18n(key: I18nKey): string {
-	const lang = (siteConfig.lang || "en").toLowerCase();
+export function i18n(key: I18nKey, language?: string): string {
+	// Build-time output keeps the configured language. Browser event handlers
+	// share the visitor's UI choice without changing authored content/config.
+	const browserLanguage =
+		typeof document === "undefined"
+			? undefined
+			: document.documentElement.dataset.uiLocale;
+	const lang = (language || browserLanguage || siteConfig.lang || "en")
+		.toLowerCase()
+		.replaceAll("-", "_");
 
 	// 1. 查找用户自定义 i18n 覆盖域（支持原大小写及小写匹配，如 zh_CN / zh_cn）
 	if (i18nConfig && typeof i18nConfig === "object") {

@@ -46,7 +46,8 @@ export type SidebarPage =
 	| "series" // 系列索引
 	| "rss" // RSS 订阅指南
 	| "atom" // Atom 订阅指南
-	| "post"; // 文章详情页
+	| "post" // 文章详情页
+	| "admin"; // 管理员控制台
 
 /** 资料卡（内容来自 profileConfig，无 WidgetLayout 标题外壳） */
 export interface ProfileWidget {

@@ -11,7 +11,7 @@
 import Icon from "@components/atoms/display/Icon.svelte";
 import Skeleton from "@components/atoms/display/Skeleton.svelte";
 import ProgressIndicator from "@components/atoms/feedback/ProgressIndicator.svelte";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import { ANIME_STATUS_META } from "@utils/anime/status";
 import { imageFeedback } from "@utils/image-feedback";
 import { reveal } from "@utils/motion";
@@ -98,7 +98,7 @@ const metaLine = $derived(
 		<div class="anime-card__header-row">
 			<span class="anime-card__status">
 				<span class="anime-card__status-dot" aria-hidden="true"></span>
-				{i18n(statusMeta.key)}
+				{$t(statusMeta.key)}
 			</span>
 		</div>
 

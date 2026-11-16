@@ -10,7 +10,7 @@
 import IconButton from "@components/atoms/action/IconButton.svelte";
 import LoadingIndicator from "@components/atoms/feedback/LoadingIndicator.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import type { MomentImage } from "@utils/content-utils";
 import { openFancyboxGallery } from "@utils/fancybox-handler";
 import { prefersReducedMotion } from "@utils/motion";
@@ -104,7 +104,7 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 function tileLabel(i: number) {
-	const label = `${i18n(I18nKey.openImage)} ${i + 1}`;
+	const label = `${$t(I18nKey.openImage)} ${i + 1}`;
 	const alt = images[i]?.alt;
 	const labelWithAlt = alt ? `${label}: ${alt}` : label;
 	return remainder > 0 && i === MAX_TILES - 1
@@ -153,7 +153,7 @@ $effect(() => {
 		class="moment-viewer"
 		bind:this={viewerEl}
 		role="group"
-		aria-roledescription={i18n(I18nKey.imageViewer)}
+		aria-roledescription={$t(I18nKey.imageViewer)}
 		tabindex="-1"
 		onkeydown={handleKeydown}
 	>
@@ -166,14 +166,14 @@ $effect(() => {
 					icon="material-symbols:open-in-full-rounded"
 					variant="standard"
 					size="xsmall"
-					label={i18n(I18nKey.viewOriginal)}
+					label={$t(I18nKey.viewOriginal)}
 					onclick={() => openLightbox(index)}
 				/>
 				<IconButton
 					icon="material-symbols:contract-rounded"
 					variant="standard"
 					size="xsmall"
-					label={i18n(I18nKey.backToGrid)}
+					label={$t(I18nKey.backToGrid)}
 					onclick={collapseViewer}
 				/>
 			</div>
@@ -184,7 +184,7 @@ $effect(() => {
 				icon="material-symbols:chevron-left-rounded"
 				variant="tonal"
 				size="xsmall"
-				label={i18n(I18nKey.previousImage)}
+				label={$t(I18nKey.previousImage)}
 				disabled={index === 0}
 				onclick={() => go(-1)}
 			/>
@@ -193,8 +193,8 @@ $effect(() => {
 					type="button"
 					class="moment-viewer__stage-btn"
 					aria-label={current.alt
-						? `${i18n(I18nKey.viewOriginal)}: ${current.alt}`
-						: i18n(I18nKey.viewOriginal)}
+						? `${$t(I18nKey.viewOriginal)}: ${current.alt}`
+						: $t(I18nKey.viewOriginal)}
 					onclick={() => openLightbox(index)}
 				>
 					{#if !loadedViewerImages.has(current.src)}
@@ -218,7 +218,7 @@ $effect(() => {
 				icon="material-symbols:chevron-right-rounded"
 				variant="tonal"
 				size="xsmall"
-				label={i18n(I18nKey.nextImage)}
+				label={$t(I18nKey.nextImage)}
 				disabled={index === images.length - 1}
 				onclick={() => go(1)}
 			/>

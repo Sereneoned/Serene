@@ -13,7 +13,7 @@
  *   带 rel=noopener noreferrer 由消费方保证的安全外链。
  */
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
 import type { DeviceItem, DeviceStatus } from "@/types/devicesConfig";
@@ -91,10 +91,10 @@ const showImage = $derived(Boolean(device.image) && !coverFailed);
 			<span
 				class="device-card__status"
 				data-status={device.status}
-				aria-label={i18n(meta.key)}
+				aria-label={$t(meta.key)}
 			>
 				<Icon icon={meta.icon} aria-hidden="true" />
-				{i18n(meta.key)}
+				{$t(meta.key)}
 			</span>
 		</div>
 
@@ -116,13 +116,13 @@ const showImage = $derived(Boolean(device.image) && !coverFailed);
 					rel="noopener noreferrer"
 				>
 					<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
-					{i18n(I18nKey.devicesViewSpecs)}
+					{$t(I18nKey.devicesViewSpecs)}
 				</a>
 			{/if}
 			{#if device.featured}
 				<span class="device-card__featured" aria-hidden="true">
 					<Icon icon="material-symbols:star-rounded" />
-					{i18n(I18nKey.devicesFeatured)}
+					{$t(I18nKey.devicesFeatured)}
 				</span>
 			{/if}
 		</div>

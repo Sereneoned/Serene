@@ -3,7 +3,7 @@ import Button from "@components/atoms/action/Button.svelte";
 import IconButton from "@components/atoms/action/IconButton.svelte";
 import TextField from "@components/atoms/input/TextField.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { decryptProtectedContent } from "@utils/password-protection";
 import {
@@ -39,7 +39,8 @@ let {
 } = $props();
 
 let password = $state("");
-let error = $state("");
+let errorKey = $state<I18nKey | null>(null);
+const error = $derived(errorKey ? $t(errorKey) : "");
 let loading = $state(false);
 let passwordVisible = $state(false);
 
@@ -84,8 +85,8 @@ const copyKeys = {
 	},
 } as const;
 const copy = copyKeys[contentKind];
-const resolvedTitle = title || i18n(copy.title);
-const resolvedDescription = description || i18n(copy.description);
+const resolvedTitle = $derived(title || $t(copy.title));
+const resolvedDescription = $derived(description || $t(copy.description));
 const resolvedHeadingIcon =
 	headingIcon ||
 	(contentKind === "post"
@@ -111,15 +112,15 @@ onMount(() => {
 });
 
 function clearError() {
-	if (error) error = "";
+	if (errorKey) errorKey = null;
 }
 
 async function unlock() {
 	if (!password.trim()) {
-		error = i18n(copy.required);
+		errorKey = copy.required;
 		return;
 	}
-	error = "";
+	errorKey = null;
 	loading = true;
 	try {
 		if (payload.contentType !== expectedContentType) throw new Error();
@@ -127,7 +128,7 @@ async function unlock() {
 		if (cacheSession) writeProtectedSession(scope, payloadId, content);
 		onunlocked(content);
 	} catch {
-		error = i18n(copy.invalid);
+		errorKey = copy.invalid;
 	} finally {
 		loading = false;
 	}
@@ -184,8 +185,8 @@ async function unlock() {
 					name="password"
 					type={passwordVisible ? "text" : "password"}
 					bind:value={password}
-					label={i18n(copy.label)}
-					placeholder={i18n(copy.label)}
+					label={$t(copy.label)}
+					placeholder={$t(copy.label)}
 					variant="outlined"
 					autocomplete="current-password"
 					disabled={loading}
@@ -200,7 +201,7 @@ async function unlock() {
 							? "material-symbols:visibility-off-rounded"
 							: "material-symbols:visibility-rounded"}
 						size="small"
-						label={i18n(
+						label={$t(
 							passwordVisible ? copy.hide : copy.show,
 						)}
 						disabled={loading}
@@ -211,8 +212,8 @@ async function unlock() {
 			<Button
 				type="submit"
 				label={loading
-				? i18n(copy.unlocking)
-				: i18n(copy.unlock)}
+				? $t(copy.unlocking)
+				: $t(copy.unlock)}
 				icon={loading
 					? "material-symbols:progress-activity"
 					: "material-symbols:lock-open-rounded"}

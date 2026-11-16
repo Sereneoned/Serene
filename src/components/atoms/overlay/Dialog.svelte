@@ -5,7 +5,7 @@
  */
 
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { prefersReducedMotion } from "@utils/motion";
 import { tick } from "svelte";
@@ -113,7 +113,7 @@ $effect(() => {
 					<button
 						type="button"
 						class="m3-dialog__close-btn m3-state-layer"
-						aria-label={i18n(I18nKey.close)}
+						aria-label={$t(I18nKey.close)}
 						onclick={close}
 					>
 						<Icon icon="material-symbols:close-rounded" />

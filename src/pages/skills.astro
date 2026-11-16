@@ -3,7 +3,7 @@
 import SkillSection from "@components/organisms/SkillSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { skillsConfig } from "@/config/skillsConfig";
 import { resolveSkillsData } from "@/utils/feature-data";
 
@@ -12,7 +12,12 @@ if (!skillsConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(skillsConfig.title, I18nKey.skills);
+const pageTitleKey = resolveI18nKey(skillsConfig.title, I18nKey.skills);
 const pageDescription = resolveI18nText(
+	skillsConfig.description,
+	I18nKey.skillsBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	skillsConfig.description,
 	I18nKey.skillsBanner,
 );
@@ -28,8 +33,8 @@ const items = resolveSkillsData(skillsConfig);
 	<SkillSection
 		categories={skillsConfig.categories}
 		items={items}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		client:visible
 	/>
 </MainGridLayout>

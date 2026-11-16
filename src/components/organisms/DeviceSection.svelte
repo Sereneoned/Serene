@@ -12,7 +12,7 @@ import TextField from "@components/atoms/input/TextField.svelte";
 import DeviceCard from "@components/molecules/DeviceCard.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { packMasonry, setupMasonry } from "@utils/masonry";
 import { onMount } from "svelte";
@@ -21,14 +21,24 @@ import type { DeviceCategory, DeviceItem } from "@/types/devicesConfig";
 let {
 	categories = [] as DeviceCategory[],
 	items = [] as DeviceItem[],
-	title = i18n(I18nKey.devices),
-	subtitle = i18n(I18nKey.devicesBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	categories?: DeviceCategory[];
 	items?: DeviceItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.devices)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.devicesBanner)),
+);
 
 let query = $state("");
 let selectedCategory = $state("");
@@ -131,8 +141,8 @@ $effect(() => {
 <Card color="var(--card-bg)" radius="l" class="devices-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:devices-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if enabledItems.length > 0}
@@ -142,8 +152,8 @@ $effect(() => {
 					<TextField
 						type="search"
 						bind:value={query}
-						placeholder={i18n(I18nKey.devicesSearchPlaceholder)}
-						label={i18n(I18nKey.search)}
+						placeholder={$t(I18nKey.devicesSearchPlaceholder)}
+						label={$t(I18nKey.search)}
 						hideLabel
 						variant="outlined"
 						class="!rounded-(--shape-corner-l)"
@@ -154,7 +164,7 @@ $effect(() => {
 						<button
 							type="button"
 							class="devices-section__search-clear"
-							aria-label={i18n(I18nKey.clear)}
+							aria-label={$t(I18nKey.clear)}
 							onclick={() => (query = "")}
 						>
 							<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -164,7 +174,7 @@ $effect(() => {
 			</div>
 
 			<div class="devices-section__filter-row">
-				<div class="devices-section__chips" aria-label={i18n(I18nKey.devicesCategoryLabel)}>
+				<div class="devices-section__chips" aria-label={$t(I18nKey.devicesCategoryLabel)}>
 					<Chips
 						items={categoryChipItems}
 						variant="filter"
@@ -174,7 +184,7 @@ $effect(() => {
 				</div>
 				{#if filteredItems.length > 0}
 					<p class="devices-section__count" aria-live="polite">
-						{filteredItems.length} {i18n(I18nKey.devicesCounts)}
+						{filteredItems.length} {$t(I18nKey.devicesCounts)}
 					</p>
 				{/if}
 			</div>
@@ -204,7 +214,7 @@ $effect(() => {
 	{:else}
 		<div class="devices-section__empty">
 			<Icon icon="material-symbols:devices-off-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.devicesNoResults)}</span>
+			<span>{$t(I18nKey.devicesNoResults)}</span>
 		</div>
 	{/if}
 </Card>

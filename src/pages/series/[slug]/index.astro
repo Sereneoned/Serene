@@ -72,7 +72,9 @@ const subtitle = `${statusLabel} · ${ordered.length} ${i18n(I18nKey.postsCount)
 			icon="material-symbols:auto-stories-rounded"
 			title={series.data.title}
 			subtitle={subtitle}
-		/>
+		>
+			<span slot="subtitle"><span data-ui-i18n={series.data.status === "completed" ? I18nKey.seriesStatusCompleted : I18nKey.seriesStatusOngoing}>{statusLabel}</span> · {ordered.length} <span data-ui-i18n={I18nKey.postsCount}>{i18n(I18nKey.postsCount)}</span></span>
+		</PageHeader>
 		{series.body && (
 			<section class="series-detail__overview">
 				<Markdown class="series-detail__overview-markdown">
@@ -111,7 +113,7 @@ const subtitle = `${statusLabel} · ${ordered.length} ${i18n(I18nKey.postsCount)
 		)}
 		{ordered.length === 0 && (
 			<div class="series-detail__empty">
-				<span>{i18n(I18nKey.noData)}</span>
+				<span data-ui-i18n={I18nKey.noData}>{i18n(I18nKey.noData)}</span>
 			</div>
 		)}
 	</Card>

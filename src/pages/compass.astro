@@ -6,7 +6,7 @@
 import CompassSection from "@components/organisms/CompassSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { compassConfig } from "@/config/compassConfig";
 import { compassData } from "../data/compass";
 
@@ -15,12 +15,17 @@ if (!compassConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(compassConfig.title, I18nKey.compass);
+const pageTitleKey = resolveI18nKey(compassConfig.title, I18nKey.compass);
 const pageDescription = resolveI18nText(
+	compassConfig.description,
+	I18nKey.compassBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	compassConfig.description,
 	I18nKey.compassBanner,
 );
 ---
 
 <MainGridLayout title={pageTitle} description={pageDescription} page="compass">
-    <CompassSection shelves={compassData} title={pageTitle} subtitle={pageDescription} client:visible></CompassSection>
+    <CompassSection shelves={compassData} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible></CompassSection>
 </MainGridLayout>

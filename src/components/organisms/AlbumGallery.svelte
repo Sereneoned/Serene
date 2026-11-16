@@ -1,6 +1,6 @@
 <script lang="ts">
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { openFancyboxGallery } from "@utils/fancybox-handler";
 import { url } from "@utils/url-utils";
@@ -69,14 +69,14 @@ function ratio(photo: AlbumPhoto): string {
 				class="album-gallery album-gallery--{layout}"
 				style={`--album-columns: ${columns}`}
 				role="list"
-				aria-label={i18n(I18nKey.imageViewer)}
+				aria-label={$t(I18nKey.imageViewer)}
 			>
 		{#each visiblePhotos as photo, index (photo.id)}
 			<button
 				type="button"
 					class="album-gallery__item"
 					style={`--album-photo-ratio: ${ratio(photo)}`}
-					aria-label={`${i18n(I18nKey.openImage)} ${index + 1}: ${photo.alt}`}
+					aria-label={`${$t(I18nKey.openImage)} ${index + 1}: ${photo.alt}`}
 						onclick={(event) => openPhoto(event, photo)}
 				>
 					<img
@@ -95,7 +95,7 @@ function ratio(photo: AlbumPhoto): string {
 {:else}
 	<div class="album-gallery__empty">
 		<Icon icon="material-symbols:photo-library-outline-rounded" aria-hidden="true" />
-		<span>{i18n(I18nKey.noData)}</span>
+		<span>{$t(I18nKey.noData)}</span>
 	</div>
 {/if}
 

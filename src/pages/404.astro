@@ -26,23 +26,23 @@ import { url } from "@utils/url-utils";
 			</div>
 
 			<PageHeader
-				title={i18n(I18nKey.notFoundTitle)}
-				subtitle={i18n(I18nKey.notFoundDescription)}
+				title={i18n(I18nKey.notFoundTitle)} titleKey={I18nKey.notFoundTitle}
+				subtitle={i18n(I18nKey.notFoundDescription)} subtitleKey={I18nKey.notFoundDescription}
 				class="text-center mb-8 max-w-xl mx-auto"
 			/>
 
 			<div class="flex flex-wrap justify-center items-center gap-3">
-				<Button href={url("/")} variant="filled" size="small" ariaLabel={i18n(I18nKey.backToHome)}>
+				<Button href={url("/")} variant="filled" size="small" ariaLabel={i18n(I18nKey.backToHome)} ariaLabelKey={I18nKey.backToHome}>
 					<span class="inline-flex items-center gap-2">
 						<Icon icon="material-symbols:home-rounded" class="text-lg" aria-hidden="true" />
-						<span>{i18n(I18nKey.backToHome)}</span>
+						<span data-ui-i18n={I18nKey.backToHome}>{i18n(I18nKey.backToHome)}</span>
 					</span>
 				</Button>
 
-				<Button href={url("/archive/")} variant="tonal" size="small" ariaLabel={i18n(I18nKey.archive)}>
+				<Button href={url("/archive/")} variant="tonal" size="small" ariaLabel={i18n(I18nKey.archive)} ariaLabelKey={I18nKey.archive}>
 					<span class="inline-flex items-center gap-2">
 						<Icon icon="material-symbols:archive-outline-rounded" class="text-lg" aria-hidden="true" />
-						<span>{i18n(I18nKey.archive)}</span>
+						<span data-ui-i18n={I18nKey.archive}>{i18n(I18nKey.archive)}</span>
 					</span>
 				</Button>
 			</div>

@@ -363,4 +363,22 @@ export const en: Translation = {
 	[Key.lightDarkMode]: "Light/Dark Mode",
 	[Key.resetToDefault]: "Reset to Default",
 	[Key.goToAboutPage]: "Go to About Page",
+	[Key.uiLanguageChinese]: "简体中文",
+	[Key.uiLanguageEnglish]: "English",
+	[Key.switchToChinese]: "Switch interface to Simplified Chinese",
+	[Key.switchToEnglish]: "Switch interface to English",
+
+	[Key.adminStudio]: "Admin Studio",
+	[Key.adminStudioSubtitle]:
+		"Manage moments, albums, music, posts and site settings",
+	[Key.adminModeActive]: "Admin Mode",
+	[Key.adminLogin]: "Admin Sign In",
+	[Key.adminLogout]: "Sign Out",
+	[Key.adminQuickNewMoment]: "Post Moment",
+	[Key.adminQuickNewAlbum]: "New Album",
+	[Key.adminQuickUploadPhotos]: "Upload Photos",
+	[Key.adminQuickManageMusic]: "Manage Music",
+	[Key.adminQuickEdit]: "Edit",
+	[Key.adminQuickDelete]: "Delete",
+	[Key.adminQuickPublish]: "Publish to GitHub",
 };

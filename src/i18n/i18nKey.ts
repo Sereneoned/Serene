@@ -352,6 +352,24 @@ enum I18nKey {
 	lightDarkMode = "lightDarkMode",
 	resetToDefault = "resetToDefault",
 	goToAboutPage = "goToAboutPage",
+	uiLanguageChinese = "uiLanguageChinese",
+	uiLanguageEnglish = "uiLanguageEnglish",
+	switchToChinese = "switchToChinese",
+	switchToEnglish = "switchToEnglish",
+
+	// Admin Studio & Inline Admin Controls
+	adminStudio = "adminStudio",
+	adminStudioSubtitle = "adminStudioSubtitle",
+	adminModeActive = "adminModeActive",
+	adminLogin = "adminLogin",
+	adminLogout = "adminLogout",
+	adminQuickNewMoment = "adminQuickNewMoment",
+	adminQuickNewAlbum = "adminQuickNewAlbum",
+	adminQuickUploadPhotos = "adminQuickUploadPhotos",
+	adminQuickManageMusic = "adminQuickManageMusic",
+	adminQuickEdit = "adminQuickEdit",
+	adminQuickDelete = "adminQuickDelete",
+	adminQuickPublish = "adminQuickPublish",
 }
 
 export default I18nKey;

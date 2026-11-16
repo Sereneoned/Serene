@@ -10,7 +10,7 @@ import Icon from "@iconify/svelte";
 	class="back-to-top-compatibility"
 	onclick="window.__shironeFab?.scrollToTop() ?? window.scrollTo({ top: 0, behavior: 'smooth' })"
 >
-	<FAB client:load variant="primary" ariaLabel={i18n(I18nKey.backToTop)}>
+	<FAB client:load variant="primary" ariaLabel={i18n(I18nKey.backToTop)} ariaLabelKey={I18nKey.backToTop}>
 		<Icon icon="material-symbols:keyboard-arrow-up-rounded" class="text-2xl" />
 	</FAB>
 </div>

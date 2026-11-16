@@ -34,12 +34,12 @@ const categoryItems = categories.slice(0, DISPLAY_LIMIT).map((c) => ({
 }));
 ---
 
-<WidgetLayout name={i18n(I18nKey.categories)} id="categories" class={className} style={style}>
+<WidgetLayout name={i18n(I18nKey.categories)} nameKey={I18nKey.categories} id="categories" class={className} style={style}>
 	<CategoryList categories={categoryItems} />
 	{hasOverflow && (
 		<div slot="footer" class="widget-index-link">
 			<a href={url("/categories/")} class="m3-state-layer">
-				{i18n(I18nKey.categoriesViewAll)}
+				<span data-ui-i18n={I18nKey.categoriesViewAll}>{i18n(I18nKey.categoriesViewAll)}</span>
 				<Icon icon="material-symbols:chevron-right-rounded" />
 			</a>
 		</div>

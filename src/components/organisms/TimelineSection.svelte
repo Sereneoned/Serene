@@ -10,21 +10,31 @@ import Card from "@components/atoms/display/Card.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import TimelineCard from "@components/molecules/TimelineCard.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import type { TimelineCategory, TimelineItem } from "@/types/timelineConfig";
 
 let {
 	categories = [] as TimelineCategory[],
 	items = [] as TimelineItem[],
-	title = i18n(I18nKey.timeline),
-	subtitle = i18n(I18nKey.timelineBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	categories?: TimelineCategory[];
 	items?: TimelineItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.timeline)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.timelineBanner)),
+);
 
 let selectedCategory = $state("");
 
@@ -59,8 +69,8 @@ const filteredItems = $derived(
 	<!-- 页面大标题 -->
 	<PageHeader
 		icon="material-symbols:timeline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	<!-- 分类筛选器与计数条 -->
@@ -69,14 +79,14 @@ const filteredItems = $derived(
 			{#if categoryChips.length > 1}
 				<div
 					class="timeline-section__chips"
-					aria-label={i18n(I18nKey.timelineCategories)}
+					aria-label={$t(I18nKey.timelineCategories)}
 				>
 					<Chips items={categoryChips} variant="filter" bind:value={selectedCategory} />
 				</div>
 			{/if}
 
 			<p class="timeline-section__count">
-				{filteredItems.length} {i18n(I18nKey.timelineCounts)}
+				{filteredItems.length} {$t(I18nKey.timelineCounts)}
 			</p>
 		</div>
 	{/if}
@@ -99,7 +109,7 @@ const filteredItems = $derived(
 		<!-- 筛选无结果时的空状态提示 -->
 		<div class="timeline-section__empty">
 			<Icon icon="material-symbols:event-busy-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.timelineNoResults)}</span>
+			<span>{$t(I18nKey.timelineNoResults)}</span>
 		</div>
 	{/if}
 </Card>

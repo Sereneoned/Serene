@@ -40,7 +40,7 @@ const postUrl = decodeURIComponent(
 	</a>
 	<div class="m3-license-card__meta">
 		<div class="m3-license-card__meta-item">
-			<div class="m3-license-card__meta-label">{i18n(I18nKey.author)}</div>
+			<div class="m3-license-card__meta-label" data-ui-i18n={I18nKey.author}>{i18n(I18nKey.author)}</div>
 			{licenseConf.author.url ? (
 				<a href={licenseConf.author.url} target="_blank" rel="noopener noreferrer" class="m3-license-card__meta-link">{licenseConf.author.name}</a>
 			) : (
@@ -48,16 +48,16 @@ const postUrl = decodeURIComponent(
 			)}
 		</div>
 		<div class="m3-license-card__meta-item">
-			<div class="m3-license-card__meta-label">{i18n(I18nKey.publishedAt)}</div>
+			<div class="m3-license-card__meta-label" data-ui-i18n={I18nKey.publishedAt}>{i18n(I18nKey.publishedAt)}</div>
 			<div class="m3-license-card__meta-value">{formatDateToYYYYMMDD(pubDate)}</div>
 		</div>
 		<div class="m3-license-card__meta-item">
-			<div class="m3-license-card__meta-label">{i18n(I18nKey.license)}</div>
+			<div class="m3-license-card__meta-label" data-ui-i18n={I18nKey.license}>{i18n(I18nKey.license)}</div>
 			<a href={licenseConf.url} target="_blank" rel="noopener noreferrer" class="m3-license-card__meta-link">{licenseConf.name}</a>
 		</div>
 		{licenseConf.source && (
 			<div class="m3-license-card__meta-item">
-				<div class="m3-license-card__meta-label">{i18n(I18nKey.reprintSource)}</div>
+				<div class="m3-license-card__meta-label" data-ui-i18n={I18nKey.reprintSource}>{i18n(I18nKey.reprintSource)}</div>
 				<a href={licenseConf.source} target="_blank" rel="noopener noreferrer" class="m3-license-card__meta-link m3-license-card__source">{licenseConf.source}</a>
 			</div>
 		)}

@@ -1,6 +1,6 @@
 <script lang="ts">
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { url } from "@utils/url-utils";
 import type { AlbumIndexItem } from "@/types/album";
@@ -23,9 +23,9 @@ let { album }: { album: AlbumIndexItem } = $props();
 			</div>
 			{#if album.protected}
 				<div class="album-card__badges">
-					<span class="album-card__protected" title={i18n(I18nKey.albumPasswordTitle)}>
+					<span class="album-card__protected" title={$t(I18nKey.albumPasswordTitle)}>
 						<Icon icon="material-symbols:lock-rounded" aria-hidden="true" />
-						<span class="sr-only">{i18n(I18nKey.albumPasswordTitle)}</span>
+						<span class="sr-only">{$t(I18nKey.albumPasswordTitle)}</span>
 					</span>
 				</div>
 			{/if}
@@ -43,7 +43,7 @@ let { album }: { album: AlbumIndexItem } = $props();
 				{#if album.location}<span>{album.location}</span>{/if}
 			</div>
 			{#if album.tags.length > 0}
-				<div class="album-card__tags" aria-label={i18n(I18nKey.tags)}>
+				<div class="album-card__tags" aria-label={$t(I18nKey.tags)}>
 					{#each album.tags.slice(0, 4) as tag}<span>#{tag}</span>{/each}
 				</div>
 			{/if}

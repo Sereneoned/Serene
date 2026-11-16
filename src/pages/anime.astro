@@ -6,7 +6,7 @@
 import AnimeSection from "@components/organisms/AnimeSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { animeConfig } from "@/config/animeConfig";
 import { getAnimeList } from "../utils/anime-data";
 
@@ -15,7 +15,12 @@ if (!animeConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(animeConfig.title, I18nKey.anime);
+const pageTitleKey = resolveI18nKey(animeConfig.title, I18nKey.anime);
 const pageDescription = resolveI18nText(
+	animeConfig.description,
+	I18nKey.animeBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	animeConfig.description,
 	I18nKey.animeBanner,
 );
@@ -26,8 +31,8 @@ const animes = await getAnimeList();
 <MainGridLayout title={pageTitle} description={pageDescription} page="anime">
 	<AnimeSection
 		animes={animes}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		pageSize={animeConfig.pageSize}
 		client:visible
 	/>

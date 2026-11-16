@@ -1,4 +1,6 @@
 <script lang="ts">
+import type I18nKey from "@i18n/i18nKey";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 
 /**
@@ -26,6 +28,7 @@ let {
 	checked = $bindable(false),
 	disabled = false,
 	label = "",
+	labelKey,
 	id = undefined,
 	ariaExpanded = undefined as boolean | undefined,
 	ariaControls = undefined as string | undefined,
@@ -56,6 +59,8 @@ let {
 	disabled?: boolean;
 	/** 无障碍标签（aria-label） */
 	label?: string;
+	/** Optional system UI key; literal labels remain unchanged without it. */
+	labelKey?: I18nKey;
 	/** 根元素 id 透传（供 CSS 选择器 / 锚点引用） */
 	id?: string;
 	/** 折叠展开语义（aria-expanded） */
@@ -74,6 +79,8 @@ let {
 	class?: string;
 	style?: string;
 } = $props();
+
+const resolvedLabel = $derived(labelKey ? $t(labelKey) : label);
 
 function handleClick() {
 	if (toggle) {
@@ -94,7 +101,8 @@ function handleClick() {
 		class:m3-icon-button--checked={checked}
 		class:m3-icon-button--disabled={disabled}
 		{style}
-		aria-label={label}
+		aria-label={resolvedLabel}
+		data-ui-i18n-aria-label={labelKey}
 		aria-pressed={toggle ? checked : undefined}
 		aria-expanded={ariaExpanded}
 		aria-controls={ariaControls}
@@ -114,7 +122,8 @@ function handleClick() {
 		class:m3-icon-button--checked={checked}
 		class:m3-icon-button--disabled={disabled}
 		{style}
-		aria-label={label}
+		aria-label={resolvedLabel}
+		data-ui-i18n-aria-label={labelKey}
 		aria-pressed={toggle ? checked : undefined}
 		aria-expanded={ariaExpanded}
 		aria-controls={ariaControls}

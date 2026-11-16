@@ -5,20 +5,30 @@ import Card from "@components/atoms/display/Card.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import SkillCard from "@components/molecules/SkillCard.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import type { SkillCategory, SkillItem } from "@/types/skillsConfig";
 
 let {
 	categories = [] as SkillCategory[],
 	items = [] as SkillItem[],
-	title = i18n(I18nKey.skills),
-	subtitle = i18n(I18nKey.skillsBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	categories?: SkillCategory[];
 	items?: SkillItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.skills)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.skillsBanner)),
+);
 
 let selectedCategory = $state("");
 const enabledItems = $derived(items.filter((item) => item.enable !== false));
@@ -44,17 +54,17 @@ const filteredItems = $derived(
 <Card color="var(--card-bg)" radius="l" class="skills-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:workspaces-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if categoryItems.length > 1}
-		<div class="skills-section__filters" aria-label={i18n(I18nKey.skillCategories)}>
+		<div class="skills-section__filters" aria-label={$t(I18nKey.skillCategories)}>
 			<Chips items={categoryItems} variant="filter" bind:value={selectedCategory} />
 		</div>
 	{/if}
 
-	<p class="skills-section__count">{filteredItems.length} {i18n(I18nKey.skillsCounts)}</p>
+	<p class="skills-section__count">{filteredItems.length} {$t(I18nKey.skillsCounts)}</p>
 
 	<div class="skills-section__grid" aria-live="polite">
 		{#each filteredItems as skill, index (skill.name)}

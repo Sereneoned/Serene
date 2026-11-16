@@ -3,7 +3,7 @@ import AlbumSection from "@components/organisms/AlbumSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { scanVisibleAlbums, toAlbumIndexItem } from "@utils/album-scanner";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { albumsConfig } from "@/config/albumsConfig";
 
 if (!albumsConfig.enable) {
@@ -11,7 +11,12 @@ if (!albumsConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(albumsConfig.title, I18nKey.albums);
+const pageTitleKey = resolveI18nKey(albumsConfig.title, I18nKey.albums);
 const pageDescription = resolveI18nText(
+	albumsConfig.description,
+	I18nKey.albumsBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	albumsConfig.description,
 	I18nKey.albumsBanner,
 );
@@ -20,5 +25,5 @@ const albums = scanVisibleAlbums().map(toAlbumIndexItem);
 ---
 
 <MainGridLayout title={pageTitle} description={pageDescription} page="albums">
-	<AlbumSection {albums} title={pageTitle} subtitle={pageDescription} client:visible />
+	<AlbumSection {albums} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible />
 </MainGridLayout>

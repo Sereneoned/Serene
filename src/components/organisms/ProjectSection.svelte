@@ -7,7 +7,7 @@ import TextField from "@components/atoms/input/TextField.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import ProjectCard from "@components/molecules/ProjectCard.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { packMasonry, setupMasonry } from "@utils/masonry";
 import { onMount } from "svelte";
@@ -16,14 +16,24 @@ import type { ProjectCategory, ProjectItem } from "@/types/projectsConfig";
 let {
 	categories = [] as ProjectCategory[],
 	items = [] as ProjectItem[],
-	title = i18n(I18nKey.projects),
-	subtitle = i18n(I18nKey.projectsBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	categories?: ProjectCategory[];
 	items?: ProjectItem[];
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.projects)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.projectsBanner)),
+);
 
 let query = $state("");
 let selectedCategory = $state("");
@@ -124,8 +134,8 @@ $effect(() => {
 <Card color="var(--card-bg)" radius="l" class="projects-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:deployed-code-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
 
 	{#if enabledItems.length > 0}
@@ -135,8 +145,8 @@ $effect(() => {
 					<TextField
 						type="search"
 						bind:value={query}
-						placeholder={i18n(I18nKey.search)}
-						label={i18n(I18nKey.search)}
+						placeholder={$t(I18nKey.search)}
+						label={$t(I18nKey.search)}
 						hideLabel
 						variant="outlined"
 						class="!rounded-(--shape-corner-l)"
@@ -147,7 +157,7 @@ $effect(() => {
 						<button
 							type="button"
 							class="projects-section__search-clear"
-							aria-label={i18n(I18nKey.clear)}
+							aria-label={$t(I18nKey.clear)}
 							onclick={() => (query = "")}
 						>
 							<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -160,7 +170,7 @@ $effect(() => {
 				{#if categoryItems.length > 1}
 					<div
 						class="projects-section__chips"
-						aria-label={i18n(I18nKey.projectCategories)}
+						aria-label={$t(I18nKey.projectCategories)}
 					>
 						<Chips
 							items={categoryItems}
@@ -172,7 +182,7 @@ $effect(() => {
 				{/if}
 				{#if filteredItems.length > 0}
 					<p class="projects-section__count" aria-live="polite">
-						{filteredItems.length} {i18n(I18nKey.projectsCounts)}
+						{filteredItems.length} {$t(I18nKey.projectsCounts)}
 					</p>
 				{/if}
 			</div>
@@ -202,7 +212,7 @@ $effect(() => {
 	{:else}
 		<div class="projects-section__empty">
 			<Icon icon="material-symbols:folder-off-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.projectsNoResults)}</span>
+			<span>{$t(I18nKey.projectsNoResults)}</span>
 		</div>
 	{/if}
 </Card>

@@ -9,6 +9,7 @@
  * 激活页 primary 实底；文案由消费方传 i18n 结果（不硬编码）。
  */
 import Icon from "@components/atoms/display/Icon.svelte";
+import type I18nKey from "@i18n/i18nKey";
 import { paginationPages } from "@utils/pagination";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 	adjacent?: number;
 	/** 上一页 / 下一页 / 第 N 页 / 跳转到页面（消费方传 i18n 结果） */
 	labels?: { prev: string; next: string; page: string; jump: string };
+	labelKeys?: Partial<Record<"prev" | "next" | "page" | "jump", I18nKey>>;
 	class?: string;
 	style?: string;
 }
@@ -35,6 +37,7 @@ const {
 		page: "Page {page}",
 		jump: "Jump",
 	},
+	labelKeys = {},
 	class: className,
 	style,
 } = Astro.props as Props;
@@ -56,7 +59,7 @@ const pageLabel = (p: number) => labels.page.replace("{page}", String(p));
 	<!-- 移动端简化版：prev + 当前/总页（点击跳转）+ next -->
 	<div class="m3-blog-pagination__mobile">
 		{prevUrl ? (
-			<a href={prevUrl} aria-label={labels.prev} class="m3-blog-pagination__arrow m3-state-layer">
+			<a href={prevUrl} aria-label={labels.prev} data-ui-i18n-aria-label={labelKeys.prev} class="m3-blog-pagination__arrow m3-state-layer">
 				<Icon icon="material-symbols:chevron-left-rounded" />
 			</a>
 		) : (
@@ -79,7 +82,7 @@ const pageLabel = (p: number) => labels.page.replace("{page}", String(p));
 			<span class="m3-blog-pagination__jump-total">{totalPages}</span>
 		</button>
 		{nextUrl ? (
-			<a href={nextUrl} aria-label={labels.next} class="m3-blog-pagination__arrow m3-state-layer">
+			<a href={nextUrl} aria-label={labels.next} data-ui-i18n-aria-label={labelKeys.next} class="m3-blog-pagination__arrow m3-state-layer">
 				<Icon icon="material-symbols:chevron-right-rounded" />
 			</a>
 		) : (
@@ -94,7 +97,7 @@ const pageLabel = (p: number) => labels.page.replace("{page}", String(p));
 		{prevUrl ? (
 			<a
 				href={prevUrl}
-				aria-label={labels.prev}
+				aria-label={labels.prev} data-ui-i18n-aria-label={labelKeys.prev}
 				class="m3-blog-pagination__arrow m3-state-layer"
 			>
 				<Icon icon="material-symbols:chevron-left-rounded" />
@@ -115,7 +118,7 @@ const pageLabel = (p: number) => labels.page.replace("{page}", String(p));
 						{p}
 					</span>
 				) : (
-					<a class="m3-blog-pagination__num m3-state-layer" href={buildUrl(p)} aria-label={pageLabel(p)}>
+					<a class="m3-blog-pagination__num m3-state-layer" href={buildUrl(p)} aria-label={pageLabel(p)} data-ui-i18n-aria-label={labelKeys.page} data-ui-i18n-params={JSON.stringify({ page: p })}>
 						{p}
 					</a>
 				),
@@ -124,7 +127,7 @@ const pageLabel = (p: number) => labels.page.replace("{page}", String(p));
 		{nextUrl ? (
 			<a
 				href={nextUrl}
-				aria-label={labels.next}
+				aria-label={labels.next} data-ui-i18n-aria-label={labelKeys.next}
 				class="m3-blog-pagination__arrow m3-state-layer"
 			>
 				<Icon icon="material-symbols:chevron-right-rounded" />

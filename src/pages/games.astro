@@ -4,7 +4,7 @@ import GamesSection from "@components/organisms/GamesSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { resolveAsset } from "@utils/asset-utils";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { gamesConfig } from "@/config/gamesConfig";
 import { resolveGamesData } from "@/utils/feature-data";
 
@@ -13,7 +13,12 @@ if (!gamesConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(gamesConfig.title, I18nKey.games);
+const pageTitleKey = resolveI18nKey(gamesConfig.title, I18nKey.games);
 const pageDescription = resolveI18nText(
+	gamesConfig.description,
+	I18nKey.gamesBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	gamesConfig.description,
 	I18nKey.gamesBanner,
 );
@@ -36,8 +41,8 @@ const items = await Promise.all(
 	<GamesSection
 		categories={gamesConfig.categories}
 		items={items}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		client:visible
 	/>
 </MainGridLayout>

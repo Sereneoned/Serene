@@ -4,9 +4,11 @@ import WidgetLayout from "@components/molecules/WidgetLayout.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { resolveImageAsset } from "@utils/asset-utils";
+import { mergeLocalAndFolderTracks } from "@utils/music/folder-scanner.server";
+import { url } from "@utils/url-utils";
 import stylus from "stylus";
 import { musicConfig, resolveMusicOptions } from "@/config/musicConfig";
-import { musicTracks } from "@/data/music";
+import { excludedMusicSources, musicTracks } from "@/data/music";
 import type { MusicWidget } from "@/types/sidebarConfig";
 import MusicSidebarClient from "./MusicSidebarClient.svelte";
 import { musicSidebarStylus } from "./musicSidebarStyles";
@@ -19,9 +21,20 @@ interface Props {
 
 const className = Astro.props.class;
 const style = Astro.props.style;
-const options = resolveMusicOptions(musicConfig);
+const useFolderMergedTracks =
+	!musicConfig.tracks &&
+	(musicConfig.provider === undefined ||
+		musicConfig.provider === "local" ||
+		musicConfig.provider === "mixed");
+const mergedTracks = useFolderMergedTracks
+	? mergeLocalAndFolderTracks(musicTracks, excludedMusicSources)
+	: undefined;
+const options = resolveMusicOptions(
+	mergedTracks ? { ...musicConfig, tracks: mergedTracks } : musicConfig,
+);
 const configuredTracks =
 	musicConfig.tracks ??
+	mergedTracks ??
 	(musicConfig.provider === "local" || musicConfig.provider === "mixed"
 		? musicTracks
 		: []);
@@ -33,10 +46,21 @@ const optimizedOptions = options
 			...options,
 			playlist: await Promise.all(
 				options.playlist.map(async (track) => {
+					const resolvedSource = url(track.source);
 					const configuredCover = configuredCovers.get(track.id) ?? track.cover;
-					if (!configuredCover) return track;
+					if (!configuredCover) {
+						return resolvedSource === track.source
+							? track
+							: { ...track, source: resolvedSource };
+					}
 					const asset = await resolveImageAsset(configuredCover);
-					if (typeof asset === "string") return track;
+					if (typeof asset === "string") {
+						const resolvedCover = track.cover ? url(track.cover) : track.cover;
+						return resolvedSource === track.source &&
+							resolvedCover === track.cover
+							? track
+							: { ...track, source: resolvedSource, cover: resolvedCover };
+					}
 					const widths = [64, 128].filter((width) => width <= asset.width);
 					if (!widths.length) widths.push(asset.width);
 					const candidates = await Promise.all(
@@ -52,6 +76,7 @@ const optimizedOptions = options
 					);
 					return {
 						...track,
+						source: resolvedSource,
 						cover: candidates.at(-1)?.image.src ?? asset.src,
 						coverSrcset: candidates
 							.map(({ image, width }) => `${image.src} ${width}w`)
@@ -98,18 +123,44 @@ const labels = {
 		"invalid-track": i18n(I18nKey.musicErrorInvalidTrack),
 	},
 };
+const labelKeys = {
+	previous: I18nKey.musicPrevious,
+	play: I18nKey.musicPlay,
+	pause: I18nKey.musicPause,
+	next: I18nKey.musicNext,
+	mute: I18nKey.musicMute,
+	unmute: I18nKey.musicUnmute,
+	playbackMode: I18nKey.musicPlaybackMode,
+	modeSequence: I18nKey.musicModeSequence,
+	modeRepeatOne: I18nKey.musicModeRepeatOne,
+	modeShuffle: I18nKey.musicModeShuffle,
+	progress: I18nKey.musicProgress,
+	volume: I18nKey.musicVolume,
+	showPlaylist: I18nKey.musicShowPlaylist,
+	hidePlaylist: I18nKey.musicHidePlaylist,
+	empty: I18nKey.musicEmpty,
+	loading: I18nKey.musicLoading,
+	notRequested: I18nKey.musicNotRequested,
+	nowPlaying: I18nKey.musicNowPlaying,
+	errors: {
+		"empty-playlist": I18nKey.musicErrorEmptyPlaylist,
+		"source-unavailable": I18nKey.musicErrorSourceUnavailable,
+		"autoplay-blocked": I18nKey.musicErrorAutoplayBlocked,
+		"invalid-track": I18nKey.musicErrorInvalidTrack,
+	},
+};
 ---
 
 {optimizedOptions && (
 	<>
 		<style is:inline set:html={musicSidebarStyles}></style>
 		<WidgetLayout
-			name={i18n(I18nKey.musicPlayerTitle)}
+			name={i18n(I18nKey.musicPlayerTitle)} nameKey={I18nKey.musicPlayerTitle}
 			id="sidebar-music-player"
 			class={className}
 			style={style}
 		>
-			<MusicSidebarClient client:load options={optimizedOptions} {labels} />
+			<MusicSidebarClient client:load options={optimizedOptions} {labels} {labelKeys} />
 		</WidgetLayout>
 	</>
 )}

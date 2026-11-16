@@ -16,22 +16,48 @@ import MomentCard, {
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import ProtectedMoment from "@components/organisms/ProtectedMoment.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
+import {
+	type AdminSession,
+	commitRepoChanges,
+	compressImageToWebP,
+	formatIsoDateTimeLocal,
+	getAdminSession,
+	MOOD_ICON_PRESETS,
+	onAdminSessionChange,
+	type RepoFileChange,
+	sanitizeUploadFilename,
+	serializeMomentMarkdown,
+	toSlug,
+} from "@utils/admin";
 import type { MomentItem } from "@utils/content-utils";
 import { initFancybox } from "@utils/fancybox-handler";
+import { showSnackbar } from "@utils/snackbar";
+import { url } from "@utils/url-utils";
 import { onMount } from "svelte";
+import { adminConfig } from "@/config";
 
 let {
 	moments = [] as MomentItem[],
 	author = { name: "", avatar: "", url: "/about/" } as MomentAuthor,
-	title = i18n(I18nKey.moments),
-	subtitle = i18n(I18nKey.momentsBanner),
+	title,
+	subtitle,
+	titleKey,
+	subtitleKey,
 }: {
 	moments?: MomentItem[];
 	author?: MomentAuthor;
 	title?: string;
 	subtitle?: string;
+	titleKey?: I18nKey;
+	subtitleKey?: I18nKey;
 } = $props();
+const resolvedTitle = $derived(
+	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.moments)),
+);
+const resolvedSubtitle = $derived(
+	subtitleKey ? $t(subtitleKey) : (subtitle ?? $t(I18nKey.momentsBanner)),
+);
 
 const MOMENTS_PAGE_SIZE = 10;
 
@@ -43,6 +69,122 @@ let initialized = false;
 type FilterPhase = "idle" | "loading" | "out";
 let phase = $state<FilterPhase>("idle");
 let phaseTimers: ReturnType<typeof setTimeout>[] = [];
+
+let adminSession = $state<AdminSession | null>(null);
+let quickBody = $state("");
+let quickLocation = $state("");
+let quickTags = $state("");
+let quickMood = $state("material-symbols:sentiment-excited-outline-rounded");
+let quickPhotos = $state<
+	Array<{ id: string; src: string; previewUrl: string; bytes: Uint8Array }>
+>([]);
+let quickPublishing = $state(false);
+let quickFolder = $state("");
+
+async function handleQuickFiles(files: FileList | File[]) {
+	const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+	if (arr.length === 0) return;
+	if (!quickFolder) {
+		quickFolder = `${new Date().toISOString().slice(0, 10)}-${Date.now().toString(36).slice(-4)}`;
+	}
+	const added: Array<{
+		id: string;
+		src: string;
+		previewUrl: string;
+		bytes: Uint8Array;
+	}> = [];
+	for (const file of arr) {
+		const compressed = await compressImageToWebP(file, {
+			maxDimension: 1600,
+			quality: 0.85,
+		});
+		const base = sanitizeUploadFilename(
+			file.name.replace(/\.[^.]+$/, ""),
+			".webp",
+		).replace(/\.[^.]+$/, "");
+		const fileName = `${base}-${Math.random().toString(36).slice(2, 5)}.webp`;
+		const src = `/images/moments/${quickFolder}/${fileName}`;
+		added.push({
+			id: `${Date.now()}-${Math.random()}`,
+			src,
+			previewUrl: URL.createObjectURL(
+				new Blob([compressed.bytes.buffer as ArrayBuffer], {
+					type: "image/webp",
+				}),
+			),
+			bytes: compressed.bytes,
+		});
+	}
+	quickPhotos = [...quickPhotos, ...added];
+}
+
+async function submitQuickMoment() {
+	if (!adminSession) return;
+	if (!quickBody.trim() && quickPhotos.length === 0) {
+		showSnackbar("请输入动态内容或添加配图");
+		return;
+	}
+	quickPublishing = true;
+	try {
+		const published = formatIsoDateTimeLocal();
+		const datePrefix = published.slice(0, 10);
+		const slug = toSlug(quickBody.slice(0, 28) || "moment", "moment");
+		const targetPath = `src/content/moments/${datePrefix}-${slug}-${Date.now().toString(36).slice(-3)}.md`;
+		const tags = quickTags
+			.split(/[,，]/)
+			.map((s) => s.trim())
+			.filter(Boolean);
+		const md = serializeMomentMarkdown({
+			published,
+			location: quickLocation,
+			mood: quickMood,
+			tags,
+			images: quickPhotos.map((p) => ({ src: p.src, alt: "" })),
+			body: quickBody,
+		});
+		const changes: RepoFileChange[] = [
+			...quickPhotos.map((p) => ({
+				path: `public/${p.src.replace(/^\/+/, "")}`,
+				action: "upsert" as const,
+				content: p.bytes,
+			})),
+			{ path: targetPath, action: "upsert", content: md },
+		];
+		await commitRepoChanges(
+			adminSession,
+			`content(moments): quick post ${datePrefix}`,
+			changes,
+		);
+		for (const p of quickPhotos) URL.revokeObjectURL(p.previewUrl);
+		quickBody = "";
+		quickLocation = "";
+		quickTags = "";
+		quickPhotos = [];
+		quickFolder = "";
+		showSnackbar("动态已提交到 GitHub，Pages 构建完成后将出现在列表中", {
+			icon: "material-symbols:check-circle-outline-rounded",
+		});
+	} catch (error) {
+		showSnackbar(error instanceof Error ? error.message : "发布失败");
+	} finally {
+		quickPublishing = false;
+	}
+}
+
+async function deleteMomentFromCard(momentId: string) {
+	if (!adminSession) return;
+	if (!window.confirm(`确定删除动态 ${momentId} 吗？`)) return;
+	try {
+		await commitRepoChanges(
+			adminSession,
+			`content(moments): delete ${momentId}`,
+			[{ path: `src/content/moments/${momentId}.md`, action: "delete" }],
+		);
+		showSnackbar("已从 GitHub 删除动态，构建后更新");
+	} catch (error) {
+		showSnackbar(error instanceof Error ? error.message : "删除失败");
+	}
+}
 
 const tagItems = $derived(
 	Array.from(new Set(moments.flatMap((moment) => moment.filterTags)))
@@ -77,7 +219,7 @@ const visibleMoments = $derived(filtered.slice(0, shownCount));
 const hasMore = $derived(filtered.length > shownCount);
 
 function countLabel(count: number) {
-	return `${count} ${i18n(I18nKey.momentsCounts)}`;
+	return `${count} ${$t(I18nKey.momentsCounts)}`;
 }
 
 /** 分类（标签）筛选：指示器展示 → 淡出 → 列表 stagger 揭幕 */
@@ -123,16 +265,92 @@ onMount(() => {
 	initialized = true;
 	// 图片灯箱：client:only 岛挂载晚于全局 init，此处确保 [data-fancybox] 已绑定
 	initFancybox();
-	return () => phaseTimers.forEach(clearTimeout);
+	let stopSession = () => {};
+	if (adminConfig.enable) {
+		adminSession = getAdminSession();
+		stopSession = onAdminSessionChange((next) => {
+			adminSession = next;
+		});
+	}
+	return () => {
+		phaseTimers.forEach(clearTimeout);
+		stopSession();
+	};
 });
 </script>
 
 <Card color="var(--card-bg)" radius="l" class="moment-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:auto-awesome-outline-rounded"
-		{title}
-		{subtitle}
+		title={resolvedTitle}
+		subtitle={resolvedSubtitle}
 	/>
+
+	{#if adminConfig.enable && adminSession}
+		<div class="moment-admin-composer">
+			<div class="moment-admin-composer__head">
+				<strong>{$t(I18nKey.adminQuickNewMoment)}</strong>
+				<a href={url("/admin/?tab=moments")}>打开完整动态管理台 →</a>
+			</div>
+			<textarea
+				class="moment-admin-composer__textarea"
+				rows="3"
+				placeholder="像 QQ 空间一样直接写下动态内容，配图可多选自动压缩..."
+				bind:value={quickBody}
+			></textarea>
+			{#if quickPhotos.length > 0}
+				<div class="moment-admin-composer__thumbs">
+					{#each quickPhotos as p (p.id)}
+						<div class="moment-admin-composer__thumb">
+							<img src={p.previewUrl} alt="" />
+							<button
+								type="button"
+								aria-label="移除图片"
+								onclick={() => {
+									URL.revokeObjectURL(p.previewUrl);
+									quickPhotos = quickPhotos.filter((item) => item.id !== p.id);
+								}}
+							>
+								×
+							</button>
+						</div>
+					{/each}
+				</div>
+			{/if}
+			<div class="moment-admin-composer__bar">
+				<label class="moment-admin-composer__upload m3-state-layer">
+					<Icon icon="material-symbols:cloud-upload-outline-rounded" aria-hidden="true" />
+					<span>传图</span>
+					<input
+						type="file"
+						accept="image/*"
+						multiple
+						hidden
+						onchange={(e) => {
+							const files = (e.currentTarget as HTMLInputElement).files;
+							if (files) void handleQuickFiles(files);
+							(e.currentTarget as HTMLInputElement).value = "";
+						}}
+					/>
+				</label>
+				<select class="moment-admin-composer__input" bind:value={quickMood} aria-label="心情">
+					{#each MOOD_ICON_PRESETS as preset (preset.icon)}
+						<option value={preset.icon}>{preset.label}</option>
+					{/each}
+				</select>
+				<input class="moment-admin-composer__input" type="text" placeholder="位置" bind:value={quickLocation} />
+				<input class="moment-admin-composer__input" type="text" placeholder="标签 (逗号分隔)" bind:value={quickTags} />
+				<Button
+					variant="filled"
+					size="small"
+					icon="material-symbols:rocket-launch-outline-rounded"
+					label={quickPublishing ? "发布中..." : "立即发表"}
+					disabled={quickPublishing}
+					onclick={submitQuickMoment}
+				/>
+			</div>
+		</div>
+	{/if}
 
 	{#if moments.length > 0}
 		<div class="moment-section__tools">
@@ -140,8 +358,8 @@ onMount(() => {
 				<TextField
 					type="search"
 					bind:value={query}
-					placeholder={i18n(I18nKey.search)}
-					label={i18n(I18nKey.search)}
+					placeholder={$t(I18nKey.search)}
+					label={$t(I18nKey.search)}
 					hideLabel
 					variant="outlined"
 					class="!rounded-(--shape-corner-l)"
@@ -152,7 +370,7 @@ onMount(() => {
 					<button
 						type="button"
 						class="moment-section__search-clear"
-						aria-label={i18n(I18nKey.clear)}
+						aria-label={$t(I18nKey.clear)}
 						onclick={() => (query = "")}
 					>
 						<Icon icon="material-symbols:close-rounded" aria-hidden="true" />
@@ -188,11 +406,31 @@ onMount(() => {
 		{#key `${query}|${selectedTag}`}
 			<div class="moment-section__list">
 				{#each visibleMoments as moment, i (moment.id)}
-					{#if moment.encrypted}
-						<ProtectedMoment {moment} {author} delay={Math.min(i, 7) * 45} />
-					{:else}
-						<MomentCard {moment} {author} delay={Math.min(i, 7) * 45} />
-					{/if}
+					<div class="moment-section__entry">
+						{#if moment.encrypted}
+							<ProtectedMoment {moment} {author} delay={Math.min(i, 7) * 45} />
+						{:else}
+							<MomentCard {moment} {author} delay={Math.min(i, 7) * 45} />
+						{/if}
+						{#if adminConfig.enable && adminSession}
+							<div class="moment-admin-actions">
+								<Button
+									variant="text"
+									size="xsmall"
+									icon="material-symbols:edit-outline-rounded"
+									label={$t(I18nKey.adminQuickEdit)}
+									href={url(`/admin/?tab=moments&edit=${encodeURIComponent(moment.id)}`)}
+								/>
+								<Button
+									variant="text"
+									size="xsmall"
+									icon="material-symbols:delete-outline-rounded"
+									label={$t(I18nKey.adminQuickDelete)}
+									onclick={() => deleteMomentFromCard(moment.id)}
+								/>
+							</div>
+						{/if}
+					</div>
 				{/each}
 			</div>
 		{/key}
@@ -201,7 +439,7 @@ onMount(() => {
 				<Button
 					variant="outlined"
 					icon="material-symbols:expand-more-rounded"
-					label={i18n(I18nKey.loadMore)}
+					label={$t(I18nKey.loadMore)}
 					onclick={() => (shownCount += MOMENTS_PAGE_SIZE)}
 				/>
 			</div>
@@ -209,7 +447,7 @@ onMount(() => {
 	{:else}
 		<div class="moment-section__empty">
 			<Icon icon="material-symbols:search-off-outline-rounded" aria-hidden="true" />
-			<span>{i18n(I18nKey.momentsNoResults)}</span>
+			<span>{$t(I18nKey.momentsNoResults)}</span>
 		</div>
 	{/if}
 </Card>
@@ -317,4 +555,99 @@ onMount(() => {
 	to
 		opacity: 0
 		transform: scale(0.96)
+
+.moment-admin-composer
+	display: flex
+	flex-direction: column
+	gap: 0.75rem
+	margin-bottom: 1.25rem
+	padding: 1rem
+	border-radius: var(--shape-corner-l)
+	border: 1px solid var(--outline-variant)
+	background: var(--surface-container-low)
+
+	&__head
+		display: flex
+		align-items: center
+		justify-content: space-between
+		font: var(--m3e-type-title-small)
+		color: var(--on-surface)
+
+		a
+			font: var(--m3e-type-label-medium)
+			color: var(--primary)
+			text-decoration: none
+
+	&__textarea
+		width: 100%
+		padding: 0.625rem 0.75rem
+		border-radius: var(--shape-corner-m)
+		border: 1px solid var(--outline-variant)
+		background: var(--surface)
+		color: var(--on-surface)
+		font: var(--m3e-type-body-medium)
+		box-sizing: border-box
+
+	&__thumbs
+		display: flex
+		flex-wrap: wrap
+		gap: 0.5rem
+
+	&__thumb
+		position: relative
+		width: 4.5rem
+		height: 4.5rem
+		border-radius: var(--shape-corner-s)
+		overflow: hidden
+
+		img
+			width: 100%
+			height: 100%
+			object-fit: cover
+
+		button
+			position: absolute
+			top: 0.15rem
+			right: 0.15rem
+			width: 1.25rem
+			height: 1.25rem
+			border: 0
+			border-radius: var(--shape-corner-full)
+			background: unquote("rgb(0 0 0 / 0.65)")
+			color: #fff
+			cursor: pointer
+			line-height: 1
+
+	&__bar
+		display: flex
+		flex-wrap: wrap
+		gap: 0.5rem
+		align-items: center
+
+	&__upload
+		display: inline-flex
+		align-items: center
+		gap: 0.375rem
+		padding: 0.45rem 0.75rem
+		border-radius: var(--shape-corner-m)
+		border: 1px dashed var(--outline)
+		color: var(--primary)
+		font: var(--m3e-type-label-large)
+		cursor: pointer
+
+	&__input
+		flex: 1 1 7rem
+		min-width: 0
+		padding: 0.45rem 0.625rem
+		border-radius: var(--shape-corner-s)
+		border: 1px solid var(--outline-variant)
+		background: var(--surface)
+		color: var(--on-surface)
+		font: var(--m3e-type-body-small)
+
+.moment-admin-actions
+	display: flex
+	justify-content: flex-end
+	gap: 0.375rem
+	margin-top: 0.25rem
 </style>

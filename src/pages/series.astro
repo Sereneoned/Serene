@@ -18,7 +18,7 @@ if (!seriesConfig.enable) {
 
 import { getSeriesCatalog, getSortedPostsList } from "@utils/content-utils";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { excerptFromMarkdown, normaliseSeriesSlug } from "@utils/series-utils";
 import { getSeriesUrl } from "@utils/url-utils";
 
@@ -72,8 +72,11 @@ const pageDescription = seriesConfig.description
 		<PageHeader
 			icon="material-symbols:auto-stories-rounded"
 			title={pageTitle}
+			titleKey={resolveI18nKey(seriesConfig.title, I18nKey.series)}
 			subtitle={seriesSummary}
-		/>
+		>
+			<span slot="subtitle">{items.length} <span data-ui-i18n={items.length === 1 ? I18nKey.seriesCount : I18nKey.seriesCounts}>{i18n(items.length === 1 ? I18nKey.seriesCount : I18nKey.seriesCounts)}</span> · {totalPosts} <span data-ui-i18n={I18nKey.postsCount}>{i18n(I18nKey.postsCount)}</span></span>
+		</PageHeader>
 		{items.length > 0 && (
 			<div class="series-index__list">
 				{items.map((item) => (
@@ -87,6 +90,7 @@ const pageDescription = seriesConfig.description
 							<span
 								class="series-index__status"
 								data-series-status={item.status}
+								data-ui-i18n={item.status === "completed" ? I18nKey.seriesStatusCompleted : I18nKey.seriesStatusOngoing}
 							>
 								{item.status === "completed"
 									? i18n(I18nKey.seriesStatusCompleted)
@@ -95,17 +99,17 @@ const pageDescription = seriesConfig.description
 						</div>
 						<div class="series-index__meta">
 							<span>
-								{item.count} {i18n(I18nKey.postsCount)}
+								{item.count} <span data-ui-i18n={I18nKey.postsCount}>{i18n(I18nKey.postsCount)}</span>
 							</span>
 							{item.latest && (
 								<span>
-									{i18n(I18nKey.statsUpdated)}{" "}
+									<span data-ui-i18n={I18nKey.statsUpdated}>{i18n(I18nKey.statsUpdated)}</span>{" "}
 									{formatDateToYYYYMMDD(item.latest)}
 								</span>
 							)}
 							{item.category && (
 								<span>
-									{i18n(I18nKey.categories)} · {item.category}
+									<span data-ui-i18n={I18nKey.categories}>{i18n(I18nKey.categories)}</span> · {item.category}
 								</span>
 							)}
 						</div>
@@ -118,7 +122,7 @@ const pageDescription = seriesConfig.description
 		)}
 		{items.length === 0 && (
 			<div class="series-index__empty">
-				<span>{i18n(I18nKey.noData)}</span>
+				<span data-ui-i18n={I18nKey.noData}>{i18n(I18nKey.noData)}</span>
 			</div>
 		)}
 	</Card>

@@ -15,7 +15,12 @@
  * 零额外开销。契约见 `docs/content-separation/config-overlay.md`。
  */
 
+import adminOverridesData from "../data/json/admin-overrides.json" with {
+	type: "json",
+};
 import { userConfigOverrides } from "../user/user-config.ts";
+
+const adminOverrides = adminOverridesData as Readonly<Record<string, unknown>>;
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -38,9 +43,16 @@ function deepMerge(base: unknown, override: unknown): unknown {
  * @param defaults 该领域的主题默认值字面量
  */
 export function withUserConfig<T>(domain: string, defaults: T): T {
-	const override = userConfigOverrides[domain];
-	if (override === undefined) return defaults;
-	return deepMerge(defaults, override) as T;
+	const userOverride = userConfigOverrides[domain];
+	const adminOverride = adminOverrides[domain];
+	let resolved = defaults;
+	if (userOverride !== undefined) {
+		resolved = deepMerge(resolved, userOverride) as T;
+	}
+	if (adminOverride !== undefined) {
+		resolved = deepMerge(resolved, adminOverride) as T;
+	}
+	return resolved;
 }
 
 /**

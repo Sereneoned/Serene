@@ -1,12 +1,14 @@
 ---
 import { Font } from "astro:assets";
 import Snackbar from "@components/atoms/overlay/Snackbar.svelte";
+import AdminOverlay from "@components/organisms/admin/AdminOverlay.svelte";
 import ConfigCarrier from "@components/system/ConfigCarrier.astro";
 import UmamiRuntime from "@components/system/UmamiRuntime.astro";
 import { resolveAsset } from "@utils/asset-utils";
 import { createDefaultSchemeStyle } from "@utils/theme-utils";
 import { pathsEqual, toAbsoluteUrl, url } from "@utils/url-utils";
 import {
+	adminConfig,
 	expressiveCodeConfig,
 	profileConfig,
 	resolvedFontOptions,
@@ -112,6 +114,8 @@ const siteLang = lang.replace("_", "-");
 const fontRoleStyle = createFontRoleStyle(resolvedFontOptions);
 const configuredFontRoles = getConfiguredFontRoles(resolvedFontOptions);
 const defaultSchemeStyle = createDefaultSchemeStyle();
+const adminGithubUrl =
+	profileConfig.links.find((link) => /github\.com/i.test(link.url))?.url ?? "";
 ---
 
 <!DOCTYPE html>
@@ -242,6 +246,16 @@ const defaultSchemeStyle = createDefaultSchemeStyle();
 			></div>
 		)}
 		<Snackbar client:only="svelte"></Snackbar>
+		{adminConfig.enable && (
+			<AdminOverlay
+				shortcutEnabled={adminConfig.shortcut}
+				defaultRepo={adminConfig.defaultRepo}
+				defaultBranch={adminConfig.defaultBranch}
+				defaultContentPrefix={adminConfig.contentPrefix}
+				githubProfileUrl={adminGithubUrl}
+				client:only="svelte"
+			/>
+		)}
 		<slot />
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
 	</body>

@@ -34,96 +34,112 @@ import { pruneUnavailableNavLinks } from "../utils/nav-utils.ts";
 export const LinkPresets: Record<string, NavBarLink> = {
 	Home: {
 		name: i18n(I18nKey.home),
+		nameKey: I18nKey.home,
 		url: "/",
 		icon: "material-symbols:home-outline-rounded",
 		pageKey: "home",
 	},
 	Archive: {
 		name: i18n(I18nKey.archive),
+		nameKey: I18nKey.archive,
 		url: "/archive/",
 		icon: "material-symbols:archive-outline-rounded",
 		pageKey: "archive",
 	},
 	Friends: {
 		name: i18n(I18nKey.friends),
+		nameKey: I18nKey.friends,
 		url: "/friends/",
 		icon: "material-symbols:handshake-outline-rounded",
 		pageKey: "friends",
 	},
 	Moments: {
 		name: i18n(I18nKey.moments),
+		nameKey: I18nKey.moments,
 		url: "/moments/",
 		icon: "material-symbols:auto-awesome-outline-rounded",
 		pageKey: "moments",
 	},
 	Anime: {
 		name: i18n(I18nKey.anime),
+		nameKey: I18nKey.anime,
 		url: "/anime/",
 		icon: "material-symbols:live-tv-outline-rounded",
 		pageKey: "anime",
 	},
 	Compass: {
 		name: i18n(I18nKey.compass),
+		nameKey: I18nKey.compass,
 		url: "/compass/",
 		icon: "material-symbols:explore-rounded",
 		pageKey: "compass",
 	},
 	Skills: {
 		name: i18n(I18nKey.skills),
+		nameKey: I18nKey.skills,
 		url: "/skills/",
 		icon: "material-symbols:workspaces-outline-rounded",
 		pageKey: "skills",
 	},
 	Projects: {
 		name: i18n(I18nKey.projects),
+		nameKey: I18nKey.projects,
 		url: "/projects/",
 		icon: "material-symbols:deployed-code-outline-rounded",
 		pageKey: "projects",
 	},
 	Devices: {
 		name: i18n(I18nKey.devices),
+		nameKey: I18nKey.devices,
 		url: "/devices/",
 		icon: "material-symbols:devices-rounded",
 		pageKey: "devices",
 	},
 	Games: {
 		name: i18n(I18nKey.games),
+		nameKey: I18nKey.games,
 		url: "/games/",
 		icon: "material-symbols:sports-esports-outline-rounded",
 		pageKey: "games",
 	},
 	Timeline: {
 		name: i18n(I18nKey.timeline),
+		nameKey: I18nKey.timeline,
 		url: "/timeline/",
 		icon: "material-symbols:timeline-rounded",
 		pageKey: "timeline",
 	},
 	Albums: {
 		name: i18n(I18nKey.albums),
+		nameKey: I18nKey.albums,
 		url: "/albums/",
 		icon: "material-symbols:photo-library-outline-rounded",
 		pageKey: "albums",
 	},
 	Categories: {
 		name: i18n(I18nKey.categories),
+		nameKey: I18nKey.categories,
 		url: "/categories/",
 		icon: "material-symbols:folder-outline-rounded",
 		pageKey: "categories",
 	},
 	Tags: {
 		name: i18n(I18nKey.tags),
+		nameKey: I18nKey.tags,
 		url: "/tags/",
 		icon: "material-symbols:tag-rounded",
 		pageKey: "tags",
 	},
 	Series: {
 		name: i18n(I18nKey.series),
+		nameKey: I18nKey.series,
 		url: "/series/",
 		icon: "material-symbols:auto-stories-outline-rounded",
 		pageKey: "series",
 	},
 	About: {
 		name: i18n(I18nKey.about),
+		nameKey: I18nKey.about,
 		url: "/about/",
 		icon: "material-symbols:info-outline-rounded",
 		pageKey: "about",
@@ -148,6 +164,7 @@ const defaultNavBarConfig: NavBarConfig = {
 		LinkPresets.Albums,
 		{
 			name: i18n(I18nKey.more),
+			nameKey: I18nKey.more,
 			icon: "material-symbols:apps-rounded",
 			children: [
 				LinkPresets.Timeline,
@@ -166,7 +183,7 @@ const defaultNavBarConfig: NavBarConfig = {
 	],
 };
 
-import { resolveI18nText } from "../utils/i18n-utils.ts";
+import { resolveI18nKey, resolveI18nText } from "../utils/i18n-utils.ts";
 
 function fail(message: string): never {
 	throw new Error(`[config] nav-bar：${message}`);
@@ -219,13 +236,27 @@ export function resolveNavBarLinks(
 		}
 
 		const name =
-			entry.name !== undefined ? resolveName(entry.name) : base?.name;
+			entry.name !== undefined
+				? resolveName(entry.name)
+				: base?.name !== undefined
+					? resolveName(base.name)
+					: undefined;
 		if (name === undefined) {
 			fail("每个条目都需要 name，或用 preset 引用一个内置预设。");
 		}
 
+		// Keep provenance only for explicit translation references or untouched system presets.
+		// A literal name override must never inherit the preset's translation key.
+		const nameKey =
+			entry.name !== undefined
+				? (resolveI18nKey(entry.name) ??
+					(entry.nameKey && entry.name === i18n(entry.nameKey)
+						? entry.nameKey
+						: undefined))
+				: (resolveI18nKey(base?.name) ?? base?.nameKey);
+
 		// 未声明 children 时沿用预设自带的子菜单（已由 ...base 带入）。
-		return {
+		const resolvedLink: NavBarLink = {
 			...base,
 			name,
 			...(entry.url !== undefined ? { url: entry.url } : {}),
@@ -236,6 +267,9 @@ export function resolveNavBarLinks(
 				? { children: resolveNavBarLinks(entry.children, presets) }
 				: {}),
 		};
+		if (nameKey !== undefined) resolvedLink.nameKey = nameKey;
+		else delete resolvedLink.nameKey;
+		return resolvedLink;
 	});
 }
 

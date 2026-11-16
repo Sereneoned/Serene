@@ -12,7 +12,7 @@ import ArchiveList, {
 import Card from "@components/atoms/display/Card.svelte";
 import SegmentedButton from "@components/atoms/selection/SegmentedButton.svelte";
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { formatCalendarDate } from "@utils/content-date";
 import { getPostUrlBySlug, url } from "@utils/url-utils";
@@ -75,32 +75,32 @@ const filterCrumb = $derived.by(() => {
 	if (uncategorized) {
 		return {
 			href: url("/categories/"),
-			label: i18n(I18nKey.categories),
-			value: i18n(I18nKey.uncategorized),
+			label: $t(I18nKey.categories),
+			value: $t(I18nKey.uncategorized),
 		};
 	}
 	if (category) {
 		return {
 			href: url("/categories/"),
-			label: i18n(I18nKey.categories),
+			label: $t(I18nKey.categories),
 			value: category,
 		};
 	}
 	if (tag) {
 		return {
 			href: url("/tags/"),
-			label: i18n(I18nKey.tags),
+			label: $t(I18nKey.tags),
 			value: `#${tag}`,
 		};
 	}
 	return null;
 });
 
-const groupOptions = [
-	{ value: "year", label: i18n(I18nKey.archiveGroupYear) },
-	{ value: "category", label: i18n(I18nKey.archiveGroupCategory) },
-	{ value: "tag", label: i18n(I18nKey.archiveGroupTag) },
-];
+const groupOptions = $derived([
+	{ value: "year", label: $t(I18nKey.archiveGroupYear) },
+	{ value: "category", label: $t(I18nKey.archiveGroupCategory) },
+	{ value: "tag", label: $t(I18nKey.archiveGroupTag) },
+]);
 
 /** 筛选后的文章（分组维度与之正交，均在下方消费） */
 const filtered = $derived(
@@ -127,7 +127,7 @@ function toItem(post: Post): ArchiveItem {
 }
 
 function countLabel(count: number) {
-	return `${count} ${i18n(count === 1 ? I18nKey.postCount : I18nKey.postsCount)}`;
+	return `${count} ${$t(count === 1 ? I18nKey.postCount : I18nKey.postsCount)}`;
 }
 
 /** 按当前分组维度构建组；组内保持筛选后顺序（时间倒序）。 */
@@ -141,7 +141,7 @@ const groups = $derived.by((): ArchiveGroup[] => {
 	};
 	if (groupBy === "category") {
 		for (const p of filtered) {
-			add(p.data.category ?? i18n(I18nKey.uncategorized), toItem(p));
+			add(p.data.category ?? $t(I18nKey.uncategorized), toItem(p));
 		}
 	} else if (groupBy === "tag") {
 		for (const p of filtered) {
@@ -190,12 +190,12 @@ $effect(() => {
 			<SegmentedButton
 				options={groupOptions}
 				bind:value={groupBy}
-				label={i18n(I18nKey.archiveGroup)}
+				label={$t(I18nKey.archiveGroup)}
 			/>
 		</div>
 	{/if}
 	{#if filterCrumb}
-		<nav class="archive-panel__crumb" aria-label={i18n(I18nKey.breadcrumb)}>
+		<nav class="archive-panel__crumb" aria-label={$t(I18nKey.breadcrumb)}>
 			<ol class="archive-panel__crumb-list">
 				<li class="archive-panel__crumb-item">
 					<a class="archive-panel__crumb-link m3-state-layer" href={filterCrumb.href}>
@@ -224,7 +224,7 @@ $effect(() => {
 		/>
 	{:else}
 		<div class="archive-panel__empty">
-			<span>{i18n(I18nKey.noData)}</span>
+			<span>{$t(I18nKey.noData)}</span>
 		</div>
 	{/if}
 </Card>

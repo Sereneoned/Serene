@@ -4,6 +4,22 @@ import { i18n } from "../i18n/translation";
 /** `$t:home` 形式的 i18n 引用前缀；不带前缀的 name 一律按字面量处理。 */
 export const I18N_REFERENCE_PREFIX = "$t:";
 
+/** Preserve the source key only for a system fallback or an explicit $t: reference. */
+export function resolveI18nKey(
+	text: string | undefined,
+	fallbackKey?: I18nKey,
+): I18nKey | undefined {
+	if (!text) return fallbackKey;
+	if (!text.startsWith(I18N_REFERENCE_PREFIX)) return undefined;
+	const key = text.slice(I18N_REFERENCE_PREFIX.length);
+	if (!Object.hasOwn(I18nKey, key)) {
+		throw new Error(
+			`[config] 未知的 i18n 词条 "${key}"。可用词条见 src/i18n/i18nKey.ts。`,
+		);
+	}
+	return I18nKey[key as keyof typeof I18nKey];
+}
+
 /**
  * 解析可能包含 `$t:<i18nKey>` 的文本。
  * 若以 `$t:` 开头，则校验并提取对应 I18nKey 调用 i18n()；

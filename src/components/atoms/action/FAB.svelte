@@ -1,4 +1,6 @@
 <script lang="ts">
+import type I18nKey from "@i18n/i18nKey";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 
 /**
@@ -16,7 +18,9 @@ let {
 	children,
 	icon = "",
 	label = "",
+	labelKey,
 	ariaLabel = "",
+	ariaLabelKey,
 	variant = "primary",
 	size = "regular",
 	lowered = false,
@@ -33,8 +37,12 @@ let {
 	icon?: string;
 	/** 可见文本：传入即变为 Extended FAB（含图标） */
 	label?: string;
+	/** Optional system UI text key; author-provided labels stay literal. */
+	labelKey?: I18nKey;
 	/** 无障碍标签（图标模式下默认取 label 或 icon） */
 	ariaLabel?: string;
+	/** Optional system UI accessible-name key. */
+	ariaLabelKey?: I18nKey;
 	/** 变体：primary（默认）/ secondary / tertiary / surface */
 	variant?: "primary" | "secondary" | "tertiary" | "surface";
 	/** 尺寸：small 40 / regular 56（默认）/ large 96；Extended 时 small 与 regular 同为 56 高、large 96 高 */
@@ -51,6 +59,9 @@ let {
 	style?: string;
 } = $props();
 
+const resolvedLabel = $derived(labelKey ? $t(labelKey) : label);
+const resolvedAriaLabel = $derived(ariaLabelKey ? $t(ariaLabelKey) : ariaLabel);
+
 /** 圆角 token 名 → 设计令牌；其他值按 CSS 原样传入 */
 const RADIUS_TOKENS: Record<string, string> = {
 	m: "var(--shape-corner-m)",
@@ -64,11 +75,12 @@ const radiusVar = (r: string) => RADIUS_TOKENS[r] ?? r;
 <button
 	type={type}
 	class="m3-fab m3-fab--{variant} m3-fab--{size} m3-state-layer {className}"
-	class:m3-fab--extended={!!label}
+	class:m3-fab--extended={!!resolvedLabel}
 	class:m3-fab--lowered={lowered}
 	class:m3-fab--disabled={disabled}
 	style={radius ? `--m3-fab-radius: ${radiusVar(radius)}; ${style}` : style}
-	aria-label={ariaLabel || label || icon || undefined}
+	aria-label={resolvedAriaLabel || resolvedLabel || icon || undefined}
+	data-ui-i18n-aria-label={ariaLabelKey ?? (!ariaLabel ? labelKey : undefined)}
 	disabled={disabled}
 	onclick={onclick}
 >
@@ -77,8 +89,8 @@ const radiusVar = (r: string) => RADIUS_TOKENS[r] ?? r;
 	{:else if children}
 		{@render children()}
 	{/if}
-	{#if label}
-		<span class="m3-fab__label">{label}</span>
+	{#if resolvedLabel}
+		<span class="m3-fab__label" data-ui-i18n={labelKey}>{resolvedLabel}</span>
 	{/if}
 </button>
 

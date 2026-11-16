@@ -23,9 +23,11 @@ const tagSummary = `${tags.length} ${i18n(I18nKey.tagsCount)} · ${totalPosts} $
 	<Card color="var(--card-bg)" radius="l" class="tag-index px-8 py-6">
 		<PageHeader
 			icon="material-symbols:tag-rounded"
-			title={i18n(I18nKey.tags)}
+			title={i18n(I18nKey.tags)} titleKey={I18nKey.tags}
 				subtitle={tagSummary}
-		/>
+		>
+			<span slot="subtitle">{tags.length} <span data-ui-i18n={I18nKey.tagsCount}>{i18n(I18nKey.tagsCount)}</span> · {totalPosts} <span data-ui-i18n={I18nKey.postsCount}>{i18n(I18nKey.postsCount)}</span></span>
+		</PageHeader>
 		{tags.length > 0 && (
 			<div class="tag-index__cloud">
 				{tags.map((tag) => (
@@ -42,7 +44,7 @@ const tagSummary = `${tags.length} ${i18n(I18nKey.tagsCount)} · ${totalPosts} $
 		)}
 		{tags.length === 0 && (
 			<div class="tag-index__empty">
-				<span>{i18n(I18nKey.noData)}</span>
+				<span data-ui-i18n={I18nKey.noData}>{i18n(I18nKey.noData)}</span>
 			</div>
 		)}
 	</Card>

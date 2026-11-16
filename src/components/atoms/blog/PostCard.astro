@@ -17,6 +17,7 @@ interface Props {
 	href: string;
 	title: string;
 	description?: string;
+	descriptionKey?: I18nKey;
 	/** 封面图地址（省略则无封面，右侧显示进入箭头按钮） */
 	image?: string;
 	imageSrcset?: string;
@@ -33,6 +34,8 @@ interface Props {
 	tags?: BlogMetaLink[];
 	/** 字数展示文本（如 "1426 words"，渲染在分类右侧） */
 	wordCount?: string;
+	wordCountValue?: number;
+	wordCountKey?: I18nKey;
 	class?: string;
 	style?: string;
 }
@@ -41,6 +44,7 @@ const {
 	href,
 	title,
 	description,
+	descriptionKey,
 	image,
 	imageSrcset,
 	imageAvifSrcset,
@@ -55,6 +59,8 @@ const {
 	category = null,
 	tags = [],
 	wordCount,
+	wordCountValue,
+	wordCountKey,
 	class: className,
 	style,
 } = Astro.props;
@@ -90,6 +96,7 @@ const titleLabel =
 					]}
 					aria-hidden="true"
 					title={encrypted ? `${pinnedLabel}, ${encryptedLabel}` : pinnedLabel}
+					data-ui-i18n-title={encrypted ? undefined : I18nKey.pinned}
 				>
 					<Icon icon="material-symbols:keep-rounded" />
 					{encrypted && (
@@ -100,7 +107,7 @@ const titleLabel =
 				</span>
 			)}
 			{encrypted && !pinned && (
-				<span class="m3-blog-postcard__encrypted" aria-hidden="true" title={encryptedLabel}>
+				<span class="m3-blog-postcard__encrypted" aria-hidden="true" title={encryptedLabel} data-ui-i18n-title={I18nKey.postEncryptedBadge}>
 					<Icon icon="material-symbols:lock-rounded" />
 				</span>
 			)}
@@ -115,11 +122,13 @@ const titleLabel =
 				category={category}
 				tags={tags}
 				{wordCount}
+				{wordCountValue}
+				{wordCountKey}
 				hideUpdate
 				hideTags
 			/>
 		)}
-		{description && <p class="m3-blog-postcard__desc">{description}</p>}
+		{description && <p class="m3-blog-postcard__desc" data-ui-i18n={descriptionKey}>{description}</p>}
 		{tags.length > 0 && (
 			<div class="m3-blog-postcard__tags">
 				{tags.map((t) => (

@@ -7,7 +7,7 @@
  */
 
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { resolveNavBarLinks, resolvePageKey } from "@utils/nav-utils";
 import { url } from "@utils/url-utils";
@@ -21,29 +21,31 @@ const openGroups = $state<Record<string, boolean>>({});
 
 const links = resolveNavBarLinks(navBarConfig.links);
 
-const primaryItems = links.map((link) => {
-	const key = link.name.toLowerCase();
-	return {
-		value: key,
-		label: link.name,
-		icon: link.icon,
-		href: link.url ? (link.external ? link.url : url(link.url)) : undefined,
-		external: !!link.external,
-		pageKey: link.pageKey ?? "",
-		children: link.children?.map((child) => ({
-			value: child.name.toLowerCase(),
-			label: child.name,
-			icon: child.icon,
-			href: child.url
-				? child.external
-					? child.url
-					: url(child.url)
-				: undefined,
-			external: !!child.external,
-			pageKey: child.pageKey ?? "",
-		})),
-	};
-});
+const primaryItems = $derived(
+	links.map((link) => {
+		const key = link.name.toLowerCase();
+		return {
+			value: key,
+			label: link.nameKey ? $t(link.nameKey) : link.name,
+			icon: link.icon,
+			href: link.url ? (link.external ? link.url : url(link.url)) : undefined,
+			external: !!link.external,
+			pageKey: link.pageKey ?? "",
+			children: link.children?.map((child) => ({
+				value: child.name.toLowerCase(),
+				label: child.nameKey ? $t(child.nameKey) : child.name,
+				icon: child.icon,
+				href: child.url
+					? child.external
+						? child.url
+						: url(child.url)
+					: undefined,
+				external: !!child.external,
+				pageKey: child.pageKey ?? "",
+			})),
+		};
+	}),
+);
 
 function syncFromRoute() {
 	const pageKey = resolvePageKey(new URL(window.location.href));
@@ -116,7 +118,7 @@ let drawerEl: HTMLElement | undefined = $state();
 			<div class="site-drawer__subtitle">{siteConfig.subtitle}</div>
 		</div>
 
-		<nav class="site-drawer__nav" aria-label={i18n(I18nKey.navigationDrawer)}>
+		<nav class="site-drawer__nav" aria-label={$t(I18nKey.navigationDrawer)}>
 			{#each primaryItems as item (item.value)}
 				{#if item.children}
 					<div class="site-drawer__group">

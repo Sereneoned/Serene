@@ -41,7 +41,7 @@ const softCategory = !isHome && !isArchive && postCategory ? postCategory : "";
      axe region 规则（内容必须处于某个 landmark 区域内） -->
 <nav
 	id="category-bar-region"
-	aria-label={i18n(I18nKey.categories)}
+	aria-label={i18n(I18nKey.categories)} data-ui-i18n-aria-label={I18nKey.categories}
 	class:list={{ hidden: Astro.url.pathname.startsWith("/categories") || Astro.url.pathname.startsWith("/tags") }}
 >
 	<Card color="var(--card-bg)" radius="l" class="category-bar onload-animation mb-4 p-2" id="category-bar">
@@ -50,7 +50,7 @@ const softCategory = !isHome && !isArchive && postCategory ? postCategory : "";
 				variant="tonal"
 				href={homeUrl}
 				selected={isHome}
-				label={i18n(I18nKey.home)}
+				label={i18n(I18nKey.home)} labelKey={I18nKey.home}
 				class="shrink-0"
 			>
 				<Icon icon="material-symbols:home" class="text-lg" aria-hidden="true" />
@@ -61,7 +61,7 @@ const softCategory = !isHome && !isArchive && postCategory ? postCategory : "";
 				selected={isArchive}
 				class="shrink-0"
 			>
-				{i18n(I18nKey.archive)}
+				<span data-ui-i18n={I18nKey.archive}>{i18n(I18nKey.archive)}</span>
 			</Chip>
 
 			<!-- 分类区：横向滚动 -->

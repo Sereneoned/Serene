@@ -3,7 +3,7 @@
 import DeviceSection from "@components/organisms/DeviceSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { resolveI18nText } from "@utils/i18n-utils";
+import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { devicesConfig } from "@/config/devicesConfig";
 import { resolveDevicesData } from "@/utils/feature-data";
 
@@ -12,7 +12,12 @@ if (!devicesConfig.enable) {
 }
 
 const pageTitle = resolveI18nText(devicesConfig.title, I18nKey.devices);
+const pageTitleKey = resolveI18nKey(devicesConfig.title, I18nKey.devices);
 const pageDescription = resolveI18nText(
+	devicesConfig.description,
+	I18nKey.devicesBanner,
+);
+const pageDescriptionKey = resolveI18nKey(
 	devicesConfig.description,
 	I18nKey.devicesBanner,
 );
@@ -28,8 +33,8 @@ const items = resolveDevicesData(devicesConfig);
 	<DeviceSection
 		categories={devicesConfig.categories}
 		items={items}
-		title={pageTitle}
-		subtitle={pageDescription}
+		title={pageTitle} titleKey={pageTitleKey}
+		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		client:visible
 	/>
 </MainGridLayout>

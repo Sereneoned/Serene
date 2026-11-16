@@ -24,14 +24,18 @@ interface Props {
 	tags?: BlogMetaLink[];
 	/** 字数展示文本（如 "1426 words"，渲染在分类右侧） */
 	wordCount?: string;
+	wordCountValue?: number;
+	wordCountKey?: I18nKey;
 	/** 隐藏标签段 */
 	hideTags?: boolean;
 	/** 隐藏更新日期 */
 	hideUpdate?: boolean;
 	/** 无分类时的占位文案 */
 	uncategorizedLabel?: string;
+	uncategorizedLabelKey?: I18nKey;
 	/** 无标签时的占位文案 */
 	noTagsLabel?: string;
+	noTagsLabelKey?: I18nKey;
 }
 
 const {
@@ -41,10 +45,18 @@ const {
 	category,
 	tags = [],
 	wordCount,
+	wordCountValue,
+	wordCountKey,
 	hideTags = false,
 	hideUpdate = false,
 	uncategorizedLabel = i18n(I18nKey.uncategorized),
+	uncategorizedLabelKey = Astro.props.uncategorizedLabel === undefined
+		? I18nKey.uncategorized
+		: undefined,
 	noTagsLabel = i18n(I18nKey.noTags),
+	noTagsLabelKey = Astro.props.noTagsLabel === undefined
+		? I18nKey.noTags
+		: undefined,
 } = Astro.props;
 ---
 
@@ -72,14 +84,14 @@ const {
 				aria-label={`View all posts in the ${category.name} category`}
 			>{category.name}</a>
 		) : (
-			<span class="m3-blog-postmeta__text">{uncategorizedLabel}</span>
+			<span class="m3-blog-postmeta__text" data-ui-i18n={uncategorizedLabelKey}>{uncategorizedLabel}</span>
 		)}
 	</span>
 
 	{wordCount && (
 		<span class="m3-blog-postmeta__item">
 			<MetaIcon icon="material-symbols:article-outline-rounded" />
-			<span class="m3-blog-postmeta__text">{wordCount}</span>
+			<span class="m3-blog-postmeta__text">{wordCountKey && wordCountValue !== undefined ? <>{wordCountValue} <span data-ui-i18n={wordCountKey}>{i18n(wordCountKey)}</span></> : wordCount}</span>
 		</span>
 	)}
 
@@ -100,7 +112,7 @@ const {
 					))}
 				</span>
 			) : (
-				<span class="m3-blog-postmeta__text">{noTagsLabel}</span>
+				<span class="m3-blog-postmeta__text" data-ui-i18n={noTagsLabelKey}>{noTagsLabel}</span>
 			)}
 		</span>
 	)}

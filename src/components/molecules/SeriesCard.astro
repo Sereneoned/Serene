@@ -71,7 +71,7 @@ if (context.next) {
 				</a>
 			</h2>
 			<span class="series-card__rule" aria-hidden="true"></span>
-			<span class={`series-card__status series-card__status--${context.status}`}>
+			<span class={`series-card__status series-card__status--${context.status}`} data-ui-i18n={context.status === "completed" ? I18nKey.seriesStatusCompleted : I18nKey.seriesStatusOngoing}>
 				{statusLabel}
 			</span>
 		</div>
@@ -86,7 +86,7 @@ if (context.next) {
 				return part;
 			})}
 			<span class="series-card__meta-sep" aria-hidden="true">·</span>
-			{i18n(I18nKey.seriesPartOf)}
+			<span data-ui-i18n={I18nKey.seriesPartOf}>{i18n(I18nKey.seriesPartOf)}</span>
 		</p>
 	</header>
 
@@ -110,11 +110,11 @@ if (context.next) {
 						)}
 						<span class="series-card__row-body">
 							<span class="series-card__row-title">{neighbour.ref.title}</span>
-							<span class="series-card__row-meta">
+							<span class="series-card__row-meta" data-ui-i18n={I18nKey.seriesPart} data-ui-i18n-params={JSON.stringify({ index: neighbour.index, total: context.total })}>
 								{partLabel(neighbour.index)}
 							</span>
 						</span>
-						<span class="sr-only">
+						<span class="sr-only" data-ui-i18n={neighbour.direction === "prev" ? I18nKey.seriesPrevInSeries : I18nKey.seriesNextInSeries}>
 							{i18n(
 								neighbour.direction === "prev"
 									? I18nKey.seriesPrevInSeries

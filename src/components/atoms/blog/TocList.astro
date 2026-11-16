@@ -31,7 +31,7 @@ const visible = headings.filter((h) => h.depth < base + maxDepth);
 let counter = 0;
 ---
 
-<nav class:list={["m3-blog-toc", className]} aria-label={i18n(I18nKey.tableOfContents)}>
+<nav class:list={["m3-blog-toc", className]} aria-label={i18n(I18nKey.tableOfContents)} data-ui-i18n-aria-label={I18nKey.tableOfContents}>
 	{visible.map((h) => {
 		const rel = h.depth - base;
 		const top = rel === 0;
