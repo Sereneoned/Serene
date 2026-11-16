@@ -370,6 +370,7 @@ function moveTrack(index: number, delta: -1 | 1) {
 }
 
 async function removeTrack(index: number) {
+	if (saving) return;
 	const target = tracks[index];
 	if (!target) return;
 	const nextTracks = tracks.filter((_, i) => i !== index);
@@ -378,7 +379,9 @@ async function removeTrack(index: number) {
 
 	const isLocalManaged = target.source.startsWith("/assets/music/url/");
 	if (isLocalManaged) {
-		const fileName = target.source.replace(/^\/assets\/music\/url\//, "");
+		const fileName = decodeURIComponent(
+			target.source.replace(/^\/assets\/music\/url\//, ""),
+		);
 		if (deleteUnderlyingFile && folderAudioFiles.includes(fileName)) {
 			changes.push({
 				path: `public/assets/music/url/${fileName}`,
@@ -389,29 +392,26 @@ async function removeTrack(index: number) {
 		}
 	}
 
-	tracks = nextTracks;
-	excludedSources = nextExcluded;
-
-	if (changes.length > 0) {
-		saving = true;
-		try {
-			changes.push({
-				path: "src/data/json/music.json",
-				action: "upsert",
-				content: buildMusicJsonString(nextTracks, nextExcluded),
-			});
-			await commitRepoChanges(
-				session,
-				`chore(music): remove track ${target.title}`,
-				changes,
-			);
-			showSnackbar(`已删除「${target.title}」并提交到仓库`);
-			await loadMusicData();
-		} catch (error) {
-			showSnackbar(error instanceof Error ? error.message : "删除失败");
-		} finally {
-			saving = false;
-		}
+	saving = true;
+	try {
+		changes.push({
+			path: "src/data/json/music.json",
+			action: "upsert",
+			content: buildMusicJsonString(nextTracks, nextExcluded),
+		});
+		await commitRepoChanges(
+			session,
+			`chore(music): remove track ${target.title}`,
+			changes,
+		);
+		tracks = nextTracks;
+		excludedSources = nextExcluded;
+		showSnackbar(`已删除「${target.title}」并提交到仓库`);
+		await loadMusicData();
+	} catch (error) {
+		showSnackbar(error instanceof Error ? error.message : "删除失败");
+	} finally {
+		saving = false;
 	}
 }
 
@@ -654,6 +654,7 @@ onMount(() => {
 							size="xsmall"
 							icon="material-symbols:delete-outline-rounded"
 							ariaLabel="删除"
+							disabled={saving}
 							onclick={() => removeTrack(idx)}
 						/>
 					</div>

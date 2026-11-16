@@ -119,8 +119,27 @@ async function githubRequest<T>(
 			);
 		}
 		if (response.status === 403) {
+			const acceptedPerms = response.headers.get(
+				"X-Accepted-GitHub-Permissions",
+			);
+			const rateRemaining = response.headers.get("x-ratelimit-remaining");
+			if (/resource not accessible by personal access token/i.test(detail)) {
+				const permHint = acceptedPerms ? `（需要权限: ${acceptedPerms}）` : "";
+				throw new GitHubApiError(
+					`Token 写入权限不足${permHint}：请在 GitHub → Fine-grained Tokens 中勾选 "Only select repositories"（仅选本仓库），并将 Repository permissions → Contents 设为 "Read and write"（部署状态需 Actions: Read and write）。`,
+					403,
+					endpoint,
+				);
+			}
+			if (rateRemaining === "0" || /rate limit/i.test(detail)) {
+				throw new GitHubApiError(
+					`触发 GitHub API 速率限制，请稍等 1 分钟后再试 (${detail})`,
+					403,
+					endpoint,
+				);
+			}
 			throw new GitHubApiError(
-				`权限不足或触发速率限制：${detail}`,
+				`权限不足：${detail}${acceptedPerms ? ` (${acceptedPerms})` : ""}`,
 				403,
 				endpoint,
 			);
@@ -260,7 +279,26 @@ export async function listRepoDirectory(
 	}
 }
 
-export async function commitRepoChanges(
+let commitMutex: Promise<unknown> = Promise.resolve();
+
+function runSerializedCommit<T>(task: () => Promise<T>): Promise<T> {
+	const next = commitMutex.then(task, task);
+	commitMutex = next.catch(() => {});
+	return next;
+}
+
+export function commitRepoChanges(
+	session: AdminSession,
+	message: string,
+	changes: readonly RepoFileChange[],
+	onProgress?: (progress: CommitProgress) => void,
+): Promise<{ commitSha: string; htmlUrl: string }> {
+	return runSerializedCommit(() =>
+		executeCommitRepoChanges(session, message, changes, onProgress),
+	);
+}
+
+async function executeCommitRepoChanges(
 	session: AdminSession,
 	message: string,
 	changes: readonly RepoFileChange[],
@@ -281,6 +319,7 @@ export async function commitRepoChanges(
 		(c): c is Extract<RepoFileChange, { action: "upsert" }> =>
 			c.action === "upsert",
 	);
+	const hasDeletes = uniqueChanges.some((c) => c.action === "delete");
 
 	onProgress?.({
 		phase: "preparing",
@@ -300,6 +339,25 @@ export async function commitRepoChanges(
 	);
 	const baseTreeSha = parentCommit.tree.sha;
 
+	let existingBlobPaths: Set<string> | null = null;
+	if (hasDeletes) {
+		try {
+			const baseTree = await githubRequest<{
+				tree?: Array<{ path?: string; type?: string }>;
+				truncated?: boolean;
+			}>(session.token, `${repoPrefix}/git/trees/${baseTreeSha}?recursive=1`);
+			if (!baseTree.truncated && Array.isArray(baseTree.tree)) {
+				existingBlobPaths = new Set(
+					baseTree.tree
+						.filter((item) => item.type === "blob" && item.path)
+						.map((item) => item.path as string),
+				);
+			}
+		} catch {
+			// If tree inspection fails, fall back to direct treeEntries.
+		}
+	}
+
 	const treeEntries: Array<{
 		path: string;
 		mode: "100644";
@@ -310,6 +368,9 @@ export async function commitRepoChanges(
 	let completed = 0;
 	for (const change of uniqueChanges) {
 		if (change.action === "delete") {
+			if (existingBlobPaths && !existingBlobPaths.has(change.path)) {
+				continue;
+			}
 			treeEntries.push({
 				path: change.path,
 				mode: "100644",
@@ -350,6 +411,18 @@ export async function commitRepoChanges(
 			sha: blob.sha,
 		});
 		completed += 1;
+	}
+
+	if (treeEntries.length === 0) {
+		onProgress?.({
+			phase: "done",
+			completed: upserts.length,
+			total: upserts.length,
+		});
+		return {
+			commitSha: parentCommitSha,
+			htmlUrl: `https://github.com/${session.owner}/${session.repo}/commit/${parentCommitSha}`,
+		};
 	}
 
 	onProgress?.({

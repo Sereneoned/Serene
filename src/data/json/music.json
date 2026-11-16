@@ -1,4 +1,131 @@
 {
-  "tracks": [],
-  "excludedSources": []
+	"tracks": [
+		{
+			"id": "曹方-遇见我-mp3",
+			"title": "遇见我",
+			"artist": "曹方",
+			"source": "/assets/music/url/曹方 - 遇见我.mp3"
+		},
+		{
+			"id": "陈绮贞-还是会寂寞-mp3",
+			"title": "还是会寂寞",
+			"artist": "陈绮贞",
+			"source": "/assets/music/url/陈绮贞 - 还是会寂寞.mp3"
+		},
+		{
+			"id": "陈绮贞-after-17-mp3",
+			"title": "After 17",
+			"artist": "陈绮贞",
+			"source": "/assets/music/url/陈绮贞 - After 17.mp3"
+		},
+		{
+			"id": "范玮琪-一个像夏天一个像秋天-mp3",
+			"title": "一个像夏天一个像秋天",
+			"artist": "范玮琪",
+			"source": "/assets/music/url/范玮琪 - 一个像夏天一个像秋天.mp3"
+		},
+		{
+			"id": "方大同-才二十三-mp3",
+			"title": "才二十三",
+			"artist": "方大同",
+			"source": "/assets/music/url/方大同 - 才二十三.mp3"
+		},
+		{
+			"id": "方大同-麦恩莉-mp3",
+			"title": "麦恩莉",
+			"artist": "方大同",
+			"source": "/assets/music/url/方大同 - 麦恩莉.mp3"
+		},
+		{
+			"id": "梁静茹-暖暖-mp3",
+			"title": "暖暖",
+			"artist": "梁静茹",
+			"source": "/assets/music/url/梁静茹 - 暖暖.mp3"
+		},
+		{
+			"id": "梁静茹-我喜欢-mp3",
+			"title": "我喜欢",
+			"artist": "梁静茹",
+			"source": "/assets/music/url/梁静茹 - 我喜欢.mp3"
+		},
+		{
+			"id": "梁静茹-小手拉大手-mp3",
+			"title": "小手拉大手",
+			"artist": "梁静茹",
+			"source": "/assets/music/url/梁静茹 - 小手拉大手.mp3"
+		},
+		{
+			"id": "莫文蔚-慢慢喜欢你-mp3",
+			"title": "慢慢喜欢你",
+			"artist": "莫文蔚",
+			"source": "/assets/music/url/莫文蔚 - 慢慢喜欢你.mp3"
+		},
+		{
+			"id": "莫文蔚-是非题-mp3",
+			"title": "是非题",
+			"artist": "莫文蔚",
+			"source": "/assets/music/url/莫文蔚 - 是非题.mp3"
+		},
+		{
+			"id": "齐秦-大约在冬季-mp3",
+			"title": "大约在冬季",
+			"artist": "齐秦",
+			"source": "/assets/music/url/齐秦 - 大约在冬季.mp3"
+		},
+		{
+			"id": "苏慧伦-鸭子-mp3",
+			"title": "鸭子",
+			"artist": "苏慧伦",
+			"source": "/assets/music/url/苏慧伦 - 鸭子.mp3"
+		},
+		{
+			"id": "孙燕姿-honey-honey-mp3",
+			"title": "Honey Honey",
+			"artist": "孙燕姿",
+			"source": "/assets/music/url/孙燕姿 - Honey Honey.mp3"
+		},
+		{
+			"id": "许嵩-玫瑰花的葬礼-mp3",
+			"title": "玫瑰花的葬礼",
+			"artist": "许嵩",
+			"source": "/assets/music/url/许嵩 - 玫瑰花的葬礼.mp3"
+		},
+		{
+			"id": "杨丞琳-匿名的好友-mp3",
+			"title": "匿名的好友",
+			"artist": "杨丞琳",
+			"source": "/assets/music/url/杨丞琳 - 匿名的好友.mp3"
+		},
+		{
+			"id": "张惠妹-我可以抱你吗-mp3",
+			"title": "我可以抱你吗",
+			"artist": "张惠妹",
+			"source": "/assets/music/url/张惠妹 - 我可以抱你吗.mp3"
+		},
+		{
+			"id": "张震岳-蔡健雅-思念是一种病-mp3",
+			"title": "思念是一种病",
+			"artist": "张震岳 / 蔡健雅",
+			"source": "/assets/music/url/张震岳 _ 蔡健雅 - 思念是一种病.mp3"
+		},
+		{
+			"id": "赵雷-我记得-mp3",
+			"title": "我记得",
+			"artist": "赵雷",
+			"source": "/assets/music/url/赵雷 - 我记得.mp3"
+		},
+		{
+			"id": "周杰伦-可爱女人-mp3",
+			"title": "可爱女人",
+			"artist": "周杰伦",
+			"source": "/assets/music/url/周杰伦 - 可爱女人.mp3"
+		},
+		{
+			"id": "卓文萱-读心术-mp3",
+			"title": "读心术",
+			"artist": "卓文萱",
+			"source": "/assets/music/url/卓文萱 - 读心术.mp3"
+		}
+	],
+	"excludedSources": []
 }

@@ -1,5 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import Card from "@components/atoms/display/Card.svelte";
+import Icon from "@components/atoms/display/Icon.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
 import { getPostUrl } from "@utils/url-utils";
 import { POST_CARD_MIN_WIDTH, postListConfig } from "@/config/postListConfig";
 import PostCard from "./PostCard.astro";
@@ -15,7 +19,14 @@ const { mode, cover, cardWidth } = postListConfig.layout;
 <!-- 卡片间留白分隔（gap = --m3e-space-4，无容器底色 / 无虚线）。
      容器承载布局模式：m3e-post-list--list / --grid（PostCard 原子经
      :global 祖先钩子联动形态），--cover-left 仅 list 模式生效。 -->
-<div class:list={["m3e-post-list-shell", `m3e-post-list-shell--${cardWidth}`]}>
+{page.data.length === 0 ? (
+	<Card color="var(--card-bg)" radius="l" class="px-8 py-12 text-center">
+		<div class="flex flex-col items-center justify-center gap-3 text-[var(--on-surface-variant)]">
+			<Icon icon="material-symbols:article-outline-rounded" class="text-4xl opacity-60" aria-hidden="true" />
+			<span data-ui-i18n={I18nKey.noData}>{i18n(I18nKey.noData)}</span>
+		</div>
+	</Card>
+) : (<div class:list={["m3e-post-list-shell", `m3e-post-list-shell--${cardWidth}`]}>
     <div
         id="post-list"
         class:list={[
@@ -45,6 +56,8 @@ const { mode, cover, cardWidth } = postListConfig.layout;
         ))}
     </div>
 </div>
+
+)}
 
 <style lang="stylus">
 @import "../../styles/breakpoints.styl"

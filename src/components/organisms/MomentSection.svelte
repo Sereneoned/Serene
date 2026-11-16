@@ -80,6 +80,8 @@ let quickPhotos = $state<
 >([]);
 let quickPublishing = $state(false);
 let quickFolder = $state("");
+let deletingId = $state("");
+let deletedIds = $state<Set<string>>(new Set());
 
 async function handleQuickFiles(files: FileList | File[]) {
 	const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
@@ -172,22 +174,32 @@ async function submitQuickMoment() {
 }
 
 async function deleteMomentFromCard(momentId: string) {
-	if (!adminSession) return;
+	if (!adminSession || deletingId) return;
 	if (!window.confirm(`确定删除动态 ${momentId} 吗？`)) return;
+	deletingId = momentId;
 	try {
 		await commitRepoChanges(
 			adminSession,
 			`content(moments): delete ${momentId}`,
 			[{ path: `src/content/moments/${momentId}.md`, action: "delete" }],
 		);
-		showSnackbar("已从 GitHub 删除动态，构建后更新");
+		deletedIds = new Set(deletedIds).add(momentId);
+		showSnackbar("已从 GitHub 删除动态，构建后线上列表更新");
 	} catch (error) {
 		showSnackbar(error instanceof Error ? error.message : "删除失败");
+	} finally {
+		deletingId = "";
 	}
 }
 
 const tagItems = $derived(
-	Array.from(new Set(moments.flatMap((moment) => moment.filterTags)))
+	Array.from(
+		new Set(
+			moments
+				.filter((m) => !deletedIds.has(m.id))
+				.flatMap((moment) => moment.filterTags),
+		),
+	)
 		.sort((a, b) => a.localeCompare(b))
 		.map((tag) => ({ value: tag, label: tag })),
 );
@@ -209,6 +221,7 @@ const filtered = $derived.by(() => {
 	const normalizedQuery = query.trim().toLowerCase();
 
 	return moments.filter((moment) => {
+		if (deletedIds.has(moment.id)) return false;
 		if (selectedTag && !moment.filterTags.includes(selectedTag)) return false;
 		if (!normalizedQuery) return true;
 		return (searchTexts.get(moment.id) ?? "").includes(normalizedQuery);
@@ -426,6 +439,7 @@ onMount(() => {
 									size="xsmall"
 									icon="material-symbols:delete-outline-rounded"
 									label={$t(I18nKey.adminQuickDelete)}
+									disabled={deletingId === moment.id}
 									onclick={() => deleteMomentFromCard(moment.id)}
 								/>
 							</div>

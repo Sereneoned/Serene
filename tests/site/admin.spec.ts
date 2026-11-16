@@ -129,7 +129,11 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await page.goto(withBase("/moments/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".admin-dock")).toBeVisible();
 		await expect(page.locator(".moment-admin-composer")).toBeVisible();
-		await expect(page.locator(".moment-admin-actions").first()).toBeVisible();
+		if ((await page.locator(".moment-section__entry").count()) > 0) {
+			await expect(page.locator(".moment-admin-actions").first()).toBeVisible();
+		} else {
+			await expect(page.locator(".moment-section__empty")).toBeVisible();
+		}
 
 		await page.goto(withBase("/albums/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".album-section__admin-bar")).toBeVisible();

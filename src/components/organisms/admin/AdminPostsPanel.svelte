@@ -92,8 +92,15 @@ async function loadPostsAndAbout() {
 				if (file) loaded.push(parsePostMarkdown(path, file.content));
 			} else if (entry.type === "dir") {
 				const indexMd = `src/content/posts/${entry.name}/index.md`;
-				const file = await readRepoTextFile(session, indexMd);
-				if (file) loaded.push(parsePostMarkdown(indexMd, file.content));
+				const mdFile = await readRepoTextFile(session, indexMd);
+				if (mdFile) {
+					loaded.push(parsePostMarkdown(indexMd, mdFile.content));
+				} else {
+					const indexMdx = `src/content/posts/${entry.name}/index.mdx`;
+					const mdxFile = await readRepoTextFile(session, indexMdx);
+					if (mdxFile)
+						loaded.push(parsePostMarkdown(indexMdx, mdxFile.content));
+				}
 			}
 		}
 		loaded.sort((a, b) => b.published.localeCompare(a.published));
@@ -387,7 +394,7 @@ onMount(() => {
 						</div>
 						<div class="posts-admin__row-btns">
 							<Button variant="tonal" size="xsmall" icon="material-symbols:edit-outline-rounded" label="编辑" onclick={() => selectPost(post)} />
-							<Button variant="text" size="xsmall" icon="material-symbols:delete-outline-rounded" label="删除" onclick={() => handleDeletePost(post)} />
+							<Button variant="text" size="xsmall" icon="material-symbols:delete-outline-rounded" label="删除" disabled={saving} onclick={() => handleDeletePost(post)} />
 						</div>
 					</div>
 				{/each}

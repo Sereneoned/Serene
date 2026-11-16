@@ -5,9 +5,35 @@ import type { GetStaticPaths } from "astro";
 import { postListConfig } from "@/config/postListConfig";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../utils/content-utils";
+import { url } from "../utils/url-utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
+	if (allBlogPosts.length === 0) {
+		return [
+			{
+				params: { page: undefined },
+				props: {
+					page: {
+						data: [],
+						start: 0,
+						end: 0,
+						size: postListConfig.pageSize,
+						total: 0,
+						currentPage: 1,
+						lastPage: 1,
+						url: {
+							current: url("/"),
+							prev: undefined,
+							next: undefined,
+							first: undefined,
+							last: undefined,
+						},
+					},
+				},
+			},
+		];
+	}
 	return paginate(allBlogPosts, { pageSize: postListConfig.pageSize });
 }) satisfies GetStaticPaths;
 // https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
@@ -19,5 +45,5 @@ const len = page.data.length;
 
 <MainGridLayout page="home">
     <PostPage page={page}></PostPage>
-    <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
+    {len > 0 && <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>}
 </MainGridLayout>
