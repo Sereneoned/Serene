@@ -171,7 +171,7 @@ const adminGithubUrl =
 
 		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, configHue, lightTheme, darkTheme, defaultWallpaperMode, defaultTexturePreset, defaultTextureOpacity, textureEnabled, defaultUiLocale: siteConfig.lang}}>
 			const storedLocale = localStorage.getItem('shirone-ui-locale');
-			const activeUiLocale = storedLocale === 'en' || storedLocale === 'zh_CN' ? storedLocale : (defaultUiLocale || 'zh_CN');
+			const activeUiLocale = storedLocale === 'en' || storedLocale === 'zh_CN' ? storedLocale : (defaultUiLocale || 'en');
 			document.documentElement.dataset.uiLocale = activeUiLocale;
 			document.documentElement.lang = activeUiLocale.replace('_', '-');
 			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
