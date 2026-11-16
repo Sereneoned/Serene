@@ -18,6 +18,7 @@ import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
 import type { GameCategory, GameItem } from "@/types/gamesConfig";
+import AdminSectionEditorBar from "./admin/AdminSectionEditorBar.svelte";
 
 let {
 	categories = [] as GameCategory[],
@@ -129,6 +130,12 @@ onMount(() => {
 		icon="material-symbols:sports-esports-outline-rounded"
 		title={resolvedTitle}
 		subtitle={resolvedSubtitle}
+	/>
+
+	<AdminSectionEditorBar
+		domain="games"
+		label="游戏记录"
+		initialConfigSnapshot={{ games: { categories } }}
 	/>
 
 	{#if enabledItems.length > 0}

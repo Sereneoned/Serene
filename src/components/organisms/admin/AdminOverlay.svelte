@@ -91,27 +91,47 @@ onMount(() => {
 	<aside class="admin-dock" aria-label="管理员快捷工具栏">
 		{#if expanded}
 			<div class="admin-dock__menu">
-				<a href={url("/admin/?tab=moments")} class="admin-dock__item m3-state-layer">
+				<a href={url("/admin/?tab=moments")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
 					<Icon icon="material-symbols:auto-awesome-outline-rounded" aria-hidden="true" />
 					<span>{$t(I18nKey.adminQuickNewMoment)}</span>
 				</a>
-				<a href={url("/admin/?tab=albums")} class="admin-dock__item m3-state-layer">
+				<a href={url("/admin/?tab=albums")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
 					<Icon icon="material-symbols:photo-library-outline-rounded" aria-hidden="true" />
 					<span>{$t(I18nKey.adminQuickNewAlbum)}</span>
 				</a>
-				<a href={url("/admin/?tab=music")} class="admin-dock__item m3-state-layer">
+				<a href={url("/admin/?tab=music")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
 					<Icon icon="material-symbols:library-music-outline-rounded" aria-hidden="true" />
 					<span>{$t(I18nKey.adminQuickManageMusic)}</span>
 				</a>
-				<a href={url("/admin/?tab=posts")} class="admin-dock__item m3-state-layer">
+				<a href={url("/admin/?tab=posts")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
 					<Icon icon="material-symbols:article-outline-rounded" aria-hidden="true" />
 					<span>文章管理</span>
 				</a>
-				<a href={url("/admin/?tab=deploy")} class="admin-dock__item m3-state-layer">
+				<a href={url("/admin/?tab=data&domain=timeline")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
+					<Icon icon="material-symbols:timeline-rounded" aria-hidden="true" />
+					<span>时间线编辑</span>
+				</a>
+				<a href={url("/admin/?tab=data&domain=projects")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
+					<Icon icon="material-symbols:deployed-code-outline-rounded" aria-hidden="true" />
+					<span>项目展示编辑</span>
+				</a>
+				<a href={url("/admin/?tab=data&domain=games")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
+					<Icon icon="material-symbols:sports-esports-outline-rounded" aria-hidden="true" />
+					<span>游戏记录编辑</span>
+				</a>
+				<a href={url("/admin/?tab=data&domain=compass")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
+					<Icon icon="material-symbols:explore-rounded" aria-hidden="true" />
+					<span>站点罗盘编辑</span>
+				</a>
+				<a href={url("/admin/?tab=data&domain=friends")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
+					<Icon icon="material-symbols:handshake-outline-rounded" aria-hidden="true" />
+					<span>友链与其他数据</span>
+				</a>
+				<a href={url("/admin/?tab=deploy")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
 					<Icon icon="material-symbols:rocket-launch-outline-rounded" aria-hidden="true" />
 					<span>发布队列{stagedCount > 0 ? ` (${stagedCount})` : ""}</span>
 				</a>
-				<a href={url("/admin/")} class="admin-dock__item m3-state-layer">
+				<a href={url("/admin/")} class="admin-dock__item m3-state-layer" onclick={() => (expanded = false)}>
 					<Icon icon="material-symbols:admin-panel-settings-outline-rounded" aria-hidden="true" />
 					<span>{$t(I18nKey.adminStudio)}</span>
 				</a>
@@ -203,6 +223,8 @@ onMount(() => {
 		display: flex
 		flex-direction: column
 		min-width: 11.5rem
+		max-height: min(72vh, 28rem)
+		overflow-y: auto
 		padding: 0.375rem
 		border-radius: var(--shape-corner-l)
 		border: 1px solid var(--outline-variant)

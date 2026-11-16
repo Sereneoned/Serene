@@ -6,12 +6,14 @@ import I18nKey from "@i18n/i18nKey";
 import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import {
+	type AdminDataDomain,
 	type AdminSession,
 	clearAdminSession,
 	getAdminSession,
 	getStagedQueue,
 	onAdminSessionChange,
 	onStagedQueueChange,
+	parseAdminDataDomain,
 } from "@utils/admin";
 import { showSnackbar } from "@utils/snackbar";
 import { url } from "@utils/url-utils";
@@ -105,8 +107,8 @@ const tabs: Array<{ id: AdminTab; label: string; icon: string }> = [
 	},
 	{
 		id: "data",
-		label: "友链与页面数据",
-		icon: "material-symbols:group-outline-rounded",
+		label: "时间线·项目·游戏·罗盘·数据",
+		icon: "material-symbols:dashboard-customize-outline-rounded",
 	},
 	{
 		id: "site",
@@ -122,15 +124,43 @@ const tabs: Array<{ id: AdminTab; label: string; icon: string }> = [
 
 let session = $state<AdminSession | null>(null);
 let activeTab = $state<AdminTab>("moments");
+let initialDataDomain = $state<AdminDataDomain | undefined>(undefined);
 let initialEditId = $state("");
 let initialAlbumId = $state("");
 let stagedCount = $state(0);
+
+function syncFromLocation() {
+	if (typeof window === "undefined") return;
+	const params = new URLSearchParams(window.location.search);
+	const rawTab = params.get("tab");
+	const domainFromTab = parseAdminDataDomain(rawTab);
+	const domainFromQuery = parseAdminDataDomain(params.get("domain"));
+
+	if (domainFromTab) {
+		activeTab = "data";
+		initialDataDomain = domainFromTab;
+	} else if (rawTab && tabs.some((item) => item.id === rawTab)) {
+		activeTab = rawTab as AdminTab;
+		if (rawTab === "data") {
+			initialDataDomain = domainFromQuery;
+		}
+	} else if (domainFromQuery) {
+		activeTab = "data";
+		initialDataDomain = domainFromQuery;
+	}
+	initialEditId = params.get("edit") || "";
+	initialAlbumId = params.get("album") || "";
+}
 
 function switchTab(tab: AdminTab) {
 	activeTab = tab;
 	if (typeof window !== "undefined") {
 		const params = new URLSearchParams(window.location.search);
 		params.set("tab", tab);
+		if (tab !== "data") {
+			params.delete("domain");
+			initialDataDomain = undefined;
+		}
 		params.delete("edit");
 		params.delete("album");
 		history.replaceState(history.state, "", `?${params.toString()}`);
@@ -146,14 +176,7 @@ function handleLogout() {
 onMount(() => {
 	session = getAdminSession();
 	stagedCount = getStagedQueue().length;
-
-	const params = new URLSearchParams(window.location.search);
-	const rawTab = params.get("tab") as AdminTab | null;
-	if (rawTab && tabs.some((item) => item.id === rawTab)) {
-		activeTab = rawTab;
-	}
-	initialEditId = params.get("edit") || "";
-	initialAlbumId = params.get("album") || "";
+	syncFromLocation();
 
 	const stopSession = onAdminSessionChange((next) => {
 		session = next;
@@ -161,7 +184,9 @@ onMount(() => {
 	const stopQueue = onStagedQueueChange((items) => {
 		stagedCount = items.length;
 	});
+	window.addEventListener("popstate", syncFromLocation);
 	return () => {
+		window.removeEventListener("popstate", syncFromLocation);
 		stopSession();
 		stopQueue();
 	};
@@ -249,7 +274,11 @@ onMount(() => {
 	{:else if activeTab === "posts"}
 		<AdminPostsPanel {session} />
 	{:else if activeTab === "data"}
-		<AdminDataPanel {session} {initialConfigSnapshot} />
+		<AdminDataPanel
+			{session}
+			initialDomain={initialDataDomain}
+			{initialConfigSnapshot}
+		/>
 	{:else if activeTab === "site"}
 		<AdminSitePanel {session} {initialConfigSnapshot} />
 	{:else if activeTab === "deploy"}

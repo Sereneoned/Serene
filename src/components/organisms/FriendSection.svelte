@@ -13,6 +13,7 @@ import { reveal } from "@utils/motion";
 import { normalizePage, normalizePageSize } from "@utils/pagination";
 import { onMount } from "svelte";
 import type { FriendItem } from "../../data/friends";
+import AdminSectionEditorBar from "./admin/AdminSectionEditorBar.svelte";
 
 let {
 	friends = [] as FriendItem[],
@@ -125,6 +126,11 @@ onMount(() => {
 		icon="material-symbols:handshake-outline-rounded"
 		title={resolvedTitle}
 		subtitle={resolvedSubtitle}
+	/>
+
+	<AdminSectionEditorBar
+		domain="friends"
+		label="友情链接"
 	/>
 
 	{#if friends.length > 0}

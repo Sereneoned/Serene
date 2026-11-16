@@ -84,6 +84,11 @@ test.describe("Admin mode & zero-burden public pages", () => {
 
 		await page.goto(withBase("/albums/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".album-section__admin-bar")).toHaveCount(0);
+
+		for (const route of ["/timeline/", "/projects/", "/games/", "/compass/"]) {
+			await page.goto(withBase(route), { waitUntil: "domcontentloaded" });
+			await expect(page.locator(".section-admin-bar")).toHaveCount(0);
+		}
 	});
 
 	test("authenticates on /admin/ via GitHub API and unlocks tabs", async ({
@@ -303,5 +308,61 @@ test.describe("Admin mode & zero-burden public pages", () => {
 			.disableRules(["page-has-heading-one"])
 			.analyze();
 		expect(a11y.violations).toEqual([]);
+	});
+
+	test("exposes inline frontend editors on /timeline, /projects, /games, /compass & ?domain= deep links", async ({
+		page,
+	}) => {
+		await mockGitHubApi(page);
+		await page.addInitScript((session) => {
+			localStorage.setItem("shirone-admin-session", JSON.stringify(session));
+		}, MOCK_SESSION);
+
+		// Floating dock shows shortcuts for timeline/projects/games/compass
+		await page.goto(withBase("/timeline/"), { waitUntil: "domcontentloaded" });
+		await page.locator(".admin-dock__pill").click();
+		await expect(
+			page
+				.locator(".admin-dock__menu")
+				.getByRole("link", { name: "时间线编辑" }),
+		).toBeVisible();
+		await expect(
+			page
+				.locator(".admin-dock__menu")
+				.getByRole("link", { name: "站点罗盘编辑" }),
+		).toBeVisible();
+		await page.locator(".admin-dock__pill").click();
+
+		// Inline frontend editor right on /timeline/
+		await expect(page.locator(".section-admin-bar")).toBeVisible();
+		await page.getByRole("button", { name: "在当前页编辑时间线" }).click();
+		await expect(page.locator(".timeline-editor")).toBeVisible();
+		await expect(
+			page
+				.locator(".section-admin-bar")
+				.getByRole("link", { name: "前往完整管理台" }),
+		).toHaveAttribute("href", /\/admin\/\?tab=data&domain=timeline/);
+
+		const timelineA11y = await new AxeBuilder({ page })
+			.disableRules(["page-has-heading-one"])
+			.analyze();
+		expect(timelineA11y.violations).toEqual([]);
+
+		// Verify /projects/, /games/, /compass/ also expose frontend edit bars when signed in
+		for (const [route, btnName] of [
+			["/projects/", "在当前页编辑项目展示"],
+			["/games/", "在当前页编辑游戏记录"],
+			["/compass/", "在当前页编辑站点罗盘"],
+		]) {
+			await page.goto(withBase(route), { waitUntil: "domcontentloaded" });
+			await expect(page.getByRole("button", { name: btnName })).toBeVisible();
+		}
+
+		// Deep link /admin/?tab=data&domain=compass lands directly on Compass editor
+		await page.goto(withBase("/admin/?tab=data&domain=compass"), {
+			waitUntil: "domcontentloaded",
+		});
+		await expect(page.getByRole("heading", { name: /站点罗盘/ })).toBeVisible();
+		await expect(page.locator(".compass-editor")).toBeVisible();
 	});
 });

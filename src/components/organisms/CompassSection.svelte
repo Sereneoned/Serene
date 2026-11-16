@@ -22,6 +22,7 @@ import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
 import type { CompassShelf } from "../../data/compass";
+import AdminSectionEditorBar from "./admin/AdminSectionEditorBar.svelte";
 
 let {
 	shelves = [] as CompassShelf[],
@@ -133,6 +134,11 @@ onMount(() => {
 		icon="material-symbols:explore-rounded"
 		title={resolvedTitle}
 		subtitle={resolvedSubtitle}
+	/>
+
+	<AdminSectionEditorBar
+		domain="compass"
+		label="站点罗盘"
 	/>
 
 	{#if shelves.length > 0}

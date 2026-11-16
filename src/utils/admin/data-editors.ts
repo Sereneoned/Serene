@@ -22,6 +22,101 @@ export interface EditableCategory {
 	description?: string;
 }
 
+export type AdminDataDomain =
+	| "timeline"
+	| "projects"
+	| "games"
+	| "compass"
+	| "friends"
+	| "anime"
+	| "devices"
+	| "skills";
+
+export interface AdminDataDomainMeta {
+	readonly id: AdminDataDomain;
+	readonly label: string;
+	readonly path: string;
+	readonly pagePath: string;
+	readonly icon: string;
+	readonly visual: boolean;
+}
+
+export const ADMIN_DATA_DOMAINS: readonly AdminDataDomainMeta[] = [
+	{
+		id: "timeline",
+		label: "时间线",
+		path: "src/data/json/timeline.json",
+		pagePath: "/timeline/",
+		icon: "material-symbols:timeline-rounded",
+		visual: true,
+	},
+	{
+		id: "projects",
+		label: "项目展示",
+		path: "src/data/json/projects.json",
+		pagePath: "/projects/",
+		icon: "material-symbols:deployed-code-outline-rounded",
+		visual: true,
+	},
+	{
+		id: "games",
+		label: "游戏记录",
+		path: "src/data/json/games.json",
+		pagePath: "/games/",
+		icon: "material-symbols:sports-esports-outline-rounded",
+		visual: true,
+	},
+	{
+		id: "compass",
+		label: "站点罗盘",
+		path: "src/data/json/compass.json",
+		pagePath: "/compass/",
+		icon: "material-symbols:explore-rounded",
+		visual: true,
+	},
+	{
+		id: "friends",
+		label: "友情链接",
+		path: "src/data/json/friends.json",
+		pagePath: "/friends/",
+		icon: "material-symbols:handshake-outline-rounded",
+		visual: true,
+	},
+	{
+		id: "anime",
+		label: "番剧",
+		path: "src/data/json/anime.json",
+		pagePath: "/anime/",
+		icon: "material-symbols:live-tv-outline-rounded",
+		visual: false,
+	},
+	{
+		id: "devices",
+		label: "设备",
+		path: "src/data/json/devices.json",
+		pagePath: "/devices/",
+		icon: "material-symbols:devices-rounded",
+		visual: false,
+	},
+	{
+		id: "skills",
+		label: "技能",
+		path: "src/data/json/skills.json",
+		pagePath: "/skills/",
+		icon: "material-symbols:workspaces-outline-rounded",
+		visual: false,
+	},
+];
+
+/** Resolve a URL/tab value to a known AdminDataDomain, or `undefined`. */
+export function parseAdminDataDomain(
+	value: string | null | undefined,
+): AdminDataDomain | undefined {
+	if (!value) return undefined;
+	const normalized = value.trim().toLowerCase();
+	return ADMIN_DATA_DOMAINS.find((entry) => entry.id === normalized)?.id;
+}
+
 const VALID_PROJECT_PHASES = new Set<ProjectPhase>([
 	"shipped",
 	"building",

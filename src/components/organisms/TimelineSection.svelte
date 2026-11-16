@@ -13,10 +13,12 @@ import I18nKey from "@i18n/i18nKey";
 import { t } from "@i18n/runtime.ts";
 import Icon from "@iconify/svelte";
 import type { TimelineCategory, TimelineItem } from "@/types/timelineConfig";
+import AdminSectionEditorBar from "./admin/AdminSectionEditorBar.svelte";
 
 let {
 	categories = [] as TimelineCategory[],
 	items = [] as TimelineItem[],
+	order = "desc" as "desc" | "asc",
 	title,
 	subtitle,
 	titleKey,
@@ -24,6 +26,7 @@ let {
 }: {
 	categories?: TimelineCategory[];
 	items?: TimelineItem[];
+	order?: "desc" | "asc";
 	title?: string;
 	subtitle?: string;
 	titleKey?: I18nKey;
@@ -71,6 +74,12 @@ const filteredItems = $derived(
 		icon="material-symbols:timeline-rounded"
 		title={resolvedTitle}
 		subtitle={resolvedSubtitle}
+	/>
+
+	<AdminSectionEditorBar
+		domain="timeline"
+		label="时间线"
+		initialConfigSnapshot={{ timeline: { order, categories } }}
 	/>
 
 	<!-- 分类筛选器与计数条 -->

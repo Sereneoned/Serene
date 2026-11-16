@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import {
+	ADMIN_DATA_DOMAINS,
 	createEmptyCompassShelf,
 	ensureUniqueKey,
 	mergeDomainConfigOverride,
@@ -12,6 +13,7 @@ import {
 	normalizeGameItems,
 	normalizeProjectItems,
 	normalizeTimelineItems,
+	parseAdminDataDomain,
 	serializeCompassShelves,
 	serializeGameItems,
 	serializeProjectItems,
@@ -374,5 +376,14 @@ describe("Admin UI icon presets, tag helpers, and structured data editors", () =
 		assert.equal(mergedOverride.timeline.enable, true);
 		assert.equal(mergedOverride.timeline.order, "asc");
 		assert.equal(mergedOverride.timeline.categories[0].label, "里程碑");
+
+		assert.equal(parseAdminDataDomain("timeline"), "timeline");
+		assert.equal(parseAdminDataDomain(" COMPASS "), "compass");
+		assert.equal(parseAdminDataDomain("unknown"), undefined);
+		assert.ok(
+			["timeline", "projects", "games", "compass", "friends"].every((id) =>
+				ADMIN_DATA_DOMAINS.some((meta) => meta.id === id && meta.visual),
+			),
+		);
 	});
 });

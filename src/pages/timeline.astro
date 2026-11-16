@@ -35,6 +35,7 @@ const items = resolveTimelineData(timelineConfig);
 	<TimelineSection
 		categories={timelineConfig.categories}
 		items={items}
+		order={timelineConfig.order ?? "desc"}
 		title={pageTitle} titleKey={pageTitleKey}
 		subtitle={pageDescription} subtitleKey={pageDescriptionKey}
 		client:visible

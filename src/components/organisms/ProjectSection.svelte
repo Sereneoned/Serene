@@ -12,6 +12,7 @@ import Icon from "@iconify/svelte";
 import { packMasonry, setupMasonry } from "@utils/masonry";
 import { onMount } from "svelte";
 import type { ProjectCategory, ProjectItem } from "@/types/projectsConfig";
+import AdminSectionEditorBar from "./admin/AdminSectionEditorBar.svelte";
 
 let {
 	categories = [] as ProjectCategory[],
@@ -136,6 +137,12 @@ $effect(() => {
 		icon="material-symbols:deployed-code-outline-rounded"
 		title={resolvedTitle}
 		subtitle={resolvedSubtitle}
+	/>
+
+	<AdminSectionEditorBar
+		domain="projects"
+		label="项目展示"
+		initialConfigSnapshot={{ projects: { categories } }}
 	/>
 
 	{#if enabledItems.length > 0}

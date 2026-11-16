@@ -2,6 +2,8 @@
 import Button from "@components/atoms/action/Button.svelte";
 import Card from "@components/atoms/display/Card.svelte";
 import {
+	ADMIN_DATA_DOMAINS,
+	type AdminDataDomain,
 	type AdminSession,
 	buildPendingUploadChanges,
 	commitRepoChanges,
@@ -14,6 +16,7 @@ import {
 	normalizeGameItems,
 	normalizeProjectItems,
 	normalizeTimelineItems,
+	parseAdminDataDomain,
 	type RepoFileChange,
 	readRepoTextFile,
 	serializeCompassShelves,
@@ -22,6 +25,7 @@ import {
 	serializeTimelineItems,
 } from "@utils/admin";
 import { showSnackbar } from "@utils/snackbar";
+import { url } from "@utils/url-utils";
 import { onMount } from "svelte";
 import type { CompassShelf } from "@/data/compass";
 import type { FriendItem } from "@/data/friends";
@@ -36,9 +40,13 @@ import TimelineDataEditor from "./data/TimelineDataEditor.svelte";
 
 let {
 	session,
+	initialDomain,
+	singleDomain = false,
 	initialConfigSnapshot,
 }: {
 	session: AdminSession;
+	initialDomain?: AdminDataDomain;
+	singleDomain?: boolean;
 	initialConfigSnapshot?: {
 		timeline?: {
 			order: "desc" | "asc";
@@ -53,34 +61,12 @@ let {
 	};
 } = $props();
 
-type DataDomain =
-	| "timeline"
-	| "projects"
-	| "games"
-	| "compass"
-	| "friends"
-	| "anime"
-	| "devices"
-	| "skills";
+type DataDomain = AdminDataDomain;
 
-const VISUAL_DOMAINS: ReadonlySet<DataDomain> = new Set([
-	"timeline",
-	"projects",
-	"games",
-	"compass",
-	"friends",
-]);
-
-const domainTabs: Array<{ id: DataDomain; label: string; path: string }> = [
-	{ id: "timeline", label: "时间线", path: "src/data/json/timeline.json" },
-	{ id: "projects", label: "项目展示", path: "src/data/json/projects.json" },
-	{ id: "games", label: "游戏记录", path: "src/data/json/games.json" },
-	{ id: "compass", label: "站点罗盘", path: "src/data/json/compass.json" },
-	{ id: "friends", label: "友情链接", path: "src/data/json/friends.json" },
-	{ id: "anime", label: "番剧", path: "src/data/json/anime.json" },
-	{ id: "devices", label: "设备", path: "src/data/json/devices.json" },
-	{ id: "skills", label: "技能", path: "src/data/json/skills.json" },
-];
+const domainTabs = ADMIN_DATA_DOMAINS;
+const VISUAL_DOMAINS: ReadonlySet<DataDomain> = new Set(
+	domainTabs.filter((tab) => tab.visual).map((tab) => tab.id),
+);
 
 const DEFAULT_TIMELINE_CATEGORIES = $derived<readonly EditableCategory[]>(
 	initialConfigSnapshot?.timeline?.categories ?? [],
@@ -92,8 +78,10 @@ const DEFAULT_GAMES_CATEGORIES = $derived<readonly EditableCategory[]>(
 	initialConfigSnapshot?.games?.categories ?? [],
 );
 
-let activeDomain = $state<DataDomain>("timeline");
-let editMode = $state<"visual" | "json">("visual");
+let activeDomain = $state<DataDomain>(initialDomain ?? "timeline");
+let editMode = $state<"visual" | "json">(
+	VISUAL_DOMAINS.has(initialDomain ?? "timeline") ? "visual" : "json",
+);
 let loading = $state(false);
 let saving = $state(false);
 let rawJsonText = $state("[]");
@@ -375,30 +363,55 @@ async function handleSave(stageOnly = false) {
 	}
 }
 
+let syncedInitialDomain: DataDomain | undefined = initialDomain;
+
+function selectDomain(tabId: DataDomain, updateUrl = true) {
+	activeDomain = tabId;
+	editMode = VISUAL_DOMAINS.has(tabId) ? "visual" : "json";
+	if (updateUrl && !singleDomain && typeof window !== "undefined") {
+		const params = new URLSearchParams(window.location.search);
+		params.set("tab", "data");
+		params.set("domain", tabId);
+		history.replaceState(history.state, "", `?${params.toString()}`);
+	}
+	void loadDomain(tabId);
+}
+
+$effect(() => {
+	if (initialDomain && initialDomain !== syncedInitialDomain) {
+		syncedInitialDomain = initialDomain;
+		selectDomain(initialDomain, !singleDomain);
+	}
+});
+
 onMount(() => {
 	applyDefaultCategorySnapshots();
-	void loadDomain("timeline");
+	const fromUrl = singleDomain
+		? undefined
+		: parseAdminDataDomain(
+				new URLSearchParams(window.location.search).get("domain"),
+			);
+	const startDomain = initialDomain ?? fromUrl ?? "timeline";
+	syncedInitialDomain = initialDomain;
+	selectDomain(startDomain, false);
 });
 </script>
 
 <div class="data-admin">
-	<div class="data-admin__tabs">
-		{#each domainTabs as tab (tab.id)}
-			<button
-				type="button"
-				class="data-admin__tab"
-				class:data-admin__tab--active={activeDomain === tab.id}
-				onclick={() => {
-					activeDomain = tab.id;
-					if (!VISUAL_DOMAINS.has(tab.id)) editMode = "json";
-					else editMode = "visual";
-					void loadDomain(tab.id);
-				}}
-			>
-				{tab.label}
-			</button>
-		{/each}
-	</div>
+	{#if !singleDomain}
+		<div class="data-admin__tabs">
+			{#each domainTabs as tab (tab.id)}
+				<button
+					type="button"
+					class="data-admin__tab"
+					class:data-admin__tab--active={activeDomain === tab.id}
+					onclick={() => selectDomain(tab.id, true)}
+				>
+					{tab.label}
+				</button>
+			{/each}
+		</div>
+	{/if}
 
 	<Card color="var(--card-bg)" radius="l" class="p-5 md:p-6">
 		<div class="data-admin__head">
@@ -433,6 +446,15 @@ onMount(() => {
 							JSON 源码
 						</button>
 					</div>
+				{/if}
+				{#if !singleDomain}
+					<Button
+						variant="text"
+						size="xsmall"
+						icon="material-symbols:open-in-new-rounded"
+						label="查看前台页"
+						href={url(currentTab.pagePath)}
+					/>
 				{/if}
 				<Button
 					variant="outlined"
