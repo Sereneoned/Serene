@@ -75,7 +75,7 @@ let newTrackDuration = $state("");
 
 // Music global config (written into admin-overrides.json)
 let musicEnable = $state(true);
-let provider = $state<MusicProvider>("mixed");
+let provider = $state<MusicProvider>("local");
 let metingServer = $state<MetingServer>("netease");
 let metingType = $state<MetingType>("playlist");
 let metingId = $state("14164869977");

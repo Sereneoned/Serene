@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 import Snackbar from "@components/atoms/overlay/Snackbar.svelte";
 import AdminOverlay from "@components/organisms/admin/AdminOverlay.svelte";
+import ScrollHusky from "@components/organisms/ScrollHusky.astro";
 import ConfigCarrier from "@components/system/ConfigCarrier.astro";
 import UmamiRuntime from "@components/system/UmamiRuntime.astro";
 import { resolveAsset } from "@utils/asset-utils";
@@ -257,6 +258,7 @@ const adminGithubUrl =
 			/>
 		)}
 		<slot />
+		<ScrollHusky />
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
 	</body>
 </html>

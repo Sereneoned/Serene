@@ -1,1 +1,54 @@
-[]
+[
+	{
+		"title": "JOJO的奇妙冒险 星尘斗士",
+		"cover": "/assets/anime/jojo-part3.webp",
+		"link": "https://bgm.tv/subject/85631",
+		"status": "completed",
+		"rating": 8.0,
+		"progress": { "watched": 48, "total": 48 },
+		"description": "承太郎与伙伴踏上前往埃及讨伐DIO、拯救母亲的五十日星尘征途。",
+		"year": "2014",
+		"studio": "david production",
+		"genres": ["热血", "奇幻", "冒险"],
+		"period": { "start": "2014-04", "end": "2015-06" }
+	},
+	{
+		"title": "JOJO的奇妙冒险 不灭钻石",
+		"cover": "/assets/anime/jojo-part4.webp",
+		"link": "https://bgm.tv/subject/150490",
+		"status": "completed",
+		"rating": 7.8,
+		"progress": { "watched": 39, "total": 39 },
+		"description": "东方仗助与杜王町的伙伴们联手追查潜藏在小镇阴影中的连环杀手。",
+		"year": "2016",
+		"studio": "david production",
+		"genres": ["热血", "悬疑", "日常"],
+		"period": { "start": "2016-04", "end": "2016-12" }
+	},
+	{
+		"title": "JOJO的奇妙冒险 黄金之风",
+		"cover": "/assets/anime/jojo-part5.webp",
+		"link": "https://bgm.tv/subject/235128",
+		"status": "completed",
+		"rating": 8.0,
+		"progress": { "watched": 39, "total": 39 },
+		"description": "怀抱成为黑帮巨星梦想的乔鲁诺，与布加拉提小队在命运洪流中前行。",
+		"year": "2018",
+		"studio": "david production",
+		"genres": ["热血", "黑帮", "冒险"],
+		"period": { "start": "2018-10", "end": "2019-07" }
+	},
+	{
+		"title": "JOJO的奇妙冒险 石之海",
+		"cover": "/assets/anime/jojo-part6.webp",
+		"link": "https://bgm.tv/subject/332261",
+		"status": "completed",
+		"rating": 7.2,
+		"progress": { "watched": 38, "total": 38 },
+		"description": "被陷害关押进水族馆监狱的空条徐伦，在绝望中觉醒替身直面命运与真相。",
+		"year": "2021",
+		"studio": "david production",
+		"genres": ["热血", "监狱", "悬疑"],
+		"period": { "start": "2021-12", "end": "2022-12" }
+	}
+]
