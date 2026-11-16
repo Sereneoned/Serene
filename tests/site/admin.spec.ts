@@ -138,4 +138,170 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await page.goto(withBase("/albums/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".album-section__admin-bar")).toBeVisible();
 	});
+
+	test("provides visual editors with UI icon pickers & tags for timeline, projects, games, and compass", async ({
+		page,
+	}) => {
+		const postedBlobs: Array<{ content: string; encoding: string }> = [];
+		await page.route("https://api.github.com/**", async (route) => {
+			const url = new URL(route.request().url());
+			const path = url.pathname;
+			if (path === "/repos/demo-owner/Shirone/git/ref/heads/main") {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({ object: { sha: "base-commit-sha" } }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/commits/base-commit-sha") {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({ tree: { sha: "base-tree-sha" } }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/blobs") {
+				const body = route.request().postDataJSON() as {
+					content: string;
+					encoding: string;
+				};
+				postedBlobs.push(body);
+				return route.fulfill({
+					status: 201,
+					contentType: "application/json",
+					body: JSON.stringify({ sha: `blob-${postedBlobs.length}` }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/trees") {
+				return route.fulfill({
+					status: 201,
+					contentType: "application/json",
+					body: JSON.stringify({ sha: "new-tree-sha" }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/commits") {
+				return route.fulfill({
+					status: 201,
+					contentType: "application/json",
+					body: JSON.stringify({
+						sha: "new-commit-sha",
+						html_url: "https://github.com/demo-owner/Shirone/commit/new",
+					}),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/refs/heads/main") {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({ object: { sha: "new-commit-sha" } }),
+				});
+			}
+			if (path.includes("/contents/src/data/json/admin-overrides.json")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						type: "file",
+						sha: "override-sha",
+						encoding: "base64",
+						content: Buffer.from("{}").toString("base64"),
+					}),
+				});
+			}
+			if (path.includes("/contents/")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify([]),
+				});
+			}
+			return route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify({}),
+			});
+		});
+
+		await page.addInitScript((session) => {
+			localStorage.setItem("shirone-admin-session", JSON.stringify(session));
+		}, MOCK_SESSION);
+
+		await page.goto(withBase("/admin/?tab=data"), {
+			waitUntil: "domcontentloaded",
+		});
+
+		// 1. Timeline visual editor: add milestone with UI icon picker + tag input
+		await expect(page.getByRole("heading", { name: /时间线/ })).toBeVisible();
+		await page.getByLabel("事件标题 (必需)").fill("上线 Serene 博客");
+		await page
+			.locator(".timeline-editor")
+			.getByRole("button", { name: "选择图标" })
+			.first()
+			.click();
+		await expect(page.getByLabel("搜索预置 UI 图标")).toBeVisible();
+		await page.getByRole("button", { name: "发布上线" }).click();
+
+		const tagInput = page.getByLabel("技术栈 / 关联标签 (Tags)");
+		await tagInput.fill("Astro 5");
+		await tagInput.press("Enter");
+		await page.getByRole("button", { name: "里程碑", exact: true }).click();
+		await page.getByRole("button", { name: "添加到时间线" }).click();
+
+		await expect(page.locator(".timeline-editor__row-title strong")).toHaveText(
+			"上线 Serene 博客",
+		);
+
+		// Save timeline -> verifies atomic GitHub blob creation contains new timeline entry
+		await page.getByRole("button", { name: /保存 时间线/ }).click();
+		await expect.poll(() => postedBlobs.length).toBeGreaterThan(0);
+		const committedTimeline = Buffer.from(
+			postedBlobs[postedBlobs.length - 1].content,
+			"base64",
+		).toString("utf8");
+		expect(committedTimeline).toContain("上线 Serene 博客");
+		expect(committedTimeline).toContain(
+			"material-symbols:rocket-launch-rounded",
+		);
+		expect(committedTimeline).toContain("Astro 5");
+
+		// 2. Projects visual editor
+		await page.getByRole("button", { name: "项目展示", exact: true }).click();
+		await page.getByLabel("项目名称 (必需)").fill("Serene Blog");
+		await page.getByLabel("项目简介 (必需)").fill("Personal M3E site");
+		await page.getByLabel("技术栈与标签 (Technologies / Tags)").fill("Svelte");
+		await page.getByLabel("技术栈与标签 (Technologies / Tags)").press("Enter");
+		await page.getByRole("button", { name: "添加到项目列表" }).click();
+		await expect(page.locator(".projects-editor__row-title strong")).toHaveText(
+			"Serene Blog",
+		);
+
+		// 3. Games visual editor
+		await page.getByRole("button", { name: "游戏记录", exact: true }).click();
+		await page.getByLabel("游戏名称 (必需)").fill("Elden Ring");
+		await page.getByLabel("游戏简评 / 感想 (必需)").fill("Epic open world RPG");
+		await page.getByRole("button", { name: "Switch", exact: true }).click();
+		await page.getByRole("button", { name: "添加到游戏列表" }).click();
+		await expect(page.locator(".games-editor__row-title strong")).toHaveText(
+			"Elden Ring",
+		);
+
+		// 4. Compass visual editor
+		await page.getByRole("button", { name: "站点罗盘", exact: true }).click();
+		await page.getByRole("button", { name: "新增罗盘分组" }).click();
+		await page.getByLabel("分组名称 (如 开发工具)").fill("常用导航");
+		await page.getByRole("button", { name: "创建分组" }).click();
+		await page.getByLabel("站点名称 (必需)").fill("GitHub");
+		await page
+			.getByLabel("站点网址 URL (https://...)")
+			.fill("https://github.com");
+		await page.getByRole("button", { name: "添加到当前分组" }).click();
+		await expect(page.locator(".compass-editor__entry-info strong")).toHaveText(
+			"GitHub",
+		);
+
+		const a11y = await new AxeBuilder({ page })
+			.disableRules(["page-has-heading-one"])
+			.analyze();
+		expect(a11y.violations).toEqual([]);
+	});
 });

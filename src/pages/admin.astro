@@ -72,6 +72,16 @@ const initialConfigSnapshot = {
 		series: seriesConfig.enable !== false,
 		about: aboutConfig.enable !== false,
 	},
+	timeline: {
+		order: timelineConfig.order ?? "desc",
+		categories: timelineConfig.categories.map((cat) => ({ ...cat })),
+	},
+	projects: {
+		categories: projectsConfig.categories.map((cat) => ({ ...cat })),
+	},
+	games: {
+		categories: gamesConfig.categories.map((cat) => ({ ...cat })),
+	},
 };
 ---
 

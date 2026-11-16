@@ -64,6 +64,21 @@ let {
 		announcementLinkText: string;
 		announcementLinkUrl: string;
 		features: Record<string, boolean>;
+		timeline?: {
+			order: "desc" | "asc";
+			categories: Array<{ key: string; label: string; icon?: string }>;
+		};
+		projects?: {
+			categories: Array<{ key: string; label: string; icon?: string }>;
+		};
+		games?: {
+			categories: Array<{
+				key: string;
+				label: string;
+				icon?: string;
+				description?: string;
+			}>;
+		};
 	};
 } = $props();
 
@@ -234,7 +249,7 @@ onMount(() => {
 	{:else if activeTab === "posts"}
 		<AdminPostsPanel {session} />
 	{:else if activeTab === "data"}
-		<AdminDataPanel {session} />
+		<AdminDataPanel {session} {initialConfigSnapshot} />
 	{:else if activeTab === "site"}
 		<AdminSitePanel {session} {initialConfigSnapshot} />
 	{:else if activeTab === "deploy"}

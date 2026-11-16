@@ -14,6 +14,7 @@
  */
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
+import { url } from "@utils/url-utils";
 import type { CompassEntry } from "../../data/compass";
 
 let {
@@ -36,8 +37,9 @@ const iconKind = $derived(
 				: "letter",
 );
 
-/** 图片形态的 src：image 优先，回退 icon 的图片 URL */
-const imageSrc = $derived(entry.image || entry.icon || "");
+/** 图片形态的 src：image 优先，回退 icon 的图片 URL；站内绝对路径补全 base */
+const rawImageSrc = $derived(entry.image || entry.icon || "");
+const imageSrc = $derived(rawImageSrc ? url(rawImageSrc) : "");
 
 const letter = $derived((entry.label.charAt(0) || "?").toUpperCase());
 

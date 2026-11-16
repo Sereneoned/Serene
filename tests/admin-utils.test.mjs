@@ -3,6 +3,21 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+import {
+	createEmptyCompassShelf,
+	ensureUniqueKey,
+	mergeDomainConfigOverride,
+	moveListItem,
+	normalizeCompassShelves,
+	normalizeGameItems,
+	normalizeProjectItems,
+	normalizeTimelineItems,
+	serializeCompassShelves,
+	serializeGameItems,
+	serializeProjectItems,
+	serializeTimelineItems,
+} from "../src/utils/admin/data-editors.ts";
+import { UI_ICON_PRESETS } from "../src/utils/admin/icon-presets.ts";
 import { parseId3TagsFromBytes } from "../src/utils/admin/media.ts";
 import {
 	parseMomentMarkdown,
@@ -11,6 +26,13 @@ import {
 	serializeMomentMarkdown,
 	serializePostMarkdown,
 } from "../src/utils/admin/serializers.ts";
+import {
+	collectTagsFromRecords,
+	mergeUniqueTags,
+	parseTagTokens,
+	removeTagValue,
+	toggleTagValue,
+} from "../src/utils/admin/tag-presets.ts";
 import { parseTrackFromFilename } from "../src/utils/music/filename-parser.ts";
 import { scanLocalMusicFolder } from "../src/utils/music/folder-scanner.server.ts";
 
@@ -204,5 +226,153 @@ describe("Admin Markdown and Album serializers", () => {
 		assert.equal(parsed.layout, "grid");
 		assert.equal(parsed.columns, 4);
 		assert.equal(parsed.photos.length, 1);
+	});
+});
+
+describe("Admin UI icon presets, tag helpers, and structured data editors", () => {
+	it("provides categorized UI icon presets ready for offline bundling", () => {
+		const groups = new Set(UI_ICON_PRESETS.map((item) => item.group));
+		for (const expected of [
+			"timeline",
+			"projects",
+			"games",
+			"compass",
+			"brands",
+			"tags",
+		]) {
+			assert.ok(groups.has(expected), `missing icon group: ${expected}`);
+		}
+		for (const preset of UI_ICON_PRESETS) {
+			assert.match(preset.icon, /^[a-z0-9-]+:[a-z0-9-]+$/);
+			assert.ok(preset.label.trim().length > 0);
+		}
+	});
+
+	it("parses, deduplicates, toggles, removes, and collects tags cleanly", () => {
+		const parsed = parseTagTokens("Astro, TypeScript，astro,  Svelte\n");
+		assert.deepEqual(parsed, ["Astro", "TypeScript", "Svelte"]);
+
+		const merged = mergeUniqueTags(["Astro", "Svelte"], ["svelte", "M3E"]);
+		assert.deepEqual(merged, ["Astro", "Svelte", "M3E"]);
+
+		assert.deepEqual(toggleTagValue(["Astro", "Svelte"], "astro"), ["Svelte"]);
+		assert.deepEqual(toggleTagValue(["Svelte"], "TypeScript"), [
+			"Svelte",
+			"TypeScript",
+		]);
+		assert.deepEqual(removeTagValue(["Astro", "M3E"], "m3e"), ["Astro"]);
+
+		const collected = collectTagsFromRecords(
+			[{ tags: ["RPG", "PC"] }, { tags: ["pc", "Action"] }],
+			(item) => item.tags,
+		);
+		assert.deepEqual(collected, ["RPG", "PC", "Action"]);
+	});
+
+	it("normalizes and serializes timeline, projects, games, compass, and overrides", () => {
+		assert.deepEqual(moveListItem(["a", "b", "c"], 1, -1), ["b", "a", "c"]);
+		assert.equal(ensureUniqueKey("Serene App", ["serene-app"]), "serene-app-2");
+
+		const timelineJson = serializeTimelineItems(
+			normalizeTimelineItems([
+				{
+					title: "Launch Blog",
+					date: "2026.11",
+					category: "milestone",
+					icon: "material-symbols:rocket-launch-rounded",
+					tags: ["Astro", "astro"],
+					highlights: ["Shipped v1", ""],
+					links: [{ label: "GitHub", url: "https://github.com/Sereneoned" }],
+					featured: true,
+				},
+			]),
+		);
+		const timelineOut = JSON.parse(timelineJson);
+		assert.equal(timelineOut[0].title, "Launch Blog");
+		assert.deepEqual(timelineOut[0].tags, ["Astro"]);
+		assert.deepEqual(timelineOut[0].highlights, ["Shipped v1"]);
+		assert.equal(timelineOut[0].featured, true);
+
+		const projectJson = serializeProjectItems(
+			normalizeProjectItems([
+				{
+					title: "Demo Project",
+					summary: "Build summary",
+					category: "theme",
+					phase: "shipped",
+					technologies: ["Astro", "Svelte"],
+					icon: "material-symbols:code-rounded",
+				},
+				{
+					title: "Demo Project",
+					summary: "Duplicate key guard",
+					category: "theme",
+					phase: "unknown-phase",
+					technologies: [],
+				},
+			]),
+		);
+		const projectOut = JSON.parse(projectJson);
+		assert.equal(projectOut[0].key, "demo-project");
+		assert.equal(projectOut[1].key, "demo-project-2");
+		assert.equal(projectOut[1].phase, "building");
+
+		const gameJson = serializeGameItems(
+			normalizeGameItems([
+				{
+					name: "Minecraft",
+					developer: "Mojang",
+					category: "sandbox",
+					status: "playing",
+					rating: 4.7,
+					hours: 120.34,
+					tags: ["Sandbox", "Building"],
+					description: "Blocks everywhere",
+				},
+			]),
+		);
+		const gameOut = JSON.parse(gameJson);
+		assert.equal(gameOut[0].rating, 4.5);
+		assert.equal(gameOut[0].hours, 120.3);
+
+		const emptyShelf = createEmptyCompassShelf(["dev"]);
+		const compassJson = serializeCompassShelves(
+			normalizeCompassShelves([
+				emptyShelf,
+				{
+					key: "dev",
+					name: "Dev",
+					icon: "material-symbols:code-rounded",
+					entries: [
+						{
+							label: "GitHub",
+							href: "https://github.com",
+							icon: "fa7-brands:github",
+						},
+					],
+				},
+			]),
+		);
+		const compassOut = JSON.parse(compassJson);
+		assert.equal(compassOut[0].key, "shelf");
+		assert.equal(compassOut[1].entries[0].icon, "fa7-brands:github");
+
+		const mergedOverride = mergeDomainConfigOverride(
+			{ timeline: { enable: true, order: "desc" } },
+			"timeline",
+			{
+				categories: [
+					{
+						key: "milestone",
+						label: "里程碑",
+						icon: "material-symbols:flag-rounded",
+					},
+				],
+				order: "asc",
+			},
+		);
+		assert.equal(mergedOverride.timeline.enable, true);
+		assert.equal(mergedOverride.timeline.order, "asc");
+		assert.equal(mergedOverride.timeline.categories[0].label, "里程碑");
 	});
 });
