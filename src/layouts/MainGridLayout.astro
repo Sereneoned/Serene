@@ -17,7 +17,7 @@ import {
 	isDualColumn,
 } from "@utils/responsive-utils";
 import type { MarkdownHeading } from "astro";
-import { contextMenuConfig, sidebarConfig } from "@/config";
+import { contextMenuConfig, navBarConfig, sidebarConfig } from "@/config";
 import type { SidebarPage } from "@/types/sidebarConfig";
 import Layout from "./Layout.astro";
 
@@ -82,6 +82,16 @@ const hasTocWidget =
 	tocWidget !== undefined &&
 	((tocWidget.column ?? "primary") === "primary" ||
 		isDualColumn(sidebarResponsive));
+
+const hasCategoriesWidget =
+	sidebarConfig.enable &&
+	sidebarConfig.components.some(
+		(widget) => widget.type === "categories" && widget.enable,
+	);
+const hasArchiveNav = navBarConfig.links.some(
+	(link) => link.pageKey === "archive",
+);
+const showCategoryBar = hasCategoriesWidget || hasArchiveNav;
 ---
 
 <Layout title={title} banner={banner} ogImage={ogImage} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} page={page}>
@@ -110,7 +120,7 @@ const hasTocWidget =
             <!-- 主内容列：分类导航栏静态渲染（位于 Swup 容器外），
                  页面切换时保持固定不重渲染；仅内容区随导航替换 -->
             <div id="main-content-column" class={mainContentClasses.replace("transition-swup-fade", "").trim()}>
-                <CategoryBar currentPostCategory={postCategory}></CategoryBar>
+                {showCategoryBar && <CategoryBar currentPostCategory={postCategory}></CategoryBar>}
                 <main
                     id="swup-container"
                     data-current-post-category={postCategory || ""}

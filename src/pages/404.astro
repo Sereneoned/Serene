@@ -7,6 +7,11 @@ import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { url } from "@utils/url-utils";
+import { navBarConfig } from "@/config";
+
+const hasArchiveNav = navBarConfig.links.some(
+	(link) => link.pageKey === "archive",
+);
 ---
 
 <MainGridLayout
@@ -39,12 +44,14 @@ import { url } from "@utils/url-utils";
 					</span>
 				</Button>
 
-				<Button href={url("/archive/")} variant="tonal" size="small" ariaLabel={i18n(I18nKey.archive)} ariaLabelKey={I18nKey.archive}>
-					<span class="inline-flex items-center gap-2">
-						<Icon icon="material-symbols:archive-outline-rounded" class="text-lg" aria-hidden="true" />
-						<span data-ui-i18n={I18nKey.archive}>{i18n(I18nKey.archive)}</span>
-					</span>
-				</Button>
+				{hasArchiveNav && (
+					<Button href={url("/archive/")} variant="tonal" size="small" ariaLabel={i18n(I18nKey.archive)} ariaLabelKey={I18nKey.archive}>
+						<span class="inline-flex items-center gap-2">
+							<Icon icon="material-symbols:archive-outline-rounded" class="text-lg" aria-hidden="true" />
+							<span data-ui-i18n={I18nKey.archive}>{i18n(I18nKey.archive)}</span>
+						</span>
+					</Button>
+				)}
 			</div>
 		</div>
 	</Card>

@@ -9,7 +9,7 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { getSiteStats } from "@utils/site-stats";
-import { seriesConfig } from "@/config";
+import { seriesConfig, sidebarConfig } from "@/config";
 import type { StatsWidget } from "@/types/sidebarConfig";
 import WidgetLayout from "./WidgetLayout.astro";
 
@@ -23,6 +23,16 @@ const className = Astro.props.class;
 const style = Astro.props.style;
 
 const stats = await getSiteStats();
+const hasCategoriesWidget =
+	sidebarConfig.enable &&
+	sidebarConfig.components.some(
+		(widget) => widget.type === "categories" && widget.enable,
+	);
+const hasTagsWidget =
+	sidebarConfig.enable &&
+	sidebarConfig.components.some(
+		(widget) => widget.type === "tags" && widget.enable,
+	);
 // 千位分隔固定 en-US：构建产物数值稳定，不随构建机 locale 漂移
 const fmt = (n: number) => n.toLocaleString("en-US");
 
@@ -48,18 +58,26 @@ const rows = [
 		labelKey: I18nKey.moments,
 		value: fmt(stats.moments),
 	},
-	{
-		icon: "material-symbols:folder-outline-rounded",
-		label: i18n(I18nKey.categories),
-		labelKey: I18nKey.categories,
-		value: fmt(stats.categories),
-	},
-	{
-		icon: "material-symbols:tag-rounded",
-		label: i18n(I18nKey.tags),
-		labelKey: I18nKey.tags,
-		value: fmt(stats.tags),
-	},
+	...(hasCategoriesWidget
+		? [
+				{
+					icon: "material-symbols:folder-outline-rounded",
+					label: i18n(I18nKey.categories),
+					labelKey: I18nKey.categories,
+					value: fmt(stats.categories),
+				},
+			]
+		: []),
+	...(hasTagsWidget
+		? [
+				{
+					icon: "material-symbols:tag-rounded",
+					label: i18n(I18nKey.tags),
+					labelKey: I18nKey.tags,
+					value: fmt(stats.tags),
+				},
+			]
+		: []),
 	// 系列功能关闭时不产出统计行（零额外负担）
 	...(seriesConfig.enable
 		? [

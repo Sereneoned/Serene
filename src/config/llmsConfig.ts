@@ -103,11 +103,6 @@ export const llmsConfig: LlmsConfig = withUserConfig("llms", {
 			url: "/about/",
 			description: "Author profile, technical stack, and background.",
 		},
-		{
-			title: "Archive",
-			url: "/archive/",
-			description: "Chronological index of all published writings.",
-		},
 	],
 
 	/**

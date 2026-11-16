@@ -3,7 +3,15 @@ import ArchivePanel from "@components/organisms/ArchivePanel.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { navBarConfig } from "@/config";
 import { getSortedPostsList } from "../utils/content-utils";
+
+const hasArchive = navBarConfig.links.some(
+	(link) => link.pageKey === "archive",
+);
+if (!hasArchive) {
+	return Astro.redirect("/404/");
+}
 
 const sortedPostsList = await getSortedPostsList();
 const archiveSummary = `${sortedPostsList.length} ${i18n(I18nKey.postsCount)}`;

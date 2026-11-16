@@ -32,7 +32,7 @@ export const sidebarConfig: SidebarConfig = withUserConfig("sidebar", {
 		{ type: "announcement", enable: true, slot: "top", pages: ["home"] },
 		{
 			type: "categories",
-			enable: true,
+			enable: false,
 			slot: "sticky",
 			collapseAfter: 5,
 			pages: [
@@ -54,7 +54,7 @@ export const sidebarConfig: SidebarConfig = withUserConfig("sidebar", {
 		},
 		{
 			type: "series",
-			enable: true,
+			enable: false,
 			slot: "sticky",
 			collapseAfter: 5,
 			pages: [
@@ -76,7 +76,7 @@ export const sidebarConfig: SidebarConfig = withUserConfig("sidebar", {
 		},
 		{
 			type: "tags",
-			enable: true,
+			enable: false,
 			slot: "sticky",
 			collapseAfter: 6,
 			pages: [
@@ -101,7 +101,7 @@ export const sidebarConfig: SidebarConfig = withUserConfig("sidebar", {
 			enable: true,
 			slot: "top",
 			column: "secondary",
-			pages: ["home", "archive", "categories", "tags"],
+			pages: ["home"],
 		},
 		{ type: "calendar", enable: true, slot: "top", column: "secondary" },
 		{

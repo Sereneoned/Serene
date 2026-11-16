@@ -8,6 +8,7 @@ import { gamesConfig } from "./gamesConfig.ts";
 import { momentsConfig } from "./momentsConfig.ts";
 import { projectsConfig } from "./projectsConfig.ts";
 import { seriesConfig } from "./seriesConfig.ts";
+import { sidebarConfig } from "./sidebarConfig.ts";
 import { skillsConfig } from "./skillsConfig.ts";
 import { timelineConfig } from "./timelineConfig.ts";
 
@@ -26,6 +27,19 @@ export function getDisabledPages(): string[] {
 	if (albumsConfig.enable === false) disabled.push("albums");
 	if (compassConfig.enable === false) disabled.push("compass");
 	if (seriesConfig.enable === false) disabled.push("series");
+	const categoriesEnabled =
+		sidebarConfig.enable &&
+		sidebarConfig.components.some(
+			(widget) => widget.type === "categories" && widget.enable,
+		);
+	const tagsEnabled =
+		sidebarConfig.enable &&
+		sidebarConfig.components.some(
+			(widget) => widget.type === "tags" && widget.enable,
+		);
+	if (!categoriesEnabled) disabled.push("categories");
+	if (!tagsEnabled) disabled.push("tags");
+	disabled.push("archive");
 	return disabled;
 }
 
