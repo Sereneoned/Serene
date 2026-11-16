@@ -1,5 +1,50 @@
 [
   {
+    "title": "阿里园区实习",
+    "date": "2026.11",
+    "category": "career",
+    "subtitle": "智贸星途",
+    "location": "阿里巴巴数字生态创新园",
+    "description": "第一份线下实习",
+    "tags": [
+      "项目",
+      "学习",
+      "工作"
+    ],
+    "icon": "material-symbols:work-rounded"
+  },
+  {
+    "title": "成为字节外包",
+    "date": "2026.09",
+    "category": "milestone",
+    "subtitle": "字节跳动",
+    "location": "浙大杭州科创中心",
+    "tags": [
+      "全栈",
+      "项目",
+      "外包"
+    ],
+    "icon": "material-symbols:work-rounded"
+  },
+  {
+    "title": "全国大学生智能车竞赛一等奖",
+    "date": "2026.08",
+    "category": "milestone",
+    "subtitle": "合肥大学",
+    "location": "Hefei",
+    "description": "全国大学生智能车竞赛智慧农场组一等奖",
+    "icon": "material-symbols:workspace-premium-rounded"
+  },
+  {
+    "title": "加入智能车队",
+    "date": "2024.12",
+    "category": "education",
+    "subtitle": "二队队长",
+    "location": "Hangzhou",
+    "description": "经kym学长介绍加入百度智能车队并成为队长",
+    "icon": "material-symbols:event-note-rounded"
+  },
+  {
     "title": "成为大学生",
     "date": "2024.09",
     "category": "education",
