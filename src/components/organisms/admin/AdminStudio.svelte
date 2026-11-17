@@ -81,6 +81,21 @@ let {
 				description?: string;
 			}>;
 		};
+		comment?: {
+			enable: boolean;
+			provider: string;
+			lazy: boolean;
+			walineServerURL: string;
+			walineReaction: boolean;
+			walineLogin: "enable" | "disable" | "force";
+			walinePlaceholder: string;
+		};
+		umami?: {
+			enable: boolean;
+			shareUrl: string;
+			websiteId: string;
+			scriptUrl: string;
+		};
 	};
 } = $props();
 

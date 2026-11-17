@@ -13,7 +13,12 @@ import { i18n } from "@i18n/translation";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { isEncryptedPost } from "@utils/post-encryption";
 import { getProjectImageLoader } from "@utils/project-images";
-import { getCategoryUrl, getDir, getTagUrl } from "@utils/url-utils";
+import {
+	getCategoryUrl,
+	getDir,
+	getTagUrl,
+	url as resolveSiteUrl,
+} from "@utils/url-utils";
 
 interface Props {
 	class?: string;
@@ -51,8 +56,11 @@ const imageBasePath = entry.filePath
 
 const { remarkPluginFrontmatter } = await render(entry);
 
-// 解析封面：本地相对路径 → 构建产物 URL（与 ImageWrapper 同法）
-let coverUrl = image;
+// 解析封面：本地相对路径 → 构建产物 URL（与 ImageWrapper 同法）；/ 开头 public 资源补齐 siteConfig.base
+let coverUrl =
+	image?.startsWith("/") && !image.startsWith("//")
+		? resolveSiteUrl(image)
+		: image;
 let coverSrcset: string | undefined;
 let coverAvifSrcset: string | undefined;
 let coverWidth: number | undefined;

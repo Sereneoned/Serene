@@ -1,13 +1,23 @@
 ---
 import { getImage } from "astro:assets";
 import MomentSection from "@components/organisms/MomentSection.svelte";
+import UmamiStats from "@components/organisms/UmamiStats.astro";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { resolveImageAsset } from "@utils/asset-utils";
 import { getSortedMoments } from "@utils/content-utils";
 import { resolveI18nKey, resolveI18nText } from "@utils/i18n-utils";
 import { url } from "@utils/url-utils";
-import { momentsConfig, profileConfig } from "@/config";
+import { toWalineInteractionOptions } from "@utils/waline-interactions";
+import {
+	commentConfig,
+	momentsConfig,
+	profileConfig,
+	resolveCommentOptions,
+	resolveUmamiOptions,
+	siteConfig,
+	umamiConfig,
+} from "@/config";
 
 if (!momentsConfig.enable) {
 	return Astro.redirect("/404/");
@@ -62,8 +72,26 @@ const author = {
 	avatarHeight,
 	url: url("/about/"),
 };
+const walineConfig = toWalineInteractionOptions(
+	resolveCommentOptions(commentConfig),
+	siteConfig.lang,
+);
+const umamiEnabled = resolveUmamiOptions(umamiConfig) !== null;
 ---
 
 <MainGridLayout title={pageTitle} titleKey={pageTitleKey} description={pageDescription} descriptionKey={pageDescriptionKey} page="moments">
-    <MomentSection {moments} {author} title={pageTitle} titleKey={pageTitleKey} subtitle={pageDescription} subtitleKey={pageDescriptionKey} client:visible></MomentSection>
+    <MomentSection
+        {moments}
+        {author}
+        {walineConfig}
+        {umamiEnabled}
+        basePath={siteConfig.base ?? "/"}
+        title={pageTitle}
+        titleKey={pageTitleKey}
+        subtitle={pageDescription}
+        subtitleKey={pageDescriptionKey}
+        client:visible
+    >
+        <UmamiStats variant="meta" path={url("/moments/")} />
+    </MomentSection>
 </MainGridLayout>

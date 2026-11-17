@@ -384,4 +384,7 @@ export const tr: Translation = {
 	[Key.adminQuickEdit]: "Düzenle",
 	[Key.adminQuickDelete]: "Sil",
 	[Key.adminQuickPublish]: "GitHub'a Yayınla",
+	[Key.interactionLike]: "Beğen",
+	[Key.interactionLiked]: "Beğenildi",
+	[Key.interactionViews]: "Görüntülenme",
 };

@@ -7,13 +7,21 @@
  */
 import Avatar from "@components/atoms/display/Avatar.svelte";
 import Icon from "@components/atoms/display/Icon.svelte";
+import ContentInteractionBar from "@components/molecules/ContentInteractionBar.svelte";
 import MomentGallery from "@components/molecules/MomentGallery.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { t } from "@i18n/runtime.ts";
 import type { MomentItem } from "@utils/content-utils";
 import { formatDateToYYYYMMDDHHmm } from "@utils/date-utils";
 import { reveal } from "@utils/motion";
+import type {
+	WalineInteractionOptions,
+	WalinePathCounters,
+} from "@utils/waline-interactions";
 import type { Snippet } from "svelte";
+
+type InlineWalineComponent =
+	typeof import("@components/molecules/WalineInlinePanel.svelte").default;
 
 export type MomentAuthor = {
 	name: string;
@@ -29,18 +37,46 @@ let {
 	author,
 	/** stagger 入场延迟 ms（由列表传入：第 i 项 i × step） */
 	delay = 0,
+	walineConfig = null,
+	interactionPath = "",
+	interactionStats,
 	class: className = "",
 	children,
 }: {
 	moment: MomentItem;
 	author: MomentAuthor;
 	delay?: number;
+	walineConfig?: WalineInteractionOptions | null;
+	interactionPath?: string;
+	interactionStats?: WalinePathCounters;
 	class?: string;
 	children?: Snippet;
 } = $props();
 
 const publishedAt = $derived(new Date(moment.published));
 const timeText = $derived(formatDateToYYYYMMDDHHmm(publishedAt));
+
+let commentsOpen = $state(false);
+let commentCountOverride = $state<number | undefined>(undefined);
+let InlineWaline = $state.raw<InlineWalineComponent | null>(null);
+
+async function toggleComments() {
+	if (commentsOpen) {
+		commentsOpen = false;
+		return;
+	}
+	commentsOpen = true;
+	if (!InlineWaline) {
+		try {
+			const mod = await import(
+				"@components/molecules/WalineInlinePanel.svelte"
+			);
+			InlineWaline = mod.default;
+		} catch {
+			// Ignore transient chunk load error so the visitor can retry.
+		}
+	}
+}
 </script>
 
 <article class="moment-card {className}" id="moment-{moment.id}" use:reveal={{ delay }}>
@@ -113,6 +149,28 @@ const timeText = $derived(formatDateToYYYYMMDDHHmm(publishedAt));
 					</div>
 				{/if}
 			</footer>
+		{/if}
+
+		{#if walineConfig && interactionPath}
+			<ContentInteractionBar
+				variant="moment"
+				path={interactionPath}
+				serverURL={walineConfig.serverURL}
+				stats={interactionStats}
+				autoFetch={false}
+				{commentsOpen}
+				{commentCountOverride}
+				onToggleComments={toggleComments}
+			/>
+			{#if commentsOpen && InlineWaline}
+				<InlineWaline
+					path={interactionPath}
+					config={walineConfig}
+					onCommentCountChange={(count) => {
+						commentCountOverride = count;
+					}}
+				/>
+			{/if}
 		{/if}
 	{/if}
 </article>
@@ -201,6 +259,24 @@ const timeText = $derived(formatDateToYYYYMMDDHHmm(publishedAt));
 			margin-top: 0
 		:global(p:last-child)
 			margin-bottom: 0
+		:global(strong)
+			font-weight: 700
+		:global(mark)
+			padding: 0.05em 0.25em
+			border-radius: var(--shape-corner-xs)
+			background: unquote("color-mix(in oklab, var(--primary) 22%, transparent)")
+			color: inherit
+		:global(.markdown-image-figure)
+			margin: var(--m3e-space-3) 0
+		:global(.markdown-image-caption)
+			margin-top: var(--m3e-space-1)
+			color: var(--on-surface-variant)
+			font: var(--m3e-type-body-small)
+			text-align: center
+		:global(.markdown-image-figure--left .markdown-image-caption)
+			text-align: left
+		:global(.markdown-image-figure--right .markdown-image-caption)
+			text-align: right
 
 	&__footer
 		display: flex

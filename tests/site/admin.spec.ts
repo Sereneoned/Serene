@@ -81,6 +81,8 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await expect(page.locator(".admin-dock")).toHaveCount(0);
 		await expect(page.locator(".moment-admin-composer")).toHaveCount(0);
 		await expect(page.locator(".moment-admin-actions")).toHaveCount(0);
+		await expect(page.locator("[data-content-interactions]")).toHaveCount(0);
+		await expect(page.locator("shirone-waline")).toHaveCount(0);
 
 		await page.goto(withBase("/albums/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".album-section__admin-bar")).toHaveCount(0);
@@ -364,5 +366,210 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		});
 		await expect(page.getByRole("heading", { name: /站点罗盘/ })).toBeVisible();
 		await expect(page.locator(".compass-editor")).toBeVisible();
+	});
+
+	test("allows configuring Waline comments/likes and Umami analytics from /admin/?tab=site", async ({
+		page,
+	}) => {
+		const postedBlobs: Array<{ content: string; encoding: string }> = [];
+		await page.route("https://api.github.com/**", async (route) => {
+			const url = new URL(route.request().url());
+			const path = url.pathname;
+			if (path === "/repos/demo-owner/Shirone/git/ref/heads/main") {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({ object: { sha: "base-commit-sha" } }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/commits/base-commit-sha") {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({ tree: { sha: "base-tree-sha" } }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/blobs") {
+				const body = route.request().postDataJSON() as {
+					content: string;
+					encoding: string;
+				};
+				postedBlobs.push(body);
+				return route.fulfill({
+					status: 201,
+					contentType: "application/json",
+					body: JSON.stringify({ sha: `blob-${postedBlobs.length}` }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/trees") {
+				return route.fulfill({
+					status: 201,
+					contentType: "application/json",
+					body: JSON.stringify({ sha: "new-tree-sha" }),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/commits") {
+				return route.fulfill({
+					status: 201,
+					contentType: "application/json",
+					body: JSON.stringify({
+						sha: "new-commit-sha",
+						html_url: "https://github.com/demo-owner/Shirone/commit/new",
+					}),
+				});
+			}
+			if (path === "/repos/demo-owner/Shirone/git/refs/heads/main") {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({ object: { sha: "new-commit-sha" } }),
+				});
+			}
+			if (path.includes("/contents/src/data/json/admin-overrides.json")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						type: "file",
+						sha: "override-sha",
+						encoding: "base64",
+						content: Buffer.from("{}").toString("base64"),
+					}),
+				});
+			}
+			return route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify({}),
+			});
+		});
+
+		await page.addInitScript((session) => {
+			localStorage.setItem("shirone-admin-session", JSON.stringify(session));
+		}, MOCK_SESSION);
+
+		await page.goto(withBase("/admin/?tab=site"), {
+			waitUntil: "domcontentloaded",
+		});
+		await expect(
+			page.getByRole("heading", { name: /评论互动与浏览量统计/ }),
+		).toBeVisible();
+
+		await page
+			.getByLabel("Waline 服务端地址 (serverURL)")
+			.fill("https://waline.example.com");
+		await page
+			.locator('label.m3-switch:has(input[aria-label="启用 Waline"])')
+			.click();
+
+		await page
+			.getByLabel("Umami 公开分享链接 (shareUrl)")
+			.fill("https://cloud.umami.is/share/demo");
+		await page.getByLabel("Umami Website ID").fill("demo-site-id");
+		await page
+			.getByLabel("Umami 采集脚本地址 (scriptUrl)")
+			.fill("https://cloud.umami.is/script.js");
+		await page
+			.locator('label.m3-switch:has(input[aria-label="启用 Umami"])')
+			.click();
+
+		await page.getByRole("button", { name: "保存全站配置到 GitHub" }).click();
+		await expect.poll(() => postedBlobs.length).toBeGreaterThan(0);
+
+		const saved = JSON.parse(
+			Buffer.from(
+				postedBlobs[postedBlobs.length - 1].content,
+				"base64",
+			).toString("utf8"),
+		);
+		expect(saved.comment.enable).toBe(true);
+		expect(saved.comment.provider).toBe("waline");
+		expect(saved.comment.waline.serverURL).toBe("https://waline.example.com");
+		expect(saved.umami.enable).toBe(true);
+		expect(saved.umami.shareUrl).toBe("https://cloud.umami.is/share/demo");
+		expect(saved.umami.websiteId).toBe("demo-site-id");
+		expect(saved.umami.scriptUrl).toBe("https://cloud.umami.is/script.js");
+	});
+
+	test("resolves post card covers and inline body images under subpath base", async ({
+		page,
+	}) => {
+		await page.goto(withBase("/"), { waitUntil: "networkidle" });
+		const cardImg = page.locator(".m3-blog-postcard__cover img").first();
+		await expect(cardImg).toBeVisible();
+		await expect(cardImg).toHaveAttribute(
+			"src",
+			new RegExp(`^${siteBase}/images/posts/`),
+		);
+		const cardLoaded = await cardImg.evaluate(
+			(img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+		);
+		expect(cardLoaded).toBe(true);
+
+		await page.goto(withBase("/posts/如何进行科学上网/"), {
+			waitUntil: "networkidle",
+		});
+		const bodyImgs = page.locator(".markdown-content img");
+		await expect(bodyImgs.first()).toBeVisible();
+		await expect(bodyImgs.first()).toHaveAttribute(
+			"src",
+			new RegExp(`^${siteBase}/images/posts/`),
+		);
+		const bodyLoaded = await bodyImgs
+			.first()
+			.evaluate(
+				(img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+			);
+		expect(bodyLoaded).toBe(true);
+	});
+
+	test("supports bold, font size, font color, and cursor image placement/resize in moment composer", async ({
+		page,
+	}) => {
+		await mockGitHubApi(page);
+		await page.addInitScript((session) => {
+			localStorage.setItem("shirone-admin-session", JSON.stringify(session));
+		}, MOCK_SESSION);
+
+		await page.goto(withBase("/admin/?tab=moments"), {
+			waitUntil: "domcontentloaded",
+		});
+
+		const textarea = page.locator(".rich-editor__textarea");
+		await expect(textarea).toBeVisible();
+
+		await page.getByRole("button", { name: "加粗" }).click();
+		await expect(textarea).toHaveValue(/\*\*加粗文字\*\*/);
+
+		await page.getByLabel("字号").selectOption("20px");
+		await expect(textarea).toHaveValue(/font-size: 20px/);
+
+		await page.getByRole("button", { name: "字体颜色" }).click();
+		await page.getByRole("button", { name: "珊瑚红" }).click();
+		await expect(textarea).toHaveValue(/color: #e11d48/);
+
+		// Insert an external image at cursor and resize it
+		await page.getByRole("button", { name: "外链图片" }).click();
+		await page
+			.getByPlaceholder("图片 URL (https://...)")
+			.fill("https://example.com/demo-shot.webp");
+		await page.getByRole("button", { name: "插入正文" }).click();
+
+		await expect(textarea).toHaveValue(
+			/https:\/\/example\.com\/demo-shot\.webp/,
+		);
+		const widthSlider = page.getByLabel("第 1 张图片宽度");
+		await expect(widthSlider).toBeVisible();
+		await widthSlider.fill("45");
+		await widthSlider.dispatchEvent("input");
+		await expect(textarea).toHaveValue(/w-45%/);
+
+		await page
+			.locator(".rich-editor__preview img")
+			.waitFor({ state: "attached" });
+		await expect(page.locator(".rich-editor__preview img")).toHaveAttribute(
+			"style",
+			/width:\s*45%/,
+		);
 	});
 });

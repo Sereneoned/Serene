@@ -5,6 +5,7 @@ import IconButton from "@components/atoms/action/IconButton.svelte";
 import AccentBar from "@components/atoms/display/AccentBar.svelte";
 import Card from "@components/atoms/display/Card.svelte";
 import Markdown from "@components/content/Markdown.astro";
+import ContentInteractionBar from "@components/molecules/ContentInteractionBar.svelte";
 import ImageWrapper from "@components/molecules/ImageWrapper.astro";
 import LastUpdatedNotice from "@components/molecules/LastUpdatedNotice.astro";
 import License from "@components/molecules/License.astro";
@@ -45,6 +46,7 @@ import {
 	type SeriesPostContext,
 } from "@utils/series-utils";
 import { getDir, getPostUrl, getPostUrlBySlug } from "@utils/url-utils";
+import { toWalineInteractionOptions } from "@utils/waline-interactions";
 import katexStylesheet from "katex/dist/katex.css?url";
 import overlayScrollbarsStylesheet from "overlayscrollbars/overlayscrollbars.css?url";
 import {
@@ -170,8 +172,15 @@ const imageBasePath = entry.filePath
 const effectiveUpdatedDate = entry.data.updated ?? entry.data.published;
 const publishedInstant = getPublishedInstant(entry.data);
 const updatedInstant = getUpdatedInstant(entry.data);
+const resolvedCommentOptions = resolveCommentOptions(commentConfig);
 const postCommentEnabled =
-	entry.data.comment !== false && Boolean(resolveCommentOptions(commentConfig));
+	entry.data.comment !== false && Boolean(resolvedCommentOptions);
+const walineInteraction = postCommentEnabled
+	? toWalineInteractionOptions(
+			resolvedCommentOptions,
+			entry.data.lang || siteConfig.lang,
+		)
+	: null;
 const lastUpdatedNotice = resolveLastUpdatedNoticeOptions(articleConfig);
 const shareOptions = resolveArticleShareOptions(articleConfig);
 const postLicense = resolveLicenseConfig(
@@ -331,6 +340,16 @@ const jsonLd = {
 			)}
 
 			{postLicense.enable && <License title={entry.data.title} slug={entry.id} pubDate={entry.data.published} license={postLicense} class="mb-6 rounded-xl license-container onload-animation"></License>}
+
+			{walineInteraction && (
+				<ContentInteractionBar
+					path={canonicalPostUrl}
+					serverURL={walineInteraction.serverURL}
+					variant="post"
+					client:visible
+					class="mb-5 border-y border-[var(--outline-variant)] onload-animation"
+				/>
+			)}
 
 			{shareOptions && (
 				<ArticleShare

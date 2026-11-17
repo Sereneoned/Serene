@@ -40,6 +40,21 @@ let {
 		announcementLinkText: string;
 		announcementLinkUrl: string;
 		features: Record<string, boolean>;
+		comment?: {
+			enable: boolean;
+			provider: string;
+			lazy: boolean;
+			walineServerURL: string;
+			walineReaction: boolean;
+			walineLogin: "enable" | "disable" | "force";
+			walinePlaceholder: string;
+		};
+		umami?: {
+			enable: boolean;
+			shareUrl: string;
+			websiteId: string;
+			scriptUrl: string;
+		};
 	};
 } = $props();
 
@@ -72,13 +87,6 @@ let announcementLinkEnable = $state(false);
 let announcementLinkText = $state("");
 let announcementLinkUrl = $state("");
 
-// Feature toggles
-let features = $state<Record<string, boolean>>({});
-let rawOverrides = $state<Record<string, unknown>>({});
-
-let loading = $state(false);
-let saving = $state(false);
-
 const featureLabels: Array<[string, string]> = [
 	["moments", "动态 / 说说 (Moments)"],
 	["albums", "相册 (Albums)"],
@@ -93,6 +101,29 @@ const featureLabels: Array<[string, string]> = [
 	["series", "系列连载 (Series)"],
 	["about", "关于页 (About)"],
 ];
+
+// Feature toggles (pre-seeded synchronously so Switch bindings never receive undefined)
+let features = $state<Record<string, boolean>>(
+	Object.fromEntries(featureLabels.map(([key]) => [key, true])),
+);
+
+// Comment (Waline) & Umami analytics
+let commentEnable = $state(false);
+let commentLazy = $state(true);
+let walineServerUrl = $state("");
+let commentReaction = $state(true);
+let commentLogin = $state<"enable" | "disable" | "force">("enable");
+let commentPlaceholder = $state("Share your thoughts...");
+
+let umamiEnable = $state(false);
+let umamiShareUrl = $state("");
+let umamiWebsiteId = $state("");
+let umamiScriptUrl = $state("");
+
+let rawOverrides = $state<Record<string, unknown>>({});
+
+let loading = $state(false);
+let saving = $state(false);
 
 function applyDefaultsFromSnapshot() {
 	siteUrl = initialConfigSnapshot.siteUrl;
@@ -112,7 +143,22 @@ function applyDefaultsFromSnapshot() {
 	announcementLinkEnable = initialConfigSnapshot.announcementLinkEnable;
 	announcementLinkText = initialConfigSnapshot.announcementLinkText;
 	announcementLinkUrl = initialConfigSnapshot.announcementLinkUrl;
-	features = { ...initialConfigSnapshot.features };
+	features = {
+		...Object.fromEntries(featureLabels.map(([key]) => [key, true])),
+		...initialConfigSnapshot.features,
+	};
+	commentEnable = initialConfigSnapshot.comment?.enable ?? false;
+	commentLazy = initialConfigSnapshot.comment?.lazy ?? true;
+	walineServerUrl = initialConfigSnapshot.comment?.walineServerURL ?? "";
+	commentReaction = initialConfigSnapshot.comment?.walineReaction ?? true;
+	commentLogin = initialConfigSnapshot.comment?.walineLogin ?? "enable";
+	commentPlaceholder =
+		initialConfigSnapshot.comment?.walinePlaceholder ??
+		"Share your thoughts...";
+	umamiEnable = initialConfigSnapshot.umami?.enable ?? false;
+	umamiShareUrl = initialConfigSnapshot.umami?.shareUrl ?? "";
+	umamiWebsiteId = initialConfigSnapshot.umami?.websiteId ?? "";
+	umamiScriptUrl = initialConfigSnapshot.umami?.scriptUrl ?? "";
 }
 
 async function loadFromRepo() {
@@ -181,6 +227,36 @@ async function loadFromRepo() {
 				features[key] = domainObj.enable;
 			}
 		}
+
+		const c = parsed.comment as Record<string, unknown> | undefined;
+		if (c) {
+			if (typeof c.enable === "boolean") commentEnable = c.enable;
+			if (typeof c.lazy === "boolean") commentLazy = c.lazy;
+			const w = c.waline as Record<string, unknown> | undefined;
+			if (w) {
+				if (typeof w.serverURL === "string") walineServerUrl = w.serverURL;
+				if (typeof w.reaction === "boolean") commentReaction = w.reaction;
+				if (
+					w.login === "enable" ||
+					w.login === "disable" ||
+					w.login === "force"
+				) {
+					commentLogin = w.login;
+				}
+				const loc = w.locale as Record<string, unknown> | undefined;
+				if (loc && typeof loc.placeholder === "string") {
+					commentPlaceholder = loc.placeholder;
+				}
+			}
+		}
+
+		const u = parsed.umami as Record<string, unknown> | undefined;
+		if (u) {
+			if (typeof u.enable === "boolean") umamiEnable = u.enable;
+			if (typeof u.shareUrl === "string") umamiShareUrl = u.shareUrl;
+			if (typeof u.websiteId === "string") umamiWebsiteId = u.websiteId;
+			if (typeof u.scriptUrl === "string") umamiScriptUrl = u.scriptUrl;
+		}
 	} catch (error) {
 		showSnackbar(error instanceof Error ? error.message : "读取站点设置失败");
 	} finally {
@@ -219,12 +295,32 @@ function addSocialLink() {
 }
 
 async function handleSaveAll(stageOnly = false) {
+	const cleanWalineUrl = walineServerUrl.trim();
+	const cleanUmamiShareUrl = umamiShareUrl.trim();
+	if (commentEnable && !cleanWalineUrl) {
+		showSnackbar("请先填写 Waline 服务端 URL 再开启评论与点赞");
+		return;
+	}
+	if (umamiEnable && !cleanUmamiShareUrl) {
+		showSnackbar("请先填写 Umami 公开分享链接 (Share URL) 再开启浏览量统计");
+		return;
+	}
+
 	saving = true;
 	try {
 		const subtitles = homeSubtitlesText
 			.split("\n")
 			.map((l) => l.trim())
 			.filter(Boolean);
+
+		const prevComment =
+			(rawOverrides.comment as Record<string, unknown> | undefined) ?? {};
+		const prevWaline =
+			(prevComment.waline as Record<string, unknown> | undefined) ?? {};
+		const prevWalineLocale =
+			(prevWaline.locale as Record<string, unknown> | undefined) ?? {};
+		const prevUmami =
+			(rawOverrides.umami as Record<string, unknown> | undefined) ?? {};
 
 		const nextSite: Record<string, unknown> = {
 			...(rawOverrides.site as Record<string, unknown> | undefined),
@@ -283,6 +379,29 @@ async function handleSaveAll(stageOnly = false) {
 					url: announcementLinkUrl.trim(),
 					external: true,
 				},
+			},
+			comment: {
+				...prevComment,
+				enable: commentEnable,
+				provider: commentEnable || cleanWalineUrl ? "waline" : "none",
+				lazy: commentLazy,
+				waline: {
+					...prevWaline,
+					serverURL: cleanWalineUrl,
+					reaction: commentReaction,
+					login: commentLogin,
+					locale: {
+						...prevWalineLocale,
+						placeholder: commentPlaceholder.trim() || "Share your thoughts...",
+					},
+				},
+			},
+			umami: {
+				...prevUmami,
+				enable: umamiEnable,
+				shareUrl: cleanUmamiShareUrl,
+				websiteId: umamiWebsiteId.trim(),
+				scriptUrl: umamiScriptUrl.trim(),
 			},
 		};
 
@@ -468,6 +587,53 @@ onMount(() => {
 	</Card>
 
 	<Card color="var(--card-bg)" radius="l" class="p-5 md:p-6">
+		<div id="analytics-comment"></div>
+		<h2 class="site-admin__title">评论互动与浏览量统计 (Waline + Umami)</h2>
+		<p class="site-admin__sub">
+			开启后，文章详情页与每一条动态都将具备独立「赞 / 评论 / 浏览量」互动条，并同步显示 Umami 统计。配置会写入 <code>admin-overrides.json</code>。
+		</p>
+
+		<div class="site-admin__subpanel">
+			<h3 class="site-admin__subtitle">1. Waline 评论与点赞（支持访客匿名/免 GitHub 登录）</h3>
+			<div class="site-admin__switches">
+				<label class="site-admin__switch"><Switch bind:checked={commentEnable} label="启用 Waline" icons /><span>启用评论与点赞 (Waline)</span></label>
+				<label class="site-admin__switch"><Switch bind:checked={commentReaction} label="启用点赞反应" icons /><span>启用点赞 / 表情反应</span></label>
+				<label class="site-admin__switch"><Switch bind:checked={commentLazy} label="视口懒加载" icons /><span>进入视口再加载评论区</span></label>
+			</div>
+			<div class="site-admin__grid">
+				<TextField label="Waline 服务端地址 (serverURL)" placeholder="https://your-waline.vercel.app" variant="outlined" bind:value={walineServerUrl} />
+				<TextField label="评论框占位文字 (placeholder)" placeholder="Share your thoughts..." variant="outlined" bind:value={commentPlaceholder} />
+				<label class="site-admin__style-select">
+					<span>登录要求：</span>
+					<select bind:value={commentLogin}>
+						<option value="enable">可选登录 (支持游客匿名)</option>
+						<option value="disable">纯匿名评论 (关闭登录)</option>
+						<option value="force">必须登录才能评论</option>
+					</select>
+				</label>
+			</div>
+			<p class="site-admin__hint">
+				部署指引：<a href="https://waline.js.org/guide/get-started/" target="_blank" rel="noopener noreferrer">Waline + Vercel 免费部署文档 ↗</a>（部署完成后将域名填入上方 <code>serverURL</code> 即可，无需改动代码）。
+			</p>
+		</div>
+
+		<div class="site-admin__subpanel">
+			<h3 class="site-admin__subtitle">2. Umami 浏览量统计（全站 + 文章页 + 动态页）</h3>
+			<div class="site-admin__switches">
+				<label class="site-admin__switch"><Switch bind:checked={umamiEnable} label="启用 Umami" icons /><span>启用 Umami 浏览量统计</span></label>
+			</div>
+			<div class="site-admin__grid">
+				<TextField label="Umami 公开分享链接 (shareUrl)" placeholder="https://cloud.umami.is/share/..." variant="outlined" bind:value={umamiShareUrl} />
+				<TextField label="Umami Website ID" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" variant="outlined" bind:value={umamiWebsiteId} />
+				<TextField label="Umami 采集脚本地址 (scriptUrl)" placeholder="https://cloud.umami.is/script.js" variant="outlined" bind:value={umamiScriptUrl} />
+			</div>
+			<p class="site-admin__hint">
+				推荐使用免费 <a href="https://cloud.umami.is/" target="_blank" rel="noopener noreferrer">Umami Cloud ↗</a>：新建站点并开启 Share URL，将 Share URL、Website ID 与 scriptUrl 填入即可实时展示 Page Views 与 Visits。
+			</p>
+		</div>
+	</Card>
+
+	<Card color="var(--card-bg)" radius="l" class="p-5 md:p-6">
 		<h2 class="site-admin__title">功能页面总开关</h2>
 		<p class="site-admin__sub">关闭某个功能页后，对应路由会返回 404 且顶部导航入口自动隐藏。</p>
 		<div class="site-admin__toggles-grid">
@@ -515,6 +681,27 @@ onMount(() => {
 		margin: 0.25rem 0 0.75rem
 		font: var(--m3e-type-body-small)
 		color: var(--on-surface-variant)
+
+	&__subpanel
+		padding: 0.875rem 1rem
+		margin-top: 0.875rem
+		border-radius: var(--shape-corner-m)
+		border: 1px solid var(--outline-variant)
+		background: var(--surface-container-low)
+
+	&__subtitle
+		margin: 0
+		font: var(--m3e-type-title-small)
+		color: var(--on-surface)
+
+	&__hint
+		margin: 0.625rem 0 0
+		font: var(--m3e-type-body-small)
+		color: var(--on-surface-variant)
+
+		a
+			color: var(--primary)
+			text-decoration: underline
 
 	&__grid
 		display: grid

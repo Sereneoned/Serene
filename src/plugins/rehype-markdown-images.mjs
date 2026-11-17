@@ -21,7 +21,33 @@ import { isImageOnOwnLine } from "./markdown/core/image-line.mjs";
  */
 
 const WIDTH_TOKEN = /(?:^|\s)w-(\d{1,3})%(?=\s|$)/g;
+const ALIGN_TOKEN = /(?:^|\s)align-(left|center|right)(?=\s|$)/g;
 const SKIP_CLASSES = new Set(["image-grid", "markdown-mermaid"]);
+
+function normalizeBasePrefix(rawBase) {
+	if (typeof rawBase !== "string") return "";
+	const trimmed = rawBase.trim().replace(/\/+$/, "");
+	return trimmed && trimmed !== "/"
+		? trimmed.startsWith("/")
+			? trimmed
+			: `/${trimmed}`
+		: "";
+}
+
+function resolveImageSrcWithBase(src, basePrefix) {
+	if (!src || !basePrefix) return src;
+	if (!src.startsWith("/") || src.startsWith("//")) return src;
+	if (src === basePrefix || src.startsWith(`${basePrefix}/`)) return src;
+	return `${basePrefix}${src}`;
+}
+
+function stripBasePrefix(src, basePrefix) {
+	if (!src || !basePrefix) return src;
+	if (src.startsWith(`${basePrefix}/`)) {
+		return src.slice(basePrefix.length) || "/";
+	}
+	return src;
+}
 
 function classNames(node) {
 	const value = node?.properties?.className ?? node?.properties?.class;
@@ -84,18 +110,26 @@ export function matchesNoReferrerDomain(url, patterns = []) {
 }
 
 /**
- * 解析可选的 `w-N%` 宽度令牌；非法值（越界/格式错误）保留在 alt 中。
+ * 解析可选的 `w-N%` 宽度令牌与 `align-(left|center|right)` 对齐令牌；非法值保留在 alt 中。
  *
  * @param {unknown} value alt 原始值。
- * @returns {{ alt: string, width?: number }}
+ * @returns {{ alt: string, width?: number, align?: "left" | "center" | "right" }}
  */
 export function parseMarkdownImageAlt(value) {
 	const alt = typeof value === "string" ? value : String(value ?? "");
 	let width;
-	const cleaned = alt.replace(WIDTH_TOKEN, (token, rawWidth) => {
+	let align;
+	const withoutWidth = alt.replace(WIDTH_TOKEN, (token, rawWidth) => {
 		const candidate = Number.parseInt(rawWidth, 10);
 		if (width === undefined && candidate >= 1 && candidate <= 100) {
 			width = candidate;
+			return "";
+		}
+		return token;
+	});
+	const cleaned = withoutWidth.replace(ALIGN_TOKEN, (token, rawAlign) => {
+		if (align === undefined) {
+			align = rawAlign;
 			return "";
 		}
 		return token;
@@ -104,6 +138,7 @@ export function parseMarkdownImageAlt(value) {
 	return {
 		alt: cleaned.replace(/\s{2,}/g, " ").trim(),
 		width,
+		...(align !== undefined ? { align } : {}),
 	};
 }
 
@@ -113,11 +148,23 @@ function appendStyle(current, declaration) {
 	return `${style.replace(/;?$/, ";")} ${declaration}`;
 }
 
-function createFigure(image, title) {
+function resolveAlignmentStyle(align) {
+	if (align === "left")
+		return "display: block; margin-left: 0; margin-right: auto;";
+	if (align === "right")
+		return "display: block; margin-left: auto; margin-right: 0;";
+	return "display: block; margin-inline: auto;";
+}
+
+function createFigure(image, title, align) {
+	const figureClasses = ["markdown-image-figure"];
+	if (align === "left" || align === "right") {
+		figureClasses.push(`markdown-image-figure--${align}`);
+	}
 	return {
 		type: "element",
 		tagName: "figure",
-		properties: { className: ["markdown-image-figure"] },
+		properties: { className: figureClasses },
 		children: [
 			image,
 			...(title
@@ -149,11 +196,18 @@ function onlyImageChild(node) {
 
 async function readImageDimensions(src, filePath) {
 	if (!src || /^(?:https?:|data:|\/\/)/i.test(src)) return undefined;
+	const cleanSrc = src.split(/[?#]/, 1)[0] ?? src;
+	let decodedSrc = cleanSrc;
+	try {
+		decodedSrc = decodeURIComponent(cleanSrc);
+	} catch {
+		// Leave malformed percent escapes untouched for runtime handling.
+	}
 	const candidates = [];
-	if (src.startsWith("/")) {
-		candidates.push(path.join(process.cwd(), "public", src.slice(1)));
+	if (decodedSrc.startsWith("/")) {
+		candidates.push(path.join(process.cwd(), "public", decodedSrc.slice(1)));
 	} else if (filePath) {
-		candidates.push(path.resolve(path.dirname(filePath), src));
+		candidates.push(path.resolve(path.dirname(filePath), decodedSrc));
 	}
 	for (const candidate of candidates) {
 		try {
@@ -172,14 +226,19 @@ async function readImageDimensions(src, filePath) {
 async function enhanceImage(image, ancestors, allowFigure, options, filePath) {
 	image.properties ??= {};
 	const properties = image.properties;
+	const rawSrc = String(properties.src ?? "");
+	const diskSrc = stripBasePrefix(rawSrc, options.basePrefix);
+	if (typeof properties.src === "string" && options.basePrefix) {
+		properties.src = resolveImageSrcWithBase(
+			properties.src,
+			options.basePrefix,
+		);
+	}
 	// 零额外负担：所有正文图片统一惰性加载与异步解码
 	properties.loading ??= "lazy";
 	properties.decoding ??= "async";
 	if (properties.width == null || properties.height == null) {
-		const dimensions = await readImageDimensions(
-			String(properties.src ?? ""),
-			filePath,
-		);
+		const dimensions = await readImageDimensions(diskSrc, filePath);
 		if (dimensions) {
 			properties.width ??= dimensions.width;
 			properties.height ??= dimensions.height;
@@ -198,18 +257,21 @@ async function enhanceImage(image, ancestors, allowFigure, options, filePath) {
 
 	const parsedAlt = parseMarkdownImageAlt(properties.alt);
 	properties.alt = parsedAlt.alt;
-	if (parsedAlt.width !== undefined) {
+	if (parsedAlt.width !== undefined || parsedAlt.align !== undefined) {
+		const widthCss =
+			parsedAlt.width !== undefined ? `width: ${parsedAlt.width}%; ` : "";
 		properties.style = appendStyle(
 			properties.style,
-			`width: ${parsedAlt.width}%; display: block; margin-inline: auto;`,
+			`${widthCss}${resolveAlignmentStyle(parsedAlt.align)}`,
 		);
 	}
 
 	const title =
 		typeof properties.title === "string" ? properties.title.trim() : "";
 	// figure 包装仅限独立成段的图片；混排文本中的图片包 figure 会产生无效嵌套
-	return allowFigure && (title || parsedAlt.width !== undefined)
-		? createFigure(image, title)
+	return allowFigure &&
+		(title || parsedAlt.width !== undefined || parsedAlt.align !== undefined)
+		? createFigure(image, title, parsedAlt.align)
 		: image;
 }
 
@@ -264,7 +326,8 @@ async function transformChildren(
 					isImageOnOwnLine(children, index) &&
 					!shouldSkipEnhancement([...ancestors, child], node) &&
 					(Boolean(node.properties?.title?.trim()) ||
-						parseMarkdownImageAlt(node.properties?.alt).width !== undefined),
+						parseMarkdownImageAlt(node.properties?.alt).width !== undefined ||
+						parseMarkdownImageAlt(node.properties?.alt).align !== undefined),
 			);
 			if (allowFigure && images.some(Boolean)) {
 				let inline = [];
@@ -342,6 +405,7 @@ async function transformChildren(
  */
 export function rehypeMarkdownImages(options = {}) {
 	const normalizedOptions = {
+		basePrefix: normalizeBasePrefix(options.base),
 		noReferrerDomains: Array.isArray(options.noReferrerDomains)
 			? options.noReferrerDomains
 			: [],

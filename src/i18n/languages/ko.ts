@@ -379,4 +379,7 @@ export const ko: Translation = {
 	[Key.adminQuickEdit]: "편집",
 	[Key.adminQuickDelete]: "삭제",
 	[Key.adminQuickPublish]: "GitHub에 게시",
+	[Key.interactionLike]: "좋아요",
+	[Key.interactionLiked]: "좋아요 완료",
+	[Key.interactionViews]: "조회",
 };

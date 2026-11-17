@@ -4,6 +4,7 @@ import Icon from "@components/atoms/display/Icon.svelte";
 import LoadingIndicator from "@components/atoms/feedback/LoadingIndicator.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import { resolveWalineLang } from "@utils/waline-interactions";
 import stylus from "stylus";
 import type { CommentContext, WalineConfig } from "@/types/commentConfig";
 
@@ -16,26 +17,7 @@ interface Props {
 const { context, config, lazy = true } = Astro.props;
 const { scriptUrl, styleUrl, lang, ...clientOptions } = config;
 
-// Waline 使用 jp 表示日语；未内置的站点语言显式回退英语，避免落到中文默认值。
-const languages: Record<string, string> = {
-	zh: "zh-CN",
-	"zh-cn": "zh-CN",
-	"zh-tw": "zh-TW",
-	"zh-hk": "zh-TW",
-	"zh-hans": "zh-CN",
-	"zh-hant": "zh-TW",
-	jp: "jp",
-	ja: "jp",
-	en: "en",
-	es: "es",
-	ko: "ko",
-	vi: "vi",
-};
-const siteLanguage = context.language.toLowerCase().replaceAll("_", "-");
-const resolvedLang =
-	lang === "auto"
-		? (languages[siteLanguage] ?? languages[siteLanguage.split("-")[0]] ?? "en")
-		: lang;
+const resolvedLang = resolveWalineLang(context.language, lang);
 // 选项以 JSON 传给浏览器，只能携带数据；JSON 会丢弃的回调已由 resolveCommentOptions 拒绝。
 const options = {
 	...clientOptions,

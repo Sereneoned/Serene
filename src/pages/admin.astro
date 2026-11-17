@@ -10,6 +10,7 @@ import {
 	albumsConfig,
 	animeConfig,
 	announcementConfig,
+	commentConfig,
 	compassConfig,
 	devicesConfig,
 	friendsConfig,
@@ -21,6 +22,7 @@ import {
 	siteConfig,
 	skillsConfig,
 	timelineConfig,
+	umamiConfig,
 } from "@/config";
 
 if (!adminConfig.enable) {
@@ -81,6 +83,22 @@ const initialConfigSnapshot = {
 	},
 	games: {
 		categories: gamesConfig.categories.map((cat) => ({ ...cat })),
+	},
+	comment: {
+		enable: commentConfig.enable,
+		provider: commentConfig.provider,
+		lazy: commentConfig.lazy,
+		walineServerURL: commentConfig.waline?.serverURL ?? "",
+		walineReaction: commentConfig.waline?.reaction !== false,
+		walineLogin: commentConfig.waline?.login ?? "enable",
+		walinePlaceholder:
+			commentConfig.waline?.locale?.placeholder ?? "Share your thoughts...",
+	},
+	umami: {
+		enable: umamiConfig.enable,
+		shareUrl: umamiConfig.shareUrl,
+		websiteId: umamiConfig.websiteId ?? "",
+		scriptUrl: umamiConfig.scriptUrl ?? "",
 	},
 };
 ---

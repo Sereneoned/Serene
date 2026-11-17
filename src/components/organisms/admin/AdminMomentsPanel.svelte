@@ -3,6 +3,9 @@ import Button from "@components/atoms/action/Button.svelte";
 import Card from "@components/atoms/display/Card.svelte";
 import TextField from "@components/atoms/input/TextField.svelte";
 import Switch from "@components/atoms/selection/Switch.svelte";
+import RichBodyEditor, {
+	type UploadedInlineImage,
+} from "@components/molecules/RichBodyEditor.svelte";
 import Icon from "@iconify/svelte";
 import {
 	type AdminSession,
@@ -20,6 +23,7 @@ import {
 	serializeMomentMarkdown,
 	toSlug,
 } from "@utils/admin";
+import { insertMarkdownImageAtCursor } from "@utils/rich-text-editor";
 import { showSnackbar } from "@utils/snackbar";
 import { onMount } from "svelte";
 
@@ -53,6 +57,9 @@ let published = $state(formatIsoDateTimeLocal());
 let editingPath = $state<string | null>(null);
 let customImageUrl = $state("");
 let photos = $state<PendingPhoto[]>([]);
+let pendingInlineUploads = $state<
+	Record<string, { previewUrl: string; bytes: Uint8Array }>
+>({});
 
 let publishing = $state(false);
 let loadingList = $state(false);
@@ -60,9 +67,24 @@ let momentsList = $state<ParsedMomentDocument[]>([]);
 let listError = $state("");
 let folderSlug = $state("");
 
+const previewUrlMap = $derived({
+	...Object.fromEntries(
+		Object.entries(pendingInlineUploads).map(([src, item]) => [
+			src,
+			item.previewUrl,
+		]),
+	),
+	...Object.fromEntries(photos.map((p) => [p.src, p.previewUrl])),
+});
+
 function resetComposer() {
 	for (const p of photos) {
 		if (p.previewUrl.startsWith("blob:")) URL.revokeObjectURL(p.previewUrl);
+	}
+	for (const item of Object.values(pendingInlineUploads)) {
+		if (item.previewUrl.startsWith("blob:")) {
+			URL.revokeObjectURL(item.previewUrl);
+		}
 	}
 	body = "";
 	location = "";
@@ -77,6 +99,7 @@ function resetComposer() {
 	editingPath = null;
 	folderSlug = "";
 	photos = [];
+	pendingInlineUploads = {};
 }
 
 async function loadMomentsFromRepo() {
@@ -111,9 +134,11 @@ async function loadMomentsFromRepo() {
 	}
 }
 
-async function handleImageFiles(files: FileList | File[]) {
+async function compressMomentImages(
+	files: FileList | File[],
+): Promise<Array<PendingPhoto & { bytes: Uint8Array }>> {
 	const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
-	if (arr.length === 0) return;
+	if (arr.length === 0) return [];
 
 	if (!folderSlug) {
 		const datePart =
@@ -121,7 +146,7 @@ async function handleImageFiles(files: FileList | File[]) {
 		folderSlug = `${datePart}-${Date.now().toString(36).slice(-4)}`;
 	}
 
-	const next: PendingPhoto[] = [];
+	const next: Array<PendingPhoto & { bytes: Uint8Array }> = [];
 	for (const file of arr) {
 		try {
 			const compressed = await compressImageToWebP(file, {
@@ -151,7 +176,74 @@ async function handleImageFiles(files: FileList | File[]) {
 			);
 		}
 	}
-	photos = [...photos, ...next];
+	return next;
+}
+
+async function handleImageFiles(files: FileList | File[]) {
+	const next = await compressMomentImages(files);
+	if (next.length > 0) {
+		photos = [...photos, ...next];
+	}
+}
+
+async function uploadInlineMomentImages(
+	files: FileList | File[],
+): Promise<UploadedInlineImage[]> {
+	const next = await compressMomentImages(files);
+	if (next.length === 0) return [];
+	const updated = { ...pendingInlineUploads };
+	for (const item of next) {
+		updated[item.src] = { previewUrl: item.previewUrl, bytes: item.bytes };
+	}
+	pendingInlineUploads = updated;
+	return next.map((item) => ({
+		src: item.src,
+		previewUrl: item.previewUrl,
+		alt: item.alt,
+	}));
+}
+
+function moveInlineImageToGallery(item: {
+	src: string;
+	alt: string;
+	previewUrl: string;
+}) {
+	const inlineEntry = pendingInlineUploads[item.src];
+	if (inlineEntry) {
+		const { [item.src]: _, ...rest } = pendingInlineUploads;
+		pendingInlineUploads = rest;
+	}
+	photos = [
+		...photos,
+		{
+			id: `${Date.now()}-${Math.random()}`,
+			src: item.src,
+			alt: item.alt,
+			previewUrl: inlineEntry?.previewUrl ?? item.previewUrl,
+			bytes: inlineEntry?.bytes,
+			sizeKb: inlineEntry
+				? Math.max(1, Math.round(inlineEntry.bytes.byteLength / 1024))
+				: undefined,
+		},
+	];
+	showSnackbar("已移至底部九宫格相册");
+}
+
+function insertGalleryPhotoIntoBody(photo: PendingPhoto) {
+	if (photo.bytes) {
+		pendingInlineUploads = {
+			...pendingInlineUploads,
+			[photo.src]: { previewUrl: photo.previewUrl, bytes: photo.bytes },
+		};
+	}
+	photos = photos.filter((p) => p.id !== photo.id);
+	body = insertMarkdownImageAtCursor(body, body.length, body.length, {
+		src: photo.src,
+		alt: photo.alt,
+		width: 70,
+		align: "center",
+	}).value;
+	showSnackbar("已插入正文，可在下方调整大小和段落位置");
 }
 
 function addExternalPhoto() {
@@ -208,15 +300,30 @@ function buildChanges(): {
 	});
 
 	const changes: RepoFileChange[] = [];
+	const uploadedPaths = new Set<string>();
 	for (const p of photos) {
 		if (p.bytes) {
 			const cleanRel = p.src.replace(/^\/+/, "");
+			const repoPath = `public/${cleanRel}`;
+			uploadedPaths.add(repoPath);
 			changes.push({
-				path: `public/${cleanRel}`,
+				path: repoPath,
 				action: "upsert",
 				content: p.bytes,
 			});
 		}
+	}
+	for (const [src, item] of Object.entries(pendingInlineUploads)) {
+		if (!body.includes(src)) continue;
+		const cleanRel = src.replace(/^\/+/, "");
+		const repoPath = `public/${cleanRel}`;
+		if (uploadedPaths.has(repoPath)) continue;
+		uploadedPaths.add(repoPath);
+		changes.push({
+			path: repoPath,
+			action: "upsert",
+			content: item.bytes,
+		});
 	}
 	changes.push({
 		path: targetPath,
@@ -325,7 +432,7 @@ onMount(() => {
 					{editingPath ? `编辑动态：${editingPath.split("/").pop()}` : "发布新动态（类似 QQ 说说）"}
 				</h2>
 				<p class="moments-admin__sub">
-					支持 Markdown、多图自动压缩转 WebP、心情图标、位置、标签、置顶与加密说说。
+					支持字号、加粗、任意字体颜色、正文光标处插图与尺寸对齐调节，以及可选底部九宫格相册、心情、标签与加密说说。
 				</p>
 			</div>
 			{#if editingPath}
@@ -333,17 +440,19 @@ onMount(() => {
 			{/if}
 		</div>
 
-		<textarea
-			class="moments-admin__textarea"
-			rows="4"
-			placeholder="写下此刻的想法、碎碎念或实验记录（支持 Markdown 语法）..."
+		<RichBodyEditor
 			bind:value={body}
-		></textarea>
+			rows={6}
+			placeholder="写下此刻的想法（支持工具栏选字号/加粗/字体颜色，直接在光标处插图或粘贴截图）..."
+			{previewUrlMap}
+			onUploadImages={uploadInlineMomentImages}
+			onMoveToGallery={moveInlineImageToGallery}
+		/>
 
 		<div class="moments-admin__upload-bar">
 			<label class="moments-admin__upload-btn m3-state-layer">
 				<Icon icon="material-symbols:cloud-upload-outline-rounded" aria-hidden="true" />
-				<span>上传配图（多选，自动转 WebP）</span>
+				<span>添加到末尾九宫格相册（可选 · 正文插图请点上方「插图到光标处」）</span>
 				<input
 					type="file"
 					accept="image/*"
@@ -358,12 +467,12 @@ onMount(() => {
 			</label>
 			<div class="moments-admin__ext-img">
 				<TextField
-					label="或添加外链图片 URL"
+					label="或添加外链图片到末尾相册"
 					placeholder="https://..."
 					variant="outlined"
 					bind:value={customImageUrl}
 				/>
-				<Button variant="tonal" size="small" label="添加图片" onclick={addExternalPhoto} />
+				<Button variant="tonal" size="small" label="添加到底部" onclick={addExternalPhoto} />
 			</div>
 		</div>
 
@@ -379,7 +488,14 @@ onMount(() => {
 							bind:value={p.alt}
 						/>
 						<div class="moments-admin__photo-foot">
-							<span>{p.sizeKb ? `${p.sizeKb} KB` : "已引用"}</span>
+							<span>{p.sizeKb ? `${p.sizeKb} KB` : "底部相册"}</span>
+							<button
+								type="button"
+								class="moments-admin__photo-move"
+								onclick={() => insertGalleryPhotoIntoBody(p)}
+							>
+								插入正文
+							</button>
 							<button
 								type="button"
 								class="moments-admin__photo-del"
@@ -543,22 +659,6 @@ onMount(() => {
 		font: var(--m3e-type-body-small)
 		color: var(--on-surface-variant)
 
-	&__textarea
-		width: 100%
-		min-height: 7rem
-		padding: 0.875rem 1rem
-		border-radius: var(--shape-corner-m)
-		border: 1px solid var(--outline-variant)
-		background: var(--surface-container-low)
-		color: var(--on-surface)
-		font: var(--m3e-type-body-large)
-		resize: vertical
-		box-sizing: border-box
-
-		&:focus
-			outline: 2px solid var(--primary)
-			border-color: transparent
-
 	&__upload-bar
 		display: flex
 		flex-wrap: wrap
@@ -622,6 +722,13 @@ onMount(() => {
 		justify-content: space-between
 		font: var(--m3e-type-label-small)
 		color: var(--on-surface-variant)
+
+	&__photo-move
+		border: 0
+		background: transparent
+		color: var(--primary)
+		cursor: pointer
+		font: inherit
 
 	&__photo-del
 		border: 0

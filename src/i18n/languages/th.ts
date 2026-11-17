@@ -367,4 +367,7 @@ export const th: Translation = {
 	[Key.adminQuickEdit]: "แก้ไข",
 	[Key.adminQuickDelete]: "ลบ",
 	[Key.adminQuickPublish]: "เผยแพร่ไปยัง GitHub",
+	[Key.interactionLike]: "ถูกใจ",
+	[Key.interactionLiked]: "ถูกใจแล้ว",
+	[Key.interactionViews]: "ยอดดู",
 };

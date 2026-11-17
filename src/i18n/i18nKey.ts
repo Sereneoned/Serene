@@ -370,6 +370,11 @@ enum I18nKey {
 	adminQuickEdit = "adminQuickEdit",
 	adminQuickDelete = "adminQuickDelete",
 	adminQuickPublish = "adminQuickPublish",
+
+	// Post & Moment Visitor Interactions
+	interactionLike = "interactionLike",
+	interactionLiked = "interactionLiked",
+	interactionViews = "interactionViews",
 }
 
 export default I18nKey;

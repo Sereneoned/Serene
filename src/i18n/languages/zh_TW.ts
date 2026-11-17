@@ -369,4 +369,7 @@ export const zh_TW: Translation = {
 	[Key.adminQuickEdit]: "編輯",
 	[Key.adminQuickDelete]: "刪除",
 	[Key.adminQuickPublish]: "提交到 GitHub",
+	[Key.interactionLike]: "讚",
+	[Key.interactionLiked]: "已讚",
+	[Key.interactionViews]: "瀏覽",
 };

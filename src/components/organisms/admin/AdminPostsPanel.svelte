@@ -3,6 +3,9 @@ import Button from "@components/atoms/action/Button.svelte";
 import Card from "@components/atoms/display/Card.svelte";
 import TextField from "@components/atoms/input/TextField.svelte";
 import Switch from "@components/atoms/selection/Switch.svelte";
+import RichBodyEditor, {
+	type UploadedInlineImage,
+} from "@components/molecules/RichBodyEditor.svelte";
 import Icon from "@iconify/svelte";
 import {
 	type AdminSession,
@@ -47,13 +50,29 @@ let password = $state("");
 let passwordHint = $state("");
 let body = $state("");
 let pendingCoverBytes = $state<Uint8Array | null>(null);
-let pendingImageUploads = $state<Array<{ path: string; bytes: Uint8Array }>>(
-	[],
-);
+let pendingImageUploads = $state<
+	Array<{
+		publicUrl: string;
+		path: string;
+		previewUrl: string;
+		bytes: Uint8Array;
+	}>
+>([]);
 
 let aboutMarkdown = $state("");
 
+const postPreviewUrlMap = $derived(
+	Object.fromEntries(
+		pendingImageUploads.map((item) => [item.publicUrl, item.previewUrl]),
+	),
+);
+
 function resetPostForm() {
+	for (const img of pendingImageUploads) {
+		if (img.previewUrl.startsWith("blob:")) {
+			URL.revokeObjectURL(img.previewUrl);
+		}
+	}
 	editingPath = null;
 	slug = "";
 	title = "";
@@ -145,21 +164,47 @@ async function handleCoverUpload(file: File) {
 	showSnackbar("封面已压缩为 WebP，提交后生效");
 }
 
-async function handleInlineImageUpload(file: File) {
-	const compressed = await compressImageToWebP(file, {
-		maxDimension: 1600,
-		quality: 0.85,
-	});
+async function uploadPostInlineImages(
+	files: FileList | File[],
+): Promise<UploadedInlineImage[]> {
+	const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+	if (arr.length === 0) return [];
 	const resolvedSlug = toSlug(slug || title || "post", "post");
 	if (!slug) slug = resolvedSlug;
-	const fileName = `${resolvedSlug}-${Date.now().toString(36)}.webp`;
-	const publicUrl = `/images/posts/${fileName}`;
-	pendingImageUploads = [
-		...pendingImageUploads,
-		{ path: `public/images/posts/${fileName}`, bytes: compressed.bytes },
-	];
-	body = `${body.trimEnd()}\n\n![${file.name.replace(/\.[^.]+$/, "")}](${publicUrl})\n`;
-	showSnackbar("图片已插入文章正文");
+
+	const added: UploadedInlineImage[] = [];
+	const uploads: Array<{
+		publicUrl: string;
+		path: string;
+		previewUrl: string;
+		bytes: Uint8Array;
+	}> = [];
+	for (const file of arr) {
+		const compressed = await compressImageToWebP(file, {
+			maxDimension: 1600,
+			quality: 0.85,
+		});
+		const fileName = `${resolvedSlug}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}.webp`;
+		const publicUrl = `/images/posts/${fileName}`;
+		const previewUrl = URL.createObjectURL(
+			new Blob([compressed.bytes.buffer as ArrayBuffer], {
+				type: "image/webp",
+			}),
+		);
+		uploads.push({
+			publicUrl,
+			path: `public/images/posts/${fileName}`,
+			previewUrl,
+			bytes: compressed.bytes,
+		});
+		added.push({
+			src: publicUrl,
+			previewUrl,
+			alt: file.name.replace(/\.[^.]+$/, ""),
+		});
+	}
+	pendingImageUploads = [...pendingImageUploads, ...uploads];
+	return added;
 }
 
 async function handleSavePost(stageOnly = false) {
@@ -201,6 +246,7 @@ async function handleSavePost(stageOnly = false) {
 		});
 	}
 	for (const img of pendingImageUploads) {
+		if (!body.includes(img.publicUrl)) continue;
 		changes.push({ path: img.path, action: "upsert", content: img.bytes });
 	}
 	changes.push({ path: targetPath, action: "upsert", content: markdown });
@@ -331,30 +377,19 @@ onMount(() => {
 						onchange={(e) => {
 							const f = (e.currentTarget as HTMLInputElement).files?.[0];
 							if (f) void handleCoverUpload(f);
-						}}
-					/>
-				</label>
-				<label class="posts-admin__upload-btn m3-state-layer">
-					<Icon icon="material-symbols:cloud-upload-outline-rounded" aria-hidden="true" />
-					<span>插入文章配图</span>
-					<input
-						type="file"
-						accept="image/*"
-						hidden
-						onchange={(e) => {
-							const f = (e.currentTarget as HTMLInputElement).files?.[0];
-							if (f) void handleInlineImageUpload(f);
+							(e.currentTarget as HTMLInputElement).value = "";
 						}}
 					/>
 				</label>
 			</div>
 
-			<textarea
-				class="posts-admin__textarea"
-				rows="12"
-				placeholder="使用 Markdown 编写正文..."
+			<RichBodyEditor
 				bind:value={body}
-			></textarea>
+				rows={12}
+				placeholder="使用 Markdown 编写文章正文（支持字号、加粗、字体颜色；点击工具栏「插图到光标处」或粘贴截图可在任意位置插图并调大小）..."
+				previewUrlMap={postPreviewUrlMap}
+				onUploadImages={uploadPostInlineImages}
+			/>
 
 			<div class="posts-admin__switches">
 				<label class="posts-admin__switch"><Switch bind:checked={pinned} label="置顶" icons /><span>置顶</span></label>

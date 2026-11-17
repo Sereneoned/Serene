@@ -386,4 +386,7 @@ export const id: Translation = {
 	[Key.adminQuickEdit]: "Sunting",
 	[Key.adminQuickDelete]: "Hapus",
 	[Key.adminQuickPublish]: "Terbitkan ke GitHub",
+	[Key.interactionLike]: "Suka",
+	[Key.interactionLiked]: "Disukai",
+	[Key.interactionViews]: "Dilihat",
 };

@@ -383,4 +383,7 @@ export const vi: Translation = {
 	[Key.adminQuickEdit]: "Chỉnh sửa",
 	[Key.adminQuickDelete]: "Xóa",
 	[Key.adminQuickPublish]: "Xuất bản lên GitHub",
+	[Key.interactionLike]: "Thích",
+	[Key.interactionLiked]: "Đã thích",
+	[Key.interactionViews]: "Lượt xem",
 };

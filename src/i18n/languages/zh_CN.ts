@@ -369,4 +369,7 @@ export const zh_CN: Translation = {
 	[Key.adminQuickEdit]: "编辑",
 	[Key.adminQuickDelete]: "删除",
 	[Key.adminQuickPublish]: "提交到 GitHub",
+	[Key.interactionLike]: "赞",
+	[Key.interactionLiked]: "已赞",
+	[Key.interactionViews]: "浏览",
 };

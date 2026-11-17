@@ -381,4 +381,7 @@ export const en: Translation = {
 	[Key.adminQuickEdit]: "Edit",
 	[Key.adminQuickDelete]: "Delete",
 	[Key.adminQuickPublish]: "Publish to GitHub",
+	[Key.interactionLike]: "Like",
+	[Key.interactionLiked]: "Liked",
+	[Key.interactionViews]: "Views",
 };

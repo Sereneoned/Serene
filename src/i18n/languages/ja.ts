@@ -380,4 +380,7 @@ export const ja: Translation = {
 	[Key.adminQuickEdit]: "編集",
 	[Key.adminQuickDelete]: "削除",
 	[Key.adminQuickPublish]: "GitHub に公開",
+	[Key.interactionLike]: "いいね",
+	[Key.interactionLiked]: "いいね済み",
+	[Key.interactionViews]: "閲覧",
 };

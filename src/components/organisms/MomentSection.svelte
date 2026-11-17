@@ -14,6 +14,9 @@ import MomentCard, {
 	type MomentAuthor,
 } from "@components/molecules/MomentCard.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
+import RichBodyEditor, {
+	type UploadedInlineImage,
+} from "@components/molecules/RichBodyEditor.svelte";
 import ProtectedMoment from "@components/organisms/ProtectedMoment.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { t } from "@i18n/runtime.ts";
@@ -34,23 +37,37 @@ import type { MomentItem } from "@utils/content-utils";
 import { initFancybox } from "@utils/fancybox-handler";
 import { showSnackbar } from "@utils/snackbar";
 import { url } from "@utils/url-utils";
-import { onMount } from "svelte";
+import {
+	buildMomentInteractionPath,
+	fetchWalineBatchCounters,
+	type WalineInteractionOptions,
+	type WalinePathCounters,
+} from "@utils/waline-interactions";
+import { onMount, type Snippet } from "svelte";
 import { adminConfig } from "@/config";
 
 let {
 	moments = [] as MomentItem[],
 	author = { name: "", avatar: "", url: "/about/" } as MomentAuthor,
+	walineConfig = null,
+	umamiEnabled = false,
+	basePath = "/",
 	title,
 	subtitle,
 	titleKey,
 	subtitleKey,
+	children,
 }: {
 	moments?: MomentItem[];
 	author?: MomentAuthor;
+	walineConfig?: WalineInteractionOptions | null;
+	umamiEnabled?: boolean;
+	basePath?: string;
 	title?: string;
 	subtitle?: string;
 	titleKey?: I18nKey;
 	subtitleKey?: I18nKey;
+	children?: Snippet;
 } = $props();
 const resolvedTitle = $derived(
 	titleKey ? $t(titleKey) : (title ?? $t(I18nKey.moments)),
@@ -78,20 +95,42 @@ let quickMood = $state("material-symbols:sentiment-excited-outline-rounded");
 let quickPhotos = $state<
 	Array<{ id: string; src: string; previewUrl: string; bytes: Uint8Array }>
 >([]);
+let quickInlineUploads = $state<
+	Record<string, { previewUrl: string; bytes: Uint8Array }>
+>({});
 let quickPublishing = $state(false);
 let quickFolder = $state("");
 let deletingId = $state("");
 let deletedIds = $state<Set<string>>(new Set());
 
-async function handleQuickFiles(files: FileList | File[]) {
+const quickPreviewUrlMap = $derived({
+	...Object.fromEntries(
+		Object.entries(quickInlineUploads).map(([src, item]) => [
+			src,
+			item.previewUrl,
+		]),
+	),
+	...Object.fromEntries(quickPhotos.map((p) => [p.src, p.previewUrl])),
+});
+
+async function compressQuickFiles(files: FileList | File[]): Promise<
+	Array<{
+		id: string;
+		src: string;
+		alt: string;
+		previewUrl: string;
+		bytes: Uint8Array;
+	}>
+> {
 	const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
-	if (arr.length === 0) return;
+	if (arr.length === 0) return [];
 	if (!quickFolder) {
 		quickFolder = `${new Date().toISOString().slice(0, 10)}-${Date.now().toString(36).slice(-4)}`;
 	}
 	const added: Array<{
 		id: string;
 		src: string;
+		alt: string;
 		previewUrl: string;
 		bytes: Uint8Array;
 	}> = [];
@@ -109,6 +148,7 @@ async function handleQuickFiles(files: FileList | File[]) {
 		added.push({
 			id: `${Date.now()}-${Math.random()}`,
 			src,
+			alt: file.name.replace(/\.[^.]+$/, ""),
 			previewUrl: URL.createObjectURL(
 				new Blob([compressed.bytes.buffer as ArrayBuffer], {
 					type: "image/webp",
@@ -117,7 +157,55 @@ async function handleQuickFiles(files: FileList | File[]) {
 			bytes: compressed.bytes,
 		});
 	}
-	quickPhotos = [...quickPhotos, ...added];
+	return added;
+}
+
+async function handleQuickFiles(files: FileList | File[]) {
+	const added = await compressQuickFiles(files);
+	if (added.length > 0) {
+		quickPhotos = [...quickPhotos, ...added];
+	}
+}
+
+async function uploadQuickInlineImages(
+	files: FileList | File[],
+): Promise<UploadedInlineImage[]> {
+	const added = await compressQuickFiles(files);
+	if (added.length === 0) return [];
+	const nextMap = { ...quickInlineUploads };
+	for (const item of added) {
+		nextMap[item.src] = { previewUrl: item.previewUrl, bytes: item.bytes };
+	}
+	quickInlineUploads = nextMap;
+	return added.map((item) => ({
+		src: item.src,
+		previewUrl: item.previewUrl,
+		alt: item.alt,
+	}));
+}
+
+function moveQuickInlineToGallery(item: {
+	src: string;
+	alt: string;
+	previewUrl: string;
+}) {
+	const found = quickInlineUploads[item.src];
+	if (!found) {
+		showSnackbar("仅支持将当前新上传图片移至底部多图");
+		return;
+	}
+	const { [item.src]: _, ...rest } = quickInlineUploads;
+	quickInlineUploads = rest;
+	quickPhotos = [
+		...quickPhotos,
+		{
+			id: `${Date.now()}-${Math.random()}`,
+			src: item.src,
+			previewUrl: found.previewUrl,
+			bytes: found.bytes,
+		},
+	];
+	showSnackbar("已移至底部多图九宫格");
 }
 
 async function submitQuickMoment() {
@@ -144,24 +232,43 @@ async function submitQuickMoment() {
 			images: quickPhotos.map((p) => ({ src: p.src, alt: "" })),
 			body: quickBody,
 		});
-		const changes: RepoFileChange[] = [
-			...quickPhotos.map((p) => ({
-				path: `public/${p.src.replace(/^\/+/, "")}`,
-				action: "upsert" as const,
+		const uploadedPaths = new Set<string>();
+		const changes: RepoFileChange[] = [];
+		for (const p of quickPhotos) {
+			const repoPath = `public/${p.src.replace(/^\/+/, "")}`;
+			uploadedPaths.add(repoPath);
+			changes.push({
+				path: repoPath,
+				action: "upsert",
 				content: p.bytes,
-			})),
-			{ path: targetPath, action: "upsert", content: md },
-		];
+			});
+		}
+		for (const [src, item] of Object.entries(quickInlineUploads)) {
+			if (!quickBody.includes(src)) continue;
+			const repoPath = `public/${src.replace(/^\/+/, "")}`;
+			if (uploadedPaths.has(repoPath)) continue;
+			uploadedPaths.add(repoPath);
+			changes.push({
+				path: repoPath,
+				action: "upsert",
+				content: item.bytes,
+			});
+		}
+		changes.push({ path: targetPath, action: "upsert", content: md });
 		await commitRepoChanges(
 			adminSession,
 			`content(moments): quick post ${datePrefix}`,
 			changes,
 		);
 		for (const p of quickPhotos) URL.revokeObjectURL(p.previewUrl);
+		for (const item of Object.values(quickInlineUploads)) {
+			URL.revokeObjectURL(item.previewUrl);
+		}
 		quickBody = "";
 		quickLocation = "";
 		quickTags = "";
 		quickPhotos = [];
+		quickInlineUploads = {};
 		quickFolder = "";
 		showSnackbar("动态已提交到 GitHub，Pages 构建完成后将出现在列表中", {
 			icon: "material-symbols:check-circle-outline-rounded",
@@ -271,6 +378,36 @@ $effect(() => {
 	);
 });
 
+let interactionStats = $state<Record<string, WalinePathCounters>>({});
+const fetchedPaths = new Set<string>();
+
+$effect(() => {
+	if (!walineConfig || typeof window === "undefined") return;
+	const missing = visibleMoments
+		.filter((m) => !m.encrypted)
+		.map((m) => buildMomentInteractionPath(m.id, basePath))
+		.filter((path) => !fetchedPaths.has(path));
+	if (missing.length === 0) return;
+	for (const path of missing) fetchedPaths.add(path);
+	const controller = new AbortController();
+	void fetchWalineBatchCounters(
+		walineConfig.serverURL,
+		missing,
+		controller.signal,
+	)
+		.then((map) => {
+			const next = { ...interactionStats };
+			for (const [path, counts] of map.entries()) {
+				next[path] = counts;
+			}
+			interactionStats = next;
+		})
+		.catch(() => {
+			for (const path of missing) fetchedPaths.delete(path);
+		});
+	return () => controller.abort();
+});
+
 onMount(() => {
 	const params = new URLSearchParams(window.location.search);
 	query = params.get("q") || "";
@@ -299,18 +436,32 @@ onMount(() => {
 		subtitle={resolvedSubtitle}
 	/>
 
+	{#if umamiEnabled && children}
+		<div class="moment-section__page-stats">
+			{@render children()}
+		</div>
+	{/if}
+
 	{#if adminConfig.enable && adminSession}
 		<div class="moment-admin-composer">
+			{#if !walineConfig || !umamiEnabled}
+				<p class="moment-admin-composer__hint">
+					当前{#if !walineConfig && !umamiEnabled}访客点赞/评论 (Waline) 与浏览量 (Umami){:else if !walineConfig}访客点赞/评论 (Waline){:else}浏览量统计 (Umami){/if}尚未填写服务地址——<a href={url("/admin/?tab=site#analytics-comment")}>前往站点设置配置 →</a>
+				</p>
+			{/if}
 			<div class="moment-admin-composer__head">
 				<strong>{$t(I18nKey.adminQuickNewMoment)}</strong>
 				<a href={url("/admin/?tab=moments")}>打开完整动态管理台 →</a>
 			</div>
-			<textarea
-				class="moment-admin-composer__textarea"
-				rows="3"
-				placeholder="像 QQ 空间一样直接写下动态内容，配图可多选自动压缩..."
+			<RichBodyEditor
+				compact
 				bind:value={quickBody}
-			></textarea>
+				rows={4}
+				placeholder="写下此刻动态（可选字号/加粗/字体颜色；点「插图到光标处」或粘贴截图直接在当前位置插图并调大小）..."
+				previewUrlMap={quickPreviewUrlMap}
+				onUploadImages={uploadQuickInlineImages}
+				onMoveToGallery={moveQuickInlineToGallery}
+			/>
 			{#if quickPhotos.length > 0}
 				<div class="moment-admin-composer__thumbs">
 					{#each quickPhotos as p (p.id)}
@@ -331,9 +482,9 @@ onMount(() => {
 				</div>
 			{/if}
 			<div class="moment-admin-composer__bar">
-				<label class="moment-admin-composer__upload m3-state-layer">
+				<label class="moment-admin-composer__upload m3-state-layer" title="可选：仅放到底部九宫格相册；正文插图请用上方「插图到光标处」">
 					<Icon icon="material-symbols:cloud-upload-outline-rounded" aria-hidden="true" />
-					<span>传图</span>
+					<span>末尾多图相册</span>
 					<input
 						type="file"
 						accept="image/*"
@@ -423,7 +574,19 @@ onMount(() => {
 						{#if moment.encrypted}
 							<ProtectedMoment {moment} {author} delay={Math.min(i, 7) * 45} />
 						{:else}
-							<MomentCard {moment} {author} delay={Math.min(i, 7) * 45} />
+							{@const momentPath = walineConfig
+								? buildMomentInteractionPath(moment.id, basePath)
+								: ""}
+							<MomentCard
+								{moment}
+								{author}
+								delay={Math.min(i, 7) * 45}
+								{walineConfig}
+								interactionPath={momentPath}
+								interactionStats={momentPath
+									? interactionStats[momentPath]
+									: undefined}
+							/>
 						{/if}
 						{#if adminConfig.enable && adminSession}
 							<div class="moment-admin-actions">
@@ -471,6 +634,9 @@ onMount(() => {
 
 .moment-section
 	display: block
+
+	&__page-stats
+		margin-bottom: 1rem
 
 	&__tools
 		display: flex
@@ -580,6 +746,19 @@ onMount(() => {
 	border: 1px solid var(--outline-variant)
 	background: var(--surface-container-low)
 
+	&__hint
+		margin: 0
+		padding: 0.5rem 0.75rem
+		border-radius: var(--shape-corner-m)
+		background: var(--secondary-container)
+		color: var(--on-secondary-container)
+		font: var(--m3e-type-body-small)
+
+		a
+			color: var(--primary)
+			font-weight: 600
+			text-decoration: underline
+
 	&__head
 		display: flex
 		align-items: center
@@ -591,16 +770,6 @@ onMount(() => {
 			font: var(--m3e-type-label-medium)
 			color: var(--primary)
 			text-decoration: none
-
-	&__textarea
-		width: 100%
-		padding: 0.625rem 0.75rem
-		border-radius: var(--shape-corner-m)
-		border: 1px solid var(--outline-variant)
-		background: var(--surface)
-		color: var(--on-surface)
-		font: var(--m3e-type-body-medium)
-		box-sizing: border-box
 
 	&__thumbs
 		display: flex

@@ -14,3 +14,11 @@
 	font: var(--m3e-type-body-small);
 	text-align: center;
 }
+
+.custom-md .markdown-image-figure--left .markdown-image-caption {
+	text-align: left;
+}
+
+.custom-md .markdown-image-figure--right .markdown-image-caption {
+	text-align: right;
+}
