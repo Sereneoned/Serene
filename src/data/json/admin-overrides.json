@@ -1,1 +1,21 @@
-{}
+{
+	"comment": {
+		"enable": true,
+		"provider": "waline",
+		"lazy": true,
+		"waline": {
+			"serverURL": "https://serene-waline.vercel.app",
+			"reaction": true,
+			"login": "enable",
+			"locale": {
+				"placeholder": "Share your thoughts..."
+			}
+		}
+	},
+	"umami": {
+		"enable": true,
+		"shareUrl": "https://cloud.umami.is/analytics/us/share/aIofu7tlpdBBtrCl",
+		"websiteId": "c0a020a1-34fe-4e89-8434-f929ed5eb053",
+		"scriptUrl": "https://cloud.umami.is/script.js"
+	}
+}

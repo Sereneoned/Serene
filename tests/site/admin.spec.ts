@@ -1,5 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import {
+	commentConfig,
+	resolveCommentOptions,
+} from "../../src/config/commentConfig";
 import { siteConfig } from "../../src/config/siteConfig";
 
 const siteBase = (siteConfig.base || "/").replace(/\/+$/, "");
@@ -77,12 +81,19 @@ async function mockGitHubApi(page: Page) {
 
 test.describe("Admin mode & zero-burden public pages", () => {
 	test("hides all admin controls from ordinary visitors", async ({ page }) => {
+		const commentsActive = resolveCommentOptions(commentConfig) !== null;
 		await page.goto(withBase("/moments/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".admin-dock")).toHaveCount(0);
 		await expect(page.locator(".moment-admin-composer")).toHaveCount(0);
 		await expect(page.locator(".moment-admin-actions")).toHaveCount(0);
-		await expect(page.locator("[data-content-interactions]")).toHaveCount(0);
 		await expect(page.locator("shirone-waline")).toHaveCount(0);
+		if (!commentsActive) {
+			await expect(page.locator("[data-content-interactions]")).toHaveCount(0);
+		} else {
+			expect(
+				await page.locator("[data-content-interactions]").count(),
+			).toBeGreaterThan(0);
+		}
 
 		await page.goto(withBase("/albums/"), { waitUntil: "domcontentloaded" });
 		await expect(page.locator(".album-section__admin-bar")).toHaveCount(0);
@@ -458,9 +469,12 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await page
 			.getByLabel("Waline 服务端地址 (serverURL)")
 			.fill("https://waline.example.com");
-		await page
-			.locator('label.m3-switch:has(input[aria-label="启用 Waline"])')
-			.click();
+		const walineCheckbox = page.getByRole("checkbox", { name: "启用 Waline" });
+		if (!(await walineCheckbox.isChecked())) {
+			await page
+				.locator('label.m3-switch:has(input[aria-label="启用 Waline"])')
+				.click();
+		}
 
 		await page
 			.getByLabel("Umami 公开分享链接 (shareUrl)")
@@ -469,9 +483,12 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await page
 			.getByLabel("Umami 采集脚本地址 (scriptUrl)")
 			.fill("https://cloud.umami.is/script.js");
-		await page
-			.locator('label.m3-switch:has(input[aria-label="启用 Umami"])')
-			.click();
+		const umamiCheckbox = page.getByRole("checkbox", { name: "启用 Umami" });
+		if (!(await umamiCheckbox.isChecked())) {
+			await page
+				.locator('label.m3-switch:has(input[aria-label="启用 Umami"])')
+				.click();
+		}
 
 		await page.getByRole("button", { name: "保存全站配置到 GitHub" }).click();
 		await expect.poll(() => postedBlobs.length).toBeGreaterThan(0);
@@ -571,5 +588,159 @@ test.describe("Admin mode & zero-burden public pages", () => {
 			"style",
 			/width:\s*45%/,
 		);
+	});
+
+	test("renders interactive likes, views, Umami stats, and lazy per-moment Waline comments for visitors", async ({
+		page,
+	}) => {
+		const articlePosts: unknown[] = [];
+		await page.route("https://serene-waline.vercel.app/**", async (route) => {
+			const url = new URL(route.request().url());
+			if (url.pathname.startsWith("/api/article")) {
+				if (route.request().method() === "POST") {
+					const payload = route.request().postDataJSON();
+					articlePosts.push(payload);
+					return route.fulfill({
+						status: 200,
+						contentType: "application/json",
+						body: JSON.stringify({
+							errno: 0,
+							errmsg: "",
+							data: [{ time: 7, reaction0: 3 }],
+						}),
+					});
+				}
+				const paths = (url.searchParams.get("path") ?? "")
+					.split(",")
+					.filter(Boolean);
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						errno: 0,
+						errmsg: "",
+						data: paths.map(() => ({ time: 6, reaction0: 2 })),
+					}),
+				});
+			}
+			if (url.pathname.startsWith("/api/comment")) {
+				const type = url.searchParams.get("type");
+				if (type === "count") {
+					const paths = (url.searchParams.get("url") ?? "")
+						.split(",")
+						.filter(Boolean);
+					return route.fulfill({
+						status: 200,
+						contentType: "application/json",
+						body: JSON.stringify({
+							errno: 0,
+							errmsg: "",
+							data: paths.map(() => 1),
+						}),
+					});
+				}
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						errno: 0,
+						errmsg: "",
+						data: { count: 1, page: 1, pageSize: 10, totalPages: 1, data: [] },
+					}),
+				});
+			}
+			return route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify({ errno: 0, data: [] }),
+			});
+		});
+
+		await page.route("https://cdn.jsdelivr.net/**", async (route) => {
+			const reqUrl = route.request().url();
+			if (reqUrl.endsWith(".css")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "text/css",
+					body: ".wl-panel { display: block; }",
+				});
+			}
+			return route.fulfill({
+				status: 200,
+				contentType: "application/javascript",
+				body: `
+					window.Waline = {
+						init({ el, path }) {
+							const host = typeof el === "string" ? document.querySelector(el) : el;
+							if (!host) return () => {};
+							host.innerHTML = '<div class="wl-mock" data-path="' + path + '">Mock Waline for ' + path + '</div>';
+							return () => { host.innerHTML = ''; };
+						}
+					};
+				`,
+			});
+		});
+
+		await page.route("https://cloud.umami.is/**", async (route) => {
+			const reqUrl = route.request().url();
+			if (reqUrl.endsWith("script.js")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/javascript",
+					body: "window.__umamiScriptLoaded = true;",
+				});
+			}
+			if (reqUrl.includes("/api/share/")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						websiteId: "c0a020a1-34fe-4e89-8434-f929ed5eb053",
+						token: "mock-share-token",
+					}),
+				});
+			}
+			if (reqUrl.includes("/stats")) {
+				return route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						pageviews: 42,
+						visitors: 18,
+						visits: 24,
+					}),
+				});
+			}
+			return route.fulfill({ status: 204, body: "" });
+		});
+
+		await page.goto(withBase("/moments/"), { waitUntil: "domcontentloaded" });
+		await expect(
+			page.locator("[data-shirone-umami-pageviews]").first(),
+		).toHaveText("42");
+
+		const firstCard = page.locator(".moment-card").first();
+		const likeBtn = firstCard.getByRole("button", { name: /Like|赞/ });
+		await expect(likeBtn).toContainText("2");
+		await likeBtn.click();
+		await expect(likeBtn).toContainText("3");
+		expect(
+			articlePosts.some(
+				(item) => (item as { type?: string }).type === "reaction0",
+			),
+		).toBe(true);
+
+		const commentToggle = firstCard.getByRole("button", {
+			name: /Comments|评论/,
+		});
+		await commentToggle.click();
+		await expect(firstCard.locator("shirone-waline .wl-mock")).toBeVisible();
+		await expect(page.locator("shirone-waline")).toHaveCount(1);
+
+		await page.goto(withBase("/posts/如何进行科学上网/"), {
+			waitUntil: "domcontentloaded",
+		});
+		await expect(page.locator("[data-content-interactions]")).toHaveCount(1);
+		await expect(page.locator("shirone-waline")).toHaveCount(1);
 	});
 });
