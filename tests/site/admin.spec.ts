@@ -737,6 +737,18 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await expect(firstCard.locator("shirone-waline .wl-mock")).toBeVisible();
 		await expect(page.locator("shirone-waline")).toHaveCount(1);
 
+		// Homepage post preview cards directly show views, comments, and interactive likes
+		await page.goto(withBase("/"), { waitUntil: "domcontentloaded" });
+		const previewStats = page.locator("[data-post-card-stats]").first();
+		await expect(previewStats).toBeVisible();
+		await expect(previewStats.locator("[data-stat-views]")).toHaveText("6");
+		await expect(previewStats.locator("[data-stat-comments]")).toHaveText("1");
+		const previewLikeBtn = previewStats.locator("[data-stat-like-btn]");
+		await expect(previewLikeBtn).toContainText("2");
+		await previewLikeBtn.click();
+		await expect(previewLikeBtn).toContainText("3");
+		await expect(previewLikeBtn).toHaveAttribute("aria-pressed", "true");
+
 		await page.goto(withBase("/posts/如何进行科学上网/"), {
 			waitUntil: "domcontentloaded",
 		});

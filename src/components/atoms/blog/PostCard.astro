@@ -36,6 +36,7 @@ interface Props {
 	wordCount?: string;
 	wordCountValue?: number;
 	wordCountKey?: I18nKey;
+	walineServerUrl?: string;
 	class?: string;
 	style?: string;
 }
@@ -61,9 +62,15 @@ const {
 	wordCount,
 	wordCountValue,
 	wordCountKey,
+	walineServerUrl,
 	class: className,
 	style,
 } = Astro.props;
+
+const likeLabel = i18n(I18nKey.interactionLike);
+const likedLabel = i18n(I18nKey.interactionLiked);
+const commentsLabel = i18n(I18nKey.comments);
+const viewsLabel = i18n(I18nKey.interactionViews);
 
 const hasCover = !!image;
 const pinnedLabel = i18n(I18nKey.pinned);
@@ -129,11 +136,57 @@ const titleLabel =
 			/>
 		)}
 		{description && <p class="m3-blog-postcard__desc" data-ui-i18n={descriptionKey}>{description}</p>}
-		{tags.length > 0 && (
-			<div class="m3-blog-postcard__tags">
-				{tags.map((t) => (
-					<TagBadge name={t.name} href={t.href} />
-				))}
+		{(tags.length > 0 || walineServerUrl) && (
+			<div class="m3-blog-postcard__footer">
+				{tags.length > 0 && (
+					<div class="m3-blog-postcard__tags">
+						{tags.map((t) => (
+							<TagBadge name={t.name} href={t.href} />
+						))}
+					</div>
+				)}
+				{walineServerUrl && (
+					<div
+						class="m3-blog-postcard__stats"
+						data-post-card-stats
+						data-stat-path={href}
+						data-server-url={walineServerUrl}
+					>
+						<button
+							type="button"
+							class="m3-blog-postcard__stat m3-blog-postcard__stat--btn m3-state-layer"
+							data-stat-like-btn
+							data-stat-base-label={likeLabel}
+							data-stat-liked-label={likedLabel}
+							aria-pressed="false"
+							aria-label={`${likeLabel}: 0`}
+							title={`${likeLabel}: 0`}
+						>
+							<Icon class="m3-blog-postcard__heart-outline" icon="material-symbols:favorite-outline-rounded" aria-hidden="true" />
+							<Icon class="m3-blog-postcard__heart-filled" icon="material-symbols:favorite-rounded" aria-hidden="true" />
+							<em data-stat-likes>0</em>
+						</button>
+						<a
+							class="m3-blog-postcard__stat m3-blog-postcard__stat--link m3-state-layer"
+							href={`${href}#comments`}
+							data-stat-label={commentsLabel}
+							aria-label={`${commentsLabel}: 0`}
+							title={`${commentsLabel}: 0`}
+						>
+							<Icon icon="material-symbols:chat-bubble-outline-rounded" aria-hidden="true" />
+							<em data-stat-comments>0</em>
+						</a>
+						<span
+							class="m3-blog-postcard__stat"
+							data-stat-label={viewsLabel}
+							aria-label={`${viewsLabel}: 0`}
+							title={`${viewsLabel}: 0`}
+						>
+							<Icon icon="material-symbols:visibility-outline-rounded" aria-hidden="true" />
+							<em data-stat-views>0</em>
+						</span>
+					</div>
+				)}
 			</div>
 		)}
 	</div>
@@ -274,12 +327,65 @@ const titleLabel =
 		-webkit-box-orient: vertical
 		overflow: hidden
 
-	/* 底部标签行：描述之后的独立一层（TagBadge 文字型小标签） */
+	/* 底部标签与互动统计行：描述之后的独立一层 */
+	&__footer
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		justify-content: space-between
+		gap: var(--m3e-space-2) var(--m3e-space-3)
+		margin-top: var(--m3e-space-4)
+
 	&__tags
 		display: flex
 		flex-wrap: wrap
 		gap: var(--m3e-space-2)
-		margin-top: var(--m3e-space-4)
+
+	&__stats
+		display: inline-flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 0.375rem
+		margin-left: auto
+
+	&__stat
+		position: relative
+		display: inline-flex
+		align-items: center
+		gap: 0.25rem
+		height: 1.6875rem
+		padding: 0 0.55rem
+		border-radius: var(--shape-corner-full)
+		border: 1px solid var(--outline-variant)
+		background: var(--surface-container-low)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-small)
+		text-decoration: none
+		> :global(svg)
+			width: 0.9375rem
+			height: 0.9375rem
+		em
+			font-style: normal
+			font-variant-numeric: tabular-nums
+
+		&--btn
+			cursor: pointer
+			transition: background-color var(--m3e-duration-short) var(--m3e-easing-standard), border-color var(--m3e-duration-short) var(--m3e-easing-standard), color var(--m3e-duration-short) var(--m3e-easing-standard)
+			:global(.m3-blog-postcard__heart-filled)
+				display: none
+			&[aria-pressed="true"]
+				border-color: var(--primary)
+				background: var(--primary-container)
+				color: var(--on-primary-container)
+				:global(.m3-blog-postcard__heart-outline)
+					display: none
+				:global(.m3-blog-postcard__heart-filled)
+					display: inline-block
+
+		&--link
+			&:hover
+				border-color: var(--primary)
+				color: var(--primary)
 
 	&__cover
 		position: relative

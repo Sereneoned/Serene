@@ -405,12 +405,15 @@ scrollFunction();
 <script>
 import { bindFancyboxRuntime } from "../utils/fancybox-runtime";
 import { applyStoredLayoutMode } from "../utils/layout-mode";
+import { bindPostCardStats } from "../utils/post-card-stats";
 
 bindFancyboxRuntime();
+bindPostCardStats();
 
 const setup = () => {
 	window.swup.hooks.on("content:replace", () => {
 		applyStoredLayoutMode(document.getElementById("post-list"));
+		bindPostCardStats();
 	});
 };
 if (window.swup) setup();

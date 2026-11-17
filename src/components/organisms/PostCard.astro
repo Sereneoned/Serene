@@ -19,6 +19,7 @@ import {
 	getTagUrl,
 	url as resolveSiteUrl,
 } from "@utils/url-utils";
+import { commentConfig, resolveCommentOptions } from "@/config";
 
 interface Props {
 	class?: string;
@@ -138,6 +139,12 @@ const excerpt =
 	isEncrypted && entry.data.hideHomeContent
 		? i18n(I18nKey.postEncryptedSummary)
 		: description || remarkPluginFrontmatter.excerpt;
+
+const resolvedComments = resolveCommentOptions(commentConfig);
+const walineServerUrl =
+	entry.data.comment !== false && resolvedComments?.provider === "waline"
+		? resolvedComments.waline.serverURL
+		: undefined;
 ---
 
 <PostCard
@@ -162,4 +169,5 @@ const excerpt =
 	wordCount={wordCount}
 	wordCountValue={words}
 	wordCountKey={words === 1 ? I18nKey.wordCount : I18nKey.wordsCount}
+	walineServerUrl={walineServerUrl}
 />
