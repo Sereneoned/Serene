@@ -35,5 +35,10 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 			icon: "fa7-brands:zhihu",
 			url: "https://www.zhihu.com/people/2-33-95-44-91",
 		},
+		{
+			name: "CSDN",
+			icon: "simple-icons:csdn",
+			url: "https://blog.csdn.net/Sereneoned",
+		},
 	],
 });
