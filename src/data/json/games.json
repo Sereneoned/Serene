@@ -1,1 +1,30 @@
-[]
+[
+	{
+		"id": "forza-horizon-4",
+		"name": "极限竞速：地平线 4",
+		"developer": "Playground Games",
+		"category": "open-world",
+		"status": "playing",
+		"cover": "assets/games/forza-horizon-4.webp",
+		"icon": "material-symbols:explore-outline-rounded",
+		"platform": "PC",
+		"year": "2018",
+		"tags": ["开放世界", "竞速", "自由探索"],
+		"description": "在四季轮换的不列颠群岛驾驶海量车辆自由驰骋，既能体验街头竞速与季节赛，也适合纯粹兜风赏景。",
+		"link": "https://store.steampowered.com/app/1293830/Forza_Horizon_4/"
+	},
+	{
+		"id": "dead-cells",
+		"name": "死亡细胞",
+		"developer": "Motion Twin / Evil Empire",
+		"category": "action",
+		"status": "playing",
+		"cover": "assets/games/dead-cells.webp",
+		"icon": "material-symbols:swords-outline-rounded",
+		"platform": "PC",
+		"year": "2018",
+		"tags": ["动作", "Roguelite", "银河恶魔城"],
+		"description": "手感极佳的 RogueVania 横版动作游戏，上百种武器、技能与变异流派配合高速闪避弹反，爽感与挑战兼备。",
+		"link": "https://store.steampowered.com/app/588650/Dead_Cells/"
+	}
+]
