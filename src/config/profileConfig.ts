@@ -55,5 +55,10 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 			icon: "cnblogs",
 			url: "https://www.cnblogs.com/Sereneoned",
 		},
+		{
+			name: "Telegram",
+			icon: "fa7-brands:telegram-plane",
+			url: "https://t.me/Sereneoned",
+		},
 	],
 });
