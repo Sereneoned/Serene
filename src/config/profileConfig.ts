@@ -53,7 +53,7 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 		{
 			name: "博客园",
 			icon: "cnblogs",
-			url: "https://home.cnblogs.com/u/3871777/",
+			url: "https://www.cnblogs.com/Sereneoned",
 		},
 	],
 });
