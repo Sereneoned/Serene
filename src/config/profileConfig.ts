@@ -40,5 +40,20 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 			icon: "simple-icons:csdn",
 			url: "https://blog.csdn.net/Sereneoned",
 		},
+		{
+			name: "Gitee",
+			icon: "simple-icons:gitee",
+			url: "https://gitee.com/Sereneoned",
+		},
+		{
+			name: "稀土掘金",
+			icon: "simple-icons:juejin",
+			url: "https://juejin.cn/user/3665153257923355",
+		},
+		{
+			name: "博客园",
+			icon: "cnblogs",
+			url: "https://home.cnblogs.com/u/3871777/",
+		},
 	],
 });
