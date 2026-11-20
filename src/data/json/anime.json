@@ -50,5 +50,18 @@
 		"studio": "david production",
 		"genres": ["热血", "监狱", "悬疑"],
 		"period": { "start": "2021-12", "end": "2022-12" }
+	},
+	{
+		"title": "刺客伍六七",
+		"cover": "/assets/anime/scissor-seven.webp",
+		"link": "https://bgm.tv/subject/244008",
+		"status": "completed",
+		"rating": 7.3,
+		"progress": { "watched": 14, "total": 14 },
+		"description": "失忆的草根理发师伍六七以剪刀为武器承接各种奇葩刺杀委托，在欢脱闹剧与热血温情间逐步揭开过往。",
+		"year": "2018",
+		"studio": "小疯映画",
+		"genres": ["搞笑", "战斗", "治愈"],
+		"period": { "start": "2018-04", "end": "2018-06" }
 	}
 ]
