@@ -1,1 +1,23 @@
-[]
+[
+	{
+		"key": "codex-agy-subagents",
+		"title": "codex-agy-subagents",
+		"summary": "零第三方依赖的本地 MCP Server：将 Google Antigravity CLI (agy) 封装为与 OpenAI Codex 原生 1:1 对称的主用 / 溢流异步子代理池，支持 AGY-FIRST 自动调度、Git Worktree 写隔离与 429 熔断兜底。",
+		"category": "ai-tools",
+		"phase": "shipped",
+		"technologies": [
+			"Python",
+			"MCP",
+			"OpenAI Codex",
+			"Antigravity CLI",
+			"Git Worktree"
+		],
+		"icon": "material-symbols:smart-toy-outline-rounded",
+		"cover": "/assets/projects/codex-agy-subagents.webp",
+		"coverAlt": "codex-agy-subagents 架构视觉图",
+		"featured": true,
+		"website": "https://sereneoned.github.io/Serene/posts/codex-agy-subagents/",
+		"repository": "https://github.com/Sereneoned/codex-agy-subagents",
+		"year": "2026"
+	}
+]

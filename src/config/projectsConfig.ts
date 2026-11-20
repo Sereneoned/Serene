@@ -17,6 +17,11 @@ export const projectsConfig: ProjectsConfig = withUserConfig("projects", {
 	description: "$t:projectsBanner",
 	categories: [
 		{
+			key: "ai-tools",
+			label: "AI & Tools",
+			icon: "material-symbols:smart-toy-outline-rounded",
+		},
+		{
 			key: "theme",
 			label: "Theme",
 			icon: "material-symbols:palette-outline-rounded",
