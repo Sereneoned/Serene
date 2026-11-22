@@ -1,7 +1,7 @@
 ---
-title: 给 Antigravity 桌面端加上 Codex 级对话分叉：我用官方 MCP App 做了个零魔改插件
+title: "给 Antigravity 桌面端加上 Codex 级对话分叉：我用官方 MCP App 做了个零魔改插件"
 published: 2026-11-22
-description: 完整复盘开源插件 antigravity-conversation-forker 的设计与实现：基于 SEP-1865 MCP Apps 与 ui/message (target: "new")，零客户端魔改实现按 Turn 1..K 硬切片、transcript_full.jsonl 流式回读与 Smart/Compact/Full 三档记忆继承。
+description: "完整复盘开源插件 antigravity-conversation-forker 的设计与实现：基于 SEP-1865 MCP Apps 与 ui/message (target = 'new')，零客户端魔改实现按 Turn 1..K 硬切片、transcript_full.jsonl 流式回读与 Smart/Compact/Full 三档记忆继承。"
 image: /images/posts/antigravity-conversation-forker-cover.webp
 tags:
   - Antigravity
