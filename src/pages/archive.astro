@@ -3,12 +3,19 @@ import ArchivePanel from "@components/organisms/ArchivePanel.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { navBarConfig } from "@/config";
+import { navBarConfig, sidebarConfig } from "@/config";
 import { getSortedPostsList } from "../utils/content-utils";
 
-const hasArchive = navBarConfig.links.some(
+const hasArchiveNav = navBarConfig.links.some(
 	(link) => link.pageKey === "archive",
 );
+const hasCategoryOrTagSidebar =
+	sidebarConfig.enable &&
+	sidebarConfig.components.some(
+		(widget) =>
+			(widget.type === "categories" || widget.type === "tags") && widget.enable,
+	);
+const hasArchive = hasArchiveNav || hasCategoryOrTagSidebar;
 if (!hasArchive) {
 	return Astro.redirect("/404/");
 }

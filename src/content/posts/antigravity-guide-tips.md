@@ -67,6 +67,8 @@ category: 工具科普
 
 ### 3. 「轻量侦察 + 重型主攻」的省额度选模法
 
+![Gemini 4 分层选模与省额度作战图](/images/posts/antigravity-model-routing.webp)
+
 把模型和思考强度配平，体感速度能翻倍，额度还能多撑几倍：
 
 - **读文档、查报错、全局搜代码、简单网页操作**：切 **`Gemini 4 Hydrogen`** 或 **`Gemini 3.8 Flash`**（`Low` / `Medium`）。
@@ -89,6 +91,16 @@ category: 工具科普
 3. **行内指令 `⌘ + I` / `Ctrl + I`**：选中函数或代码块按快捷键直接“只改选区”；不选任何文本时按则在光标处生成新代码——给函数补 Docstring、加边界校验、拆小重构比去侧边栏聊快一个量级。
 4. **Code Lenses 与 Diagnostic Auto-Fix**：函数/类上方自带 `Refactor`、`Write Tests`、`Explain Code` 内联按钮；编译器红线报错或 Problems 面板可直接触发报错自动修复。
 
+### 6. 实战场景对比：接手陌生老项目加功能，反面教材 vs 高手打法
+
+同样是「接手一个陌生 Astro / TypeScript 仓库，新增导出功能并上线验收」，两种用法在耗时、上下文纯净度与滚动配额上的差距非常直观：
+
+- **反面教材（把 Agent 当贵一点的聊天框）**：开着 `Neon (XHigh)` 直接丢一句*“帮我加个导出页面并部署”*，不贴原型图也不指目录 → Agent 自己满仓库 `grep`/盲读消耗大量 token → 改一半你突然改主意要求换方案，又在同一条已经塞满废话的 20 轮对话里继续争辩，上下文彻底漂移，滚动配额见底、代码还改残了。
+- **高手打法（节奏感 + 分层用模 + 精准交互）**：
+  1. **快模摸底**：先用 `Gemini 4 Hydrogen` + `/plan`，结合 `@src/pages/` 点名目录，10 秒产出改动清单与涉及文件列表。
+  2. **定边界 + 主力施工**：还有拿不准的设计细节，跑一轮 `/grill-me` 敲定后切 `Gemini 4 Argon` 动手写代码，局部小修直接用 IDE 里 `Ctrl+I` 当场改完。
+  3. **带图闭环验收**：起好本地 dev server 后直接贴参考截图并用 `/browser` 自动打开 `localhost` 查 404 与 Console Error；如遇分叉试错需要保记忆重开一条，用开源的桌面端分叉面板一键从 `/plan` 确认的那一轮切出干净分支继续。
+
 ---
 
 ## 第二部分：进阶技巧（把反重力改造成顺手的工程系统）
@@ -103,12 +115,35 @@ category: 工具科普
 
 ### 2. 五层定制化体系与最容易踩的隐藏限制
 
+![Antigravity 五层定制优先级与预算红线图](/images/posts/antigravity-five-layer-stack.webp)
+
 反重力有一套从高到低分层的定制系统：**项目 `.agents/` > 项目声明式配置 (`skills.json`/`plugins.json`) > 全局 `~/.gemini/config/` > 内置定制 > 全局 JSON 配置**。写对层级能彻底告别重复贴提示词：
 
 :::warning[写 `AGENTS.md` / Rules 前必看的两条硬限制]
 1. **单文件硬上限 `24 KB`（`24,000` 字节）**：包含展开 `@[label](path)` 引用后的总大小超过上限时会在行边界被截断。
 2. **常驻 Rules 汇总预算上限 `20,000` tokens**：目录级 `AGENTS.md` / `GEMINI.md` 与全局常驻规则共享这块预算。一旦超预算，低优先级规则会被**降级成纯文件路径指针**（需要时 Agent 再按需去读），内置插件自带的 Rules 则不占该预算。  
 👉 **最佳实践**：`AGENTS.md` 只写项目架构约束、构建测试命令与“禁止踩的坑”，严禁往里塞大段教学文档。
+:::
+
+:::details[直接抄作业：可直接复制的最小高价值 AGENTS.md 骨架]
+建议控制在 40～60 行以内，把每个字都花在刀刃上：
+
+```markdown title="AGENTS.md"
+# Project Working Rules
+
+## 1. Tech Stack & Layout
+- Astro 5 + TypeScript + Svelte 5 + Biome
+- Posts under `src/content/posts/`, site configs under `src/config/`, JSON data under `src/data/json/`
+
+## 2. Canonical Build & Check Commands
+- Format & Lint: `npx @biomejs/biome check --write <files>`
+- Full Build: `pnpm build` (or rely on GitHub Actions `pages.yml` on push to `main`)
+
+## 3. Non-Negotiable Constraints & Pitfalls
+- Quote any YAML frontmatter value containing `: ` (e.g., `description: "..."`).
+- Wrap every literal `$` / `${VAR}` outside code blocks or escape as `\$` to prevent KaTeX misparsing.
+- Always fetch/rebase `origin/main` before pushing to avoid overwriting web-admin Moments commits.
+```
 :::
 
 - **Skills（`.agents/skills/<name>/SKILL.md`）—— 按需渐进披露**  
@@ -215,6 +250,23 @@ category: 工具科普
 - **官方权威文档 Markdown 直达链接**（无需手动翻网页目录）：
   - 全站文档地图索引：`https://antigravity.google/llms.txt`
   - 任意官方文档 URL 后直接追加 `.md` 就是纯文本精简版——比如查最新功能与版本号更新可直接抓：`https://antigravity.google/docs/changelog.md`
+:::
+
+---
+
+## 高频踩坑 FAQ（遇到这些问题不用再猜）
+
+:::details[点开查看：Skill 不触发 / agy 卡死 / 桌面端分叉 / 原生 Plugin Hooks 常见疑问]
+1. **为什么写了 `SKILL.md` 却从来没见 Agent 触发？**
+   - 90% 的原因出在 Frontmatter 里的 `description` 只写了“这是什么文档”，没写**什么时候触发**。加上明确条件句（如 `Use whenever the user asks to deploy, audit links, or publish articles...`）即可显著提升命中率；另外注意全局 `~/.gemini/config/skills/` 与项目 `.agents/skills/` 同名时项目级优先级更高。
+2. **Windows 下用 Python / Node 调 `agy -p` 为什么经常一直挂着不动？**
+   - 因为终端 `agy -p` 子进程默认等待标准输入 EOF。调用时务必显式传 `stdin=subprocess.DEVNULL`（Node 下 `stdio: ["ignore", "pipe", "pipe"]`），问题立解。
+3. **打包成 Plugin 之后，为什么插件里的 `hooks.json` 没有生效？**
+   - 独立项目可以用 `.agents/hooks.json`，但如果封装成标准 Antigravity **Plugin**，`hooks.json` 必须直接放在插件根目录，而不是二级 `hooks/` 子目录下。
+4. **桌面端 App 里怎么像终端 `agy` 的 `/fork` 一样按某轮分叉对话？**
+   - 原生桌面端暂未提供图形 `/fork` 按钮，我开源了一个零魔改官方 MCP App 插件 **`antigravity-conversation-forker`** 直接嵌进右上角 Side Pane `+` 菜单，点选任意轮次即可无损切片开出同项目新对话（[点击查看完整设计与实现](https://sereneoned.github.io/Serene/posts/antigravity-conversation-forker/)）：
+
+::github{repo="Sereneoned/antigravity-conversation-forker"}
 :::
 
 ---

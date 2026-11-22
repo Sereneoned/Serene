@@ -18,7 +18,8 @@ import { sidebarConfig } from "@/config";
 const hasTags =
 	sidebarConfig.enable &&
 	sidebarConfig.components.some(
-		(widget) => widget.type === "tags" && widget.enable,
+		(widget) =>
+			(widget.type === "tags" || widget.type === "categories") && widget.enable,
 	);
 if (!hasTags) {
 	return Astro.redirect("/404/");

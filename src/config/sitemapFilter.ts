@@ -38,8 +38,8 @@ export function getDisabledPages(): string[] {
 			(widget) => widget.type === "tags" && widget.enable,
 		);
 	if (!categoriesEnabled) disabled.push("categories");
-	if (!tagsEnabled) disabled.push("tags");
-	disabled.push("archive");
+	if (!(tagsEnabled || categoriesEnabled)) disabled.push("tags");
+	if (!(categoriesEnabled || tagsEnabled)) disabled.push("archive");
 	return disabled;
 }
 
