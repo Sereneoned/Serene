@@ -63,5 +63,57 @@
 		"studio": "小疯映画",
 		"genres": ["搞笑", "战斗", "治愈"],
 		"period": { "start": "2018-04", "end": "2018-06" }
+	},
+	{
+		"title": "伍六七之最强发型师",
+		"cover": "/assets/anime/scissor-seven-s2.webp",
+		"link": "https://bgm.tv/subject/277436",
+		"status": "completed",
+		"rating": 7.2,
+		"progress": { "watched": 10, "total": 10 },
+		"description": "为了保护小鸡岛居民与寻回自我，伍六七与各路来袭强敌交锋，在笑泪交织中用爱与包容化解偏见。",
+		"year": "2019",
+		"studio": "小疯映画",
+		"genres": ["搞笑", "战斗", "热血"],
+		"period": { "start": "2019-10", "end": "2020-01" }
+	},
+	{
+		"title": "伍六七之玄武国篇",
+		"cover": "/assets/anime/scissor-seven-s3.webp",
+		"link": "https://bgm.tv/subject/312700",
+		"status": "completed",
+		"rating": 6.8,
+		"progress": { "watched": 10, "total": 10 },
+		"description": "为守护小鸡岛与查明身世真相，伍六七携鸡大保和小飞远赴玄武国，在危机四伏的旅途中直面过往。",
+		"year": "2021",
+		"studio": "小疯映画",
+		"genres": ["热血", "战斗", "冒险"],
+		"period": { "start": "2021-01", "end": "2021-05" }
+	},
+	{
+		"title": "伍六七之暗影宿命",
+		"cover": "/assets/anime/scissor-seven-s4.webp",
+		"link": "https://bgm.tv/subject/403430",
+		"status": "completed",
+		"rating": 6.1,
+		"progress": { "watched": 10, "total": 10 },
+		"description": "重返玄武国的伍六七遭到暗影刺客围剿，青凤的布局浮出水面，小鸡岛也同步陷入新的宿命危机。",
+		"year": "2023",
+		"studio": "小疯映画",
+		"genres": ["热血", "战斗", "悬疑"],
+		"period": { "start": "2023-01", "end": "2023-03" }
+	},
+	{
+		"title": "伍六七之记忆碎片",
+		"cover": "/assets/anime/scissor-seven-s5.webp",
+		"link": "https://bgm.tv/subject/491930",
+		"status": "completed",
+		"rating": 6.0,
+		"progress": { "watched": 10, "total": 10 },
+		"description": "为找回珍视的伙伴，伍六七再次面对支离破碎的过往记忆，在痛苦与羁绊之中为人生作出新的抉择。",
+		"year": "2024",
+		"studio": "小疯映画",
+		"genres": ["热血", "战斗", "剧情"],
+		"period": { "start": "2024-10", "end": "2024-12" }
 	}
 ]
