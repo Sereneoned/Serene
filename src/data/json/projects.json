@@ -19,5 +19,26 @@
 		"website": "https://sereneoned.github.io/Serene/posts/codex-agy-subagents/",
 		"repository": "https://github.com/Sereneoned/codex-agy-subagents",
 		"year": "2026"
+	},
+	{
+		"key": "antigravity-conversation-forker",
+		"title": "antigravity-conversation-forker",
+		"summary": "零客户端魔改的 Antigravity 官方 MCP App 插件：在桌面端右侧栏嵌入可视化时间线，支持按任意轮次 Turn 1..K 硬切片继承记忆（Smart / Compact / Full），一键在同项目内拉起二次对话并落盘可追溯分叉谱系。",
+		"category": "ai-tools",
+		"phase": "shipped",
+		"technologies": [
+			"Python",
+			"TypeScript",
+			"MCP Apps",
+			"SEP-1865",
+			"Google Antigravity"
+		],
+		"icon": "material-symbols:call-split-rounded",
+		"cover": "/assets/projects/antigravity-conversation-forker.webp",
+		"coverAlt": "antigravity-conversation-forker 桌面端对话分叉插件视觉图",
+		"featured": true,
+		"website": "https://sereneoned.github.io/Serene/posts/antigravity-conversation-forker/",
+		"repository": "https://github.com/Sereneoned/antigravity-conversation-forker",
+		"year": "2026"
 	}
 ]
