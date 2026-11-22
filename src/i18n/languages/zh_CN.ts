@@ -55,7 +55,8 @@ export const zh_CN: Translation = {
 	[Key.animeSyncEmpty]: "当前数据源中暂无番剧条目",
 
 	[Key.compass]: "站点罗盘",
-	[Key.compassBanner]: "常去的站点 —— 开发工具、文档与各种兔子洞。",
+	[Key.compassBanner]:
+		"精选开源工具站、免费效率神器与高质量技术社区，开箱即用。",
 	[Key.compassNoResults]: "没有符合条件的站点",
 	[Key.compassCounts]: "个站点",
 

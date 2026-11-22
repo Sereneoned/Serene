@@ -69,24 +69,36 @@ function hostOf(href: string): string {
 	}
 }
 
-/** 过滤：分组命中 + 搜索命中（label/note/域名）；整组无命中则组不渲染 */
+/** 过滤：分组命中 + 多关键词搜索命中（label/note/域名/分组）；整组无命中则组不渲染 */
 const filteredShelves = $derived.by(() => {
-	const normalizedQuery = query.trim().toLowerCase();
+	const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 	return shelves
 		.filter((shelf) => !selectedGroup || shelf.key === selectedGroup)
 		.map((shelf) => ({
 			...shelf,
-			entries: normalizedQuery
-				? shelf.entries.filter((entry) =>
-						[entry.label, entry.note ?? "", hostOf(entry.href)]
-							.join(" ")
-							.toLowerCase()
-							.includes(normalizedQuery),
-					)
-				: shelf.entries,
+			entries:
+				tokens.length > 0
+					? shelf.entries.filter((entry) => {
+							const haystack = [
+								entry.label,
+								entry.note ?? "",
+								hostOf(entry.href),
+								shelf.name,
+								shelf.blurb ?? "",
+							]
+								.join(" ")
+								.toLowerCase();
+							return tokens.every((token) => haystack.includes(token));
+						})
+					: shelf.entries,
 		}))
 		.filter((shelf) => shelf.entries.length > 0);
 });
+
+function resetFilters() {
+	query = "";
+	selectedGroup = "";
+}
 
 const totalCount = $derived(
 	filteredShelves.reduce((sum, shelf) => sum + shelf.entries.length, 0),
@@ -177,7 +189,7 @@ onMount(() => {
 					/>
 				</div>
 			{/if}
-			{#if totalCount > 1}
+			{#if totalCount > 0}
 				<p class="compass-section__count">{totalCount} {$t(I18nKey.compassCounts)}</p>
 			{/if}
 		</div>
@@ -195,7 +207,10 @@ onMount(() => {
 		{#key `${selectedGroup}|${query}`}
 			{#each filteredShelves as shelf (shelf.key)}
 				<section class="compass-shelf" data-shelf={shelf.key}>
-					<SectionTitle title={shelf.name} subtitle={shelf.blurb} icon={shelf.icon} />
+					<div class="compass-shelf__head">
+						<SectionTitle title={shelf.name} subtitle={shelf.blurb} icon={shelf.icon} />
+						<span class="compass-shelf__count">{shelf.entries.length}</span>
+					</div>
 					<div class="compass-shelf__grid">
 						{#each shelf.entries as entry, i (entry.href)}
 							<CompassTile {entry} delay={Math.min(i, 7) * 45} />
@@ -208,6 +223,16 @@ onMount(() => {
 		<div class="compass-section__empty">
 			<Icon icon="material-symbols:search-off-outline-rounded" aria-hidden="true" />
 			<span>{$t(I18nKey.compassNoResults)}</span>
+			{#if query || selectedGroup}
+				<button
+					type="button"
+					class="compass-section__reset m3-state-layer"
+					onclick={resetFilters}
+				>
+					<Icon icon="material-symbols:restart-alt-rounded" aria-hidden="true" />
+					<span>{$t(I18nKey.reset)}</span>
+				</button>
+			{/if}
 		</div>
 	{/if}
 </Card>
@@ -293,16 +318,48 @@ onMount(() => {
 			width: 2.5rem
 			height: 2.5rem
 
+	&__reset
+		display: inline-flex
+		align-items: center
+		gap: 0.375rem
+		margin-top: 0.25rem
+		padding: 0.375rem 0.875rem
+		border: 1px solid var(--outline-variant)
+		border-radius: var(--shape-corner-full)
+		background: transparent
+		color: var(--primary)
+		font: var(--m3e-type-label-large)
+		cursor: pointer
+		> :global(svg)
+			width: 1.125rem
+			height: 1.125rem
+
 /* 分组：间距 + 站内 SectionTitle 标题行（自带 margin-bottom） */
 .compass-shelf
 	margin-top: 1.75rem
 
+	&__head
+		display: flex
+		align-items: flex-start
+		justify-content: space-between
+		gap: 0.75rem
+
+	&__count
+		flex-shrink: 0
+		margin-top: 0.125rem
+		padding: 0.125rem 0.625rem
+		border-radius: var(--shape-corner-full)
+		background: var(--surface-container-highest)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-small)
+
 .compass-shelf__grid
 	display: grid
-	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr))
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr))
 	gap: 0.75rem
 
 	@media (max-width: bp-sm - 1px)
+		grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr))
 		gap: 0.625rem
 
 /* 指示器退场：淡出 + 轻微收拢（reduced-motion 由全局规则压至终态） */

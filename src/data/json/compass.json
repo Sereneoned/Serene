@@ -1,81 +1,225 @@
 [
 	{
 		"key": "dev",
-		"name": "Development",
+		"name": "开发与开源",
 		"icon": "material-symbols:code-rounded",
-		"blurb": "Sites I keep open while writing code",
+		"blurb": "写代码、查文档、在线实验与探索开源生态的常驻阵地",
 		"entries": [
 			{
 				"label": "GitHub",
 				"href": "https://github.com",
-				"note": "Code hosting & collaboration",
-				"icon": "fa7-brands:github"
+				"note": "全球最大的开源代码托管与协作平台",
+				"icon": "simple-icons:github"
 			},
 			{
-				"label": "MDN",
+				"label": "MDN Web Docs",
 				"href": "https://developer.mozilla.org",
-				"note": "Authoritative web docs",
+				"note": "Mozilla 维护的权威 Web 与前端开源文档",
+				"icon": "simple-icons:mdnwebdocs"
+			},
+			{
+				"label": "DevDocs",
+				"href": "https://devdocs.io",
+				"note": "开源聚合开发文档，支持快捷键检索与离线缓存",
 				"icon": "material-symbols:menu-book-rounded"
 			},
 			{
-				"label": "Stack Overflow",
-				"href": "https://stackoverflow.com",
-				"note": "Q&A and debugging"
+				"label": "roadmap.sh",
+				"href": "https://roadmap.sh",
+				"note": "高星开源开发者学习路线图与技术知识图谱",
+				"icon": "simple-icons:roadmapdotsh"
+			},
+			{
+				"label": "Can I Use",
+				"href": "https://caniuse.com",
+				"note": "免费查询 HTML/CSS/JS 各浏览器特性兼容性",
+				"icon": "material-symbols:check-circle-outline-rounded"
+			},
+			{
+				"label": "StackBlitz",
+				"href": "https://stackblitz.com",
+				"note": "浏览器内基于 WebContainers 即时运行全栈项目",
+				"icon": "simple-icons:stackblitz"
+			},
+			{
+				"label": "Hoppscotch",
+				"href": "https://hoppscotch.io",
+				"note": "开源免费的轻量级 Web API 调试平台（Postman 替代）",
+				"icon": "simple-icons:hoppscotch"
+			},
+			{
+				"label": "Hugging Face",
+				"href": "https://huggingface.co",
+				"note": "全球开源 AI 模型、数据集与在线 Spaces 社区",
+				"icon": "simple-icons:huggingface"
 			}
 		]
 	},
 	{
 		"key": "design",
-		"name": "Design",
+		"name": "设计与创意",
 		"icon": "material-symbols:palette-outline-rounded",
-		"blurb": "Colors, icons and inspiration",
+		"blurb": "开源矢量图标、架构白板、免费字体与在线设计创作站",
 		"entries": [
 			{
 				"label": "Iconify",
 				"href": "https://icon-sets.iconify.design",
-				"note": "Searchable open-source icon sets"
+				"note": "收录 20 万+ 开源矢量图标的统一检索与导出站",
+				"icon": "simple-icons:iconify"
 			},
 			{
-				"label": "Material Symbols",
-				"href": "https://fonts.google.com/icons",
-				"note": "Official M3 icon set",
-				"icon": "material-symbols:star-rounded"
+				"label": "Lucide",
+				"href": "https://lucide.dev",
+				"note": "简洁一致的开源 SVG 线性图标库，社区持续维护",
+				"icon": "simple-icons:lucide"
 			},
 			{
 				"label": "Excalidraw",
 				"href": "https://excalidraw.com",
-				"note": "Hand-drawn whiteboard collaboration"
+				"note": "开源手绘风格架构图与端到端加密协作白板",
+				"icon": "simple-icons:excalidraw"
+			},
+			{
+				"label": "draw.io",
+				"href": "https://app.diagrams.net",
+				"note": "完全免费开源的专业流程图、UML 与架构绘制工具",
+				"icon": "simple-icons:diagramsdotnet"
+			},
+			{
+				"label": "Penpot",
+				"href": "https://penpot.app",
+				"note": "开源免费的网页设计协作平台（Figma 开源替代）",
+				"icon": "simple-icons:penpot"
+			},
+			{
+				"label": "Photopea",
+				"href": "https://www.photopea.com",
+				"note": "免安装浏览器版 Photoshop，免费编辑 PSD/Sketch/FIG",
+				"icon": "simple-icons:photopea"
+			},
+			{
+				"label": "Google Fonts",
+				"href": "https://fonts.google.com",
+				"note": "免费可商用开源字体库与 Material Symbols 图标集",
+				"icon": "simple-icons:googlefonts"
+			},
+			{
+				"label": "SVG Repo",
+				"href": "https://www.svgrepo.com",
+				"note": "50 万+ 免费可检索的开源 SVG 图标与矢量素材",
+				"icon": "material-symbols:shapes-outline-rounded"
 			}
 		]
 	},
 	{
 		"key": "tools",
-		"name": "Tools",
+		"name": "开源在线工具",
 		"icon": "material-symbols:build-outline-rounded",
+		"blurb": "即开即用、纯本地处理或完全开源的高效实用工具箱",
 		"entries": [
+			{
+				"label": "IT-Tools",
+				"href": "https://it-tools.tech",
+				"note": "高星开源开发者百宝箱，编解码/加密/格式化一站搞定",
+				"icon": "material-symbols:handyman-outline-rounded"
+			},
+			{
+				"label": "CyberChef",
+				"href": "https://gchq.github.io/CyberChef/",
+				"note": "开源数据编解码、加解密与格式解析瑞士军刀",
+				"icon": "material-symbols:terminal-rounded"
+			},
 			{
 				"label": "Squoosh",
 				"href": "https://squoosh.app",
-				"note": "Image compression & conversion"
+				"note": "Google 开源本地图片压缩与 WebP/AVIF 实时对比转换",
+				"icon": "material-symbols:compress-rounded"
 			},
 			{
 				"label": "Regex101",
 				"href": "https://regex101.com",
-				"note": "Regex testing & debugging"
+				"note": "最顺手的免费正则表达式实时高亮调试与语法解释器",
+				"icon": "material-symbols:regular-expression-rounded"
+			},
+			{
+				"label": "Mermaid Live",
+				"href": "https://mermaid.live",
+				"note": "开源文本画图编辑器，用代码实时生成流程图与时序图",
+				"icon": "simple-icons:mermaid"
+			},
+			{
+				"label": "Transform Tools",
+				"href": "https://transform.tools",
+				"note": "开源多格式互转器：JSON/TS/SVG/YAML/Go 结构体互转",
+				"icon": "material-symbols:swap-horiz-rounded"
+			},
+			{
+				"label": "PairDrop",
+				"href": "https://pairdrop.net",
+				"note": "开源跨平台网页局域网快传，免安装版隔空投送",
+				"icon": "material-symbols:wifi-tethering-rounded"
+			},
+			{
+				"label": "VERT",
+				"href": "https://vert.sh",
+				"note": "开源纯浏览器本地文件格式转换，图片/音频/文档零上传",
+				"icon": "material-symbols:conversion-path-rounded"
 			}
 		]
 	},
 	{
 		"key": "reads",
-		"name": "Reading",
+		"name": "技术阅读与社区",
 		"icon": "material-symbols:auto-stories-outline-rounded",
+		"blurb": "开源项目发现、硬核极客社区与高质量免费知识库",
 		"entries": [
-			{ "label": "Hacker News", "href": "https://news.ycombinator.com" },
-			{ "label": "V2EX", "href": "https://www.v2ex.com" },
 			{
-				"label": "Solidot",
-				"href": "https://www.solidot.org",
-				"note": "Tech and culture news"
+				"label": "HelloGitHub",
+				"href": "https://hellogithub.com",
+				"note": "面向中文开发者的开源项目精选社区与月刊榜单",
+				"icon": "material-symbols:auto-awesome-rounded"
+			},
+			{
+				"label": "GitHub Trending",
+				"href": "https://github.com/trending",
+				"note": "每日热门开源项目趋势榜，第一时间发现潜力项目",
+				"icon": "material-symbols:trending-up-rounded"
+			},
+			{
+				"label": "阮一峰科技爱好者周刊",
+				"href": "https://github.com/ruanyf/weekly",
+				"note": "高人气中文开源科技周刊，每周汇总工具、文章与趋势",
+				"icon": "material-symbols:newspaper-rounded"
+			},
+			{
+				"label": "Hacker News",
+				"href": "https://news.ycombinator.com",
+				"note": "Y Combinator 旗下全球极客与硬核工程讨论社区",
+				"icon": "simple-icons:ycombinator"
+			},
+			{
+				"label": "V2EX",
+				"href": "https://www.v2ex.com",
+				"note": "中文开发者与创意工作者的活跃技术交流社区",
+				"icon": "simple-icons:v2ex"
+			},
+			{
+				"label": "Lobsters",
+				"href": "https://lobste.rs",
+				"note": "开源驱动的高信噪比计算机技术与编程讨论站",
+				"icon": "simple-icons:lobsters"
+			},
+			{
+				"label": "freeCodeCamp",
+				"href": "https://www.freecodecamp.org",
+				"note": "完全免费开源的全栈编程互动课程与技术长文社区",
+				"icon": "simple-icons:freecodecamp"
+			},
+			{
+				"label": "ArchWiki",
+				"href": "https://wiki.archlinux.org",
+				"note": "公认最详尽的开源 Linux 与系统运维免费百科文档",
+				"icon": "simple-icons:archlinux"
 			}
 		]
 	}

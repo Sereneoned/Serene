@@ -58,24 +58,35 @@ const host = $derived.by(() => {
 		href={entry.href}
 		target="_blank"
 		rel="noopener noreferrer"
+		title={entry.note
+			? `${entry.label} — ${entry.note} (${host})`
+			: `${entry.label} (${host})`}
 	>
-		<span class="compass-tile__icon" aria-hidden="true">
-			{#if iconKind === "image" && !imgFailed}
-				<img
-					src={imageSrc}
-					alt=""
-					loading="lazy"
-					referrerpolicy="no-referrer"
-					onerror={() => (imgFailed = true)}
-				/>
-			{:else if iconKind === "iconify"}
-				<Icon icon={entry.icon!} />
-			{:else}
-				<span class="compass-tile__letter">{letter}</span>
-			{/if}
-		</span>
+		<div class="compass-tile__top">
+			<span class="compass-tile__icon" aria-hidden="true">
+				{#if iconKind === "image" && !imgFailed}
+					<img
+						src={imageSrc}
+						alt=""
+						loading="lazy"
+						referrerpolicy="no-referrer"
+						onerror={() => (imgFailed = true)}
+					/>
+				{:else if iconKind === "iconify"}
+					<Icon icon={entry.icon!} />
+				{:else}
+					<span class="compass-tile__letter">{letter}</span>
+				{/if}
+			</span>
+			<span class="compass-tile__external" aria-hidden="true">
+				<Icon icon="material-symbols:arrow-outward-rounded" />
+			</span>
+		</div>
 		<span class="compass-tile__label">{entry.label}</span>
 		<span class="compass-tile__note">{entry.note || host}</span>
+		{#if entry.note}
+			<span class="compass-tile__host">{host}</span>
+		{/if}
 	</a>
 </article>
 
@@ -83,6 +94,8 @@ const host = $derived.by(() => {
 /* 竖向瓷砖：底色与站内卡片一致（card-bg + outline-variant 边框），hover 加深 */
 .compass-tile
 	box-sizing: border-box
+	display: flex
+	flex-direction: column
 	background: var(--card-bg)
 	border: 1px solid var(--outline-variant)
 	border-radius: var(--shape-corner-l)
@@ -100,10 +113,36 @@ const host = $derived.by(() => {
 
 	&__link
 		display: flex
+		flex: 1
 		flex-direction: column
 		gap: var(--m3e-space-2)
+		height: 100%
 		min-width: 0
 		text-decoration: none
+
+	&__top
+		display: flex
+		align-items: flex-start
+		justify-content: space-between
+		gap: var(--m3e-space-2)
+
+	&__external
+		display: inline-flex
+		align-items: center
+		justify-content: center
+		color: var(--on-surface-variant)
+		opacity: 0.4
+		transition:
+			opacity var(--m3e-duration-short) var(--m3e-easing-standard),
+			transform var(--m3e-duration-short) var(--m3e-easing-emphasized-decelerate),
+			color var(--m3e-duration-short) var(--m3e-easing-standard)
+		> :global(svg)
+			width: 1rem
+			height: 1rem
+		.compass-tile:hover &
+			opacity: 1
+			color: var(--primary)
+			transform: translate(0.125rem, -0.125rem)
 
 	/* 图标位：44×44 灰块（highest 混 6% on-surface，两种模式下均自成一级），悬停轻微上浮。
 	   内边距保证图片形态不贴边（image 撑满内容区，object-fit: contain） */
@@ -155,7 +194,17 @@ const host = $derived.by(() => {
 		margin: 0
 		color: var(--on-surface-variant)
 		font: var(--m3e-type-body-small)
-		line-height: 1.4
+		line-height: 1.45
+		display: -webkit-box
+		-webkit-line-clamp: 2
+		-webkit-box-orient: vertical
+		overflow: hidden
+
+	&__host
+		margin-top: auto
+		padding-top: 0.25rem
+		color: var(--outline)
+		font: var(--m3e-type-label-small)
 		white-space: nowrap
 		overflow: hidden
 		text-overflow: ellipsis

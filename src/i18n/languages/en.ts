@@ -59,7 +59,7 @@ export const en: Translation = {
 
 	[Key.compass]: "Compass",
 	[Key.compassBanner]:
-		"Handy sites I keep coming back to — dev tools, docs and rabbit holes.",
+		"Curated open-source tool sites, free web utilities, and high-signal developer communities.",
 	[Key.compassNoResults]: "No sites matched your search",
 	[Key.compassCounts]: "sites",
 
