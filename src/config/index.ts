@@ -63,6 +63,7 @@ export { POST_CARD_MIN_WIDTH, postListConfig } from "./postListConfig";
 export { profileConfig } from "./profileConfig";
 export { projectsConfig } from "./projectsConfig";
 export { seriesConfig } from "./seriesConfig";
+export { shopConfig } from "./shopConfig";
 export { sidebarConfig } from "./sidebarConfig";
 export {
 	getDefaultSpec,

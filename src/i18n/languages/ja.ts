@@ -383,4 +383,17 @@ export const ja: Translation = {
 	[Key.interactionLike]: "いいね",
 	[Key.interactionLiked]: "いいね済み",
 	[Key.interactionViews]: "閲覧",
+
+	[Key.shop]: "ショップ",
+	[Key.shopBadge]: "公式保証",
+	[Key.shopOfferTopup]:
+		"OpenAI / Codex 公式保証チャージ＆ゼロからのサポート（Go / Plus / Pro）",
+	[Key.shopOfferTools]: "メール・SMS認証ツール · 購入前ガイド＆無料リソース",
+	[Key.shopOfferDirect]: "領収書発行可 · QQ直接連絡で手数料無料",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "コピー",
+	[Key.shopCopyQqAria]: "QQ番号 {qq} をコピー",
+	[Key.shopQqCopied]: "コピー済み",
+	[Key.shopQqCopiedToast]: "QQ {qq} をコピーしました",
+	[Key.shopVisit]: "ショップへ",
 };

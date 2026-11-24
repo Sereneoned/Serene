@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "shop configuration override",
+  "description": "Shirone shop config schema generated from @/types/shopConfig.ShopConfig",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "店铺名称（品牌名，保持原文不随 UI 语言翻译）"
+    },
+    "url": {
+      "type": "string",
+      "description": "店铺链接（留空时不渲染小店组件）"
+    },
+    "qq": {
+      "anyOf": [
+        {},
+        {
+          "type": "string"
+        }
+      ],
+      "description": "直联 QQ 号（支持一键复制免平台手续费）"
+    }
+  },
+  "additionalProperties": false
+}

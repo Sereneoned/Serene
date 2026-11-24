@@ -387,4 +387,18 @@ export const tr: Translation = {
 	[Key.interactionLike]: "Beğen",
 	[Key.interactionLiked]: "Beğenildi",
 	[Key.interactionViews]: "Görüntülenme",
+
+	[Key.shop]: "Kişisel Mağaza",
+	[Key.shopBadge]: "Resmi",
+	[Key.shopOfferTopup]:
+		"OpenAI / Codex resmi garantili yükleme ve sıfırdan destek (Go / Plus / Pro)",
+	[Key.shopOfferTools]:
+		"E-posta ve SMS doğrulama araçları · Ön rehber ve ücretsiz kaynaklar",
+	[Key.shopOfferDirect]: "Fatura kesilir · Doğrudan QQ ile komisyonsuz sipariş",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "Kopyala",
+	[Key.shopCopyQqAria]: "QQ {qq} kopyala",
+	[Key.shopQqCopied]: "Kopyalandı",
+	[Key.shopQqCopiedToast]: "QQ {qq} kopyalandı",
+	[Key.shopVisit]: "Mağazayı Aç",
 };

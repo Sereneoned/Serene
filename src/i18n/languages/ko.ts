@@ -382,4 +382,17 @@ export const ko: Translation = {
 	[Key.interactionLike]: "좋아요",
 	[Key.interactionLiked]: "좋아요 완료",
 	[Key.interactionViews]: "조회",
+
+	[Key.shop]: "개인 스토어",
+	[Key.shopBadge]: "공식 보증",
+	[Key.shopOfferTopup]:
+		"OpenAI / Codex 공식 보증 충전 및 0부터 시작하는 사후 지원 (Go / Plus / Pro)",
+	[Key.shopOfferTools]: "이메일 및 인증 도구 · 구매 전 안내 및 무료 리소스",
+	[Key.shopOfferDirect]: "영수증 발행 가능 · QQ 직접 문의 시 수수료 면제",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "복사",
+	[Key.shopCopyQqAria]: "QQ {qq} 복사",
+	[Key.shopQqCopied]: "복사됨",
+	[Key.shopQqCopiedToast]: "QQ {qq} 복사됨",
+	[Key.shopVisit]: "스토어 방문",
 };

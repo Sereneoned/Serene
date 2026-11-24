@@ -1,0 +1,390 @@
+---
+/**
+ * 个人小店侧栏 widget（PersonalShop）。
+ * 展示个人小店核心服务概览、支持一键复制 QQ 直联与外链进入店铺；
+ * 全量系统文案通过 I18nKey + data-ui-i18n 驱动，支持中英文实时切换与 10 语种。
+ */
+import Button from "@components/atoms/action/Button.svelte";
+import MetaIcon from "@components/atoms/display/MetaIcon.astro";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import Icon from "@iconify/svelte";
+import { shopConfig } from "@/config";
+import type { ShopWidget } from "@/types/sidebarConfig";
+import WidgetLayout from "./WidgetLayout.astro";
+
+interface Props {
+	class?: string;
+	style?: string;
+	widget?: ShopWidget;
+}
+
+const className = Astro.props.class;
+const style = Astro.props.style;
+
+const shopName = shopConfig.name.trim();
+const shopUrl = shopConfig.url.trim();
+const shopQq = (shopConfig.qq ?? "").trim();
+const canRender = Boolean(shopName && shopUrl);
+
+const offerings = [
+	{
+		icon: "material-symbols:verified-user-outline-rounded",
+		key: I18nKey.shopOfferTopup,
+	},
+	{
+		icon: "material-symbols:mail-outline-rounded",
+		key: I18nKey.shopOfferTools,
+	},
+	{
+		icon: "material-symbols:receipt-long-outline-rounded",
+		key: I18nKey.shopOfferDirect,
+	},
+] as const;
+
+const copyQqAriaLabel = i18n(I18nKey.shopCopyQqAria).replaceAll("{qq}", shopQq);
+const copyQqParams = JSON.stringify({ qq: shopQq });
+---
+
+{canRender && (
+	<WidgetLayout
+		name={i18n(I18nKey.shop)}
+		nameKey={I18nKey.shop}
+		id="shop"
+		class={className}
+		style={style}
+	>
+		<div class="m3-shop">
+			<div class="m3-shop__brand">
+				<div class="m3-shop__brand-main">
+					<span class="m3-shop__brand-icon" aria-hidden="true">
+						<Icon icon="material-symbols:storefront-outline-rounded" />
+					</span>
+					<span class="m3-shop__brand-name notranslate" translate="no">
+						{shopName}
+					</span>
+				</div>
+				<span class="m3-shop__badge" data-ui-i18n={I18nKey.shopBadge}>
+					{i18n(I18nKey.shopBadge)}
+				</span>
+			</div>
+
+			<ul class="m3-shop__offers">
+				{offerings.map((item) => (
+					<li class="m3-shop__offer">
+						<MetaIcon icon={item.icon} />
+						<span class="m3-shop__offer-text" data-ui-i18n={item.key}>
+							{i18n(item.key)}
+						</span>
+					</li>
+				))}
+			</ul>
+
+			<div class="m3-shop__actions">
+				{shopQq && (
+					<button
+						type="button"
+						class="m3-shop__qq-btn m3-state-layer"
+						data-shop-qq-copy
+						data-qq={shopQq}
+						title={copyQqAriaLabel}
+						data-ui-i18n-title={I18nKey.shopCopyQqAria}
+						data-ui-i18n-params={copyQqParams}
+					>
+						<span class="m3-shop__qq-meta">
+							<span class="m3-shop__qq-icon" aria-hidden="true">
+								<Icon icon="fa7-brands:qq" />
+							</span>
+							<span class="m3-shop__qq-label" data-ui-i18n={I18nKey.shopQqLabel}>
+								{i18n(I18nKey.shopQqLabel)}
+							</span>
+							<span class="m3-shop__qq-num notranslate" translate="no">
+								{shopQq}
+							</span>
+						</span>
+						<span class="m3-shop__qq-action">
+							<span
+								class="m3-shop__qq-action-icon m3-shop__qq-action-icon--copy"
+								aria-hidden="true"
+							>
+								<Icon icon="material-symbols:content-copy-rounded" />
+							</span>
+							<span
+								class="m3-shop__qq-action-icon m3-shop__qq-action-icon--check"
+								aria-hidden="true"
+							>
+								<Icon icon="material-symbols:check-rounded" />
+							</span>
+							<span data-shop-qq-copy-label data-ui-i18n={I18nKey.shopCopyQq}>
+								{i18n(I18nKey.shopCopyQq)}
+							</span>
+						</span>
+					</button>
+				)}
+
+				<Button
+					href={shopUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					variant="filled"
+					size="small"
+					full
+					class="m3-shop__visit"
+				>
+					<span class="m3-shop__visit-icon" aria-hidden="true">
+						<Icon icon="material-symbols:storefront-outline-rounded" />
+					</span>
+					<span class="m3-shop__visit-label" data-ui-i18n={I18nKey.shopVisit}>
+						{i18n(I18nKey.shopVisit)}
+					</span>
+					<span class="m3-shop__visit-arrow" aria-hidden="true">
+						<Icon icon="material-symbols:arrow-outward-rounded" />
+					</span>
+				</Button>
+			</div>
+		</div>
+	</WidgetLayout>
+)}
+
+<style lang="stylus">
+.m3-shop
+	display: flex
+	flex-direction: column
+	gap: var(--m3e-space-3)
+
+	&__brand
+		display: flex
+		align-items: center
+		justify-content: space-between
+		flex-wrap: wrap
+		gap: var(--m3e-space-2)
+		padding: var(--m3e-space-2) var(--m3e-space-3)
+		border-radius: var(--shape-corner-m)
+		background: var(--surface-container-low)
+
+	&__brand-main
+		display: flex
+		align-items: center
+		gap: var(--m3e-space-2)
+		min-width: 0
+
+	&__brand-icon
+		display: inline-flex
+		align-items: center
+		justify-content: center
+		width: 1.75rem
+		height: 1.75rem
+		flex-shrink: 0
+		border-radius: var(--shape-corner-s)
+		background: var(--primary-container)
+		color: var(--on-primary-container)
+
+		> :global(svg)
+			width: 1.0625rem
+			height: 1.0625rem
+
+	&__brand-name
+		font: var(--m3e-type-title-small)
+		font-weight: 700
+		color: var(--on-surface)
+		overflow-wrap: anywhere
+
+	&__badge
+		display: inline-flex
+		align-items: center
+		flex-shrink: 0
+		padding: 0.125rem 0.5rem
+		border-radius: var(--shape-corner-full)
+		background: var(--secondary-container)
+		color: var(--on-secondary-container)
+		font: var(--m3e-type-label-small)
+		font-weight: 600
+		line-height: 1.35
+
+	&__offers
+		display: flex
+		flex-direction: column
+		gap: var(--m3e-space-2)
+		margin: 0
+		padding: 0
+		list-style: none
+
+	&__offer
+		display: flex
+		align-items: flex-start
+		gap: var(--m3e-space-2)
+
+	&__offer-text
+		min-width: 0
+		flex: 1
+		font: var(--m3e-type-body-small)
+		line-height: 1.45
+		color: var(--on-surface-variant)
+		overflow-wrap: break-word
+
+	&__actions
+		display: flex
+		flex-direction: column
+		gap: var(--m3e-space-2)
+		padding-top: var(--m3e-space-1)
+
+	&__qq-btn
+		display: flex
+		align-items: center
+		justify-content: space-between
+		gap: var(--m3e-space-2)
+		width: 100%
+		min-height: 2.5rem
+		padding: 0.375rem var(--m3e-space-3)
+		border: 1px solid var(--outline-variant)
+		border-radius: var(--shape-corner-m)
+		background: var(--btn-regular-bg)
+		color: var(--on-surface)
+		cursor: pointer
+		text-align: left
+		--m3e-state-color: var(--primary)
+		transition:
+			border-color var(--m3e-duration-short) var(--m3e-easing-standard),
+			background-color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+		&:hover
+			border-color: var(--outline)
+
+	&__qq-meta
+		display: inline-flex
+		align-items: center
+		gap: 0.375rem
+		min-width: 0
+
+	&__qq-icon
+		display: inline-flex
+		align-items: center
+		justify-content: center
+		flex-shrink: 0
+		color: var(--primary)
+
+		> :global(svg)
+			width: 0.9375rem
+			height: 0.9375rem
+
+	&__qq-label
+		font: var(--m3e-type-label-medium)
+		font-weight: 600
+		color: var(--on-surface-variant)
+		flex-shrink: 0
+
+	&__qq-num
+		font: var(--m3e-type-label-large)
+		font-weight: 700
+		font-variant-numeric: tabular-nums
+		color: var(--on-surface)
+		overflow: hidden
+		text-overflow: ellipsis
+		white-space: nowrap
+
+	&__qq-action
+		display: inline-flex
+		align-items: center
+		gap: 0.25rem
+		flex-shrink: 0
+		font: var(--m3e-type-label-medium)
+		font-weight: 600
+		color: var(--primary)
+
+	&__qq-action-icon
+		display: inline-flex
+		align-items: center
+		justify-content: center
+
+		> :global(svg)
+			width: 0.9375rem
+			height: 0.9375rem
+
+	&__qq-action-icon--check
+		display: none
+
+	&__qq-btn[data-copied="true"]
+		border-color: var(--primary)
+		background: unquote("color-mix(in oklab, var(--primary) 10%, var(--btn-regular-bg))")
+
+	&__qq-btn[data-copied="true"] &__qq-action-icon--copy
+		display: none
+
+	&__qq-btn[data-copied="true"] &__qq-action-icon--check
+		display: inline-flex
+
+	&__visit-icon
+	&__visit-arrow
+		display: inline-flex
+		align-items: center
+		justify-content: center
+		flex-shrink: 0
+
+		> :global(svg)
+			width: 1.0625rem
+			height: 1.0625rem
+
+	&__visit-label
+		white-space: nowrap
+</style>
+
+<script>
+	import I18nKey from "@i18n/i18nKey";
+	import { i18n } from "@i18n/translation";
+	import { showSnackbar } from "@utils/snackbar";
+
+	const BOUND_KEY = "shironeShopBound";
+	const resetTimers = new WeakMap<HTMLButtonElement, number>();
+
+	async function handleShopQqCopy(button: HTMLButtonElement): Promise<void> {
+		const qq = button.dataset.qq?.trim();
+		if (!qq) return;
+
+		try {
+			await navigator.clipboard.writeText(qq);
+		} catch {
+			showSnackbar(i18n(I18nKey.copyFailed));
+			return;
+		}
+
+		button.dataset.copied = "true";
+		const label = button.querySelector<HTMLElement>("[data-shop-qq-copy-label]");
+		if (label) {
+			label.dataset.uiI18n = I18nKey.shopQqCopied;
+			label.textContent = i18n(I18nKey.shopQqCopied);
+		}
+
+		const toastText = i18n(I18nKey.shopQqCopiedToast).replaceAll("{qq}", qq);
+		showSnackbar(toastText, {
+			icon: "material-symbols:check-rounded",
+		});
+
+		const previousTimer = resetTimers.get(button);
+		if (previousTimer !== undefined) {
+			window.clearTimeout(previousTimer);
+		}
+		const timer = window.setTimeout(() => {
+			delete button.dataset.copied;
+			if (label) {
+				label.dataset.uiI18n = I18nKey.shopCopyQq;
+				label.textContent = i18n(I18nKey.shopCopyQq);
+			}
+			resetTimers.delete(button);
+		}, 2000);
+		resetTimers.set(button, timer);
+	}
+
+	if (
+		typeof document !== "undefined" &&
+		document.documentElement.dataset[BOUND_KEY] !== "true"
+	) {
+		document.documentElement.dataset[BOUND_KEY] = "true";
+		document.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			const button = target.closest<HTMLButtonElement>("[data-shop-qq-copy]");
+			if (!button) return;
+			void handleShopQqCopy(button);
+		});
+	}
+</script>

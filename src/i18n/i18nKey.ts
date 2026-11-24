@@ -375,6 +375,19 @@ enum I18nKey {
 	interactionLike = "interactionLike",
 	interactionLiked = "interactionLiked",
 	interactionViews = "interactionViews",
+
+	// Personal Shop widget
+	shop = "shop",
+	shopBadge = "shopBadge",
+	shopOfferTopup = "shopOfferTopup",
+	shopOfferTools = "shopOfferTools",
+	shopOfferDirect = "shopOfferDirect",
+	shopQqLabel = "shopQqLabel",
+	shopCopyQq = "shopCopyQq",
+	shopCopyQqAria = "shopCopyQqAria",
+	shopQqCopied = "shopQqCopied",
+	shopQqCopiedToast = "shopQqCopiedToast",
+	shopVisit = "shopVisit",
 }
 
 export default I18nKey;

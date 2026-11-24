@@ -370,4 +370,17 @@ export const th: Translation = {
 	[Key.interactionLike]: "ถูกใจ",
 	[Key.interactionLiked]: "ถูกใจแล้ว",
 	[Key.interactionViews]: "ยอดดู",
+
+	[Key.shop]: "ร้านค้าส่วนตัว",
+	[Key.shopBadge]: "รับประกัน",
+	[Key.shopOfferTopup]:
+		"เติมเงิน OpenAI / Codex รับประกันทางการ & ดูแลตั้งแต่เริ่มต้น (Go / Plus / Pro)",
+	[Key.shopOfferTools]: "อีเมลและรับรหัสยืนยัน · คำแนะนำก่อนซื้อและทรัพยากรฟรี",
+	[Key.shopOfferDirect]: "ออกใบแจ้งหนี้ได้ · ติดต่อ QQ โดยตรงฟรีค่าธรรมเนียม",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "คัดลอก",
+	[Key.shopCopyQqAria]: "คัดลอก QQ {qq}",
+	[Key.shopQqCopied]: "คัดลอกแล้ว",
+	[Key.shopQqCopiedToast]: "คัดลอก QQ {qq} แล้ว",
+	[Key.shopVisit]: "ไปที่ร้านค้า",
 };

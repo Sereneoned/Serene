@@ -213,6 +213,12 @@ export const CONFIG_DOMAINS = Object.freeze([
 		module: "@/types/seriesConfig",
 	},
 	{
+		key: "shop",
+		file: "shop",
+		type: "ShopConfig",
+		module: "@/types/shopConfig",
+	},
+	{
 		// 导航项要引用 LinkPresets 并调用 i18n()，无法用「默认值 ⊕ 覆盖」表达，
 		// 因此走整体替换的中间形态，由 resolveNavBarLinks() 在代码仓侧还原。
 		key: "navBar",

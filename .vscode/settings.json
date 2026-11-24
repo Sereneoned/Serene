@@ -147,6 +147,10 @@
     "./.vscode/schemas/series.schema.json": [
       "config/series.yaml",
       "config/series.yml"
+    ],
+    "./.vscode/schemas/shop.schema.json": [
+      "config/shop.yaml",
+      "config/shop.yml"
     ]
   }
 }

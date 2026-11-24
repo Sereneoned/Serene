@@ -389,4 +389,18 @@ export const id: Translation = {
 	[Key.interactionLike]: "Suka",
 	[Key.interactionLiked]: "Disukai",
 	[Key.interactionViews]: "Dilihat",
+
+	[Key.shop]: "Toko Pribadi",
+	[Key.shopBadge]: "Resmi",
+	[Key.shopOfferTopup]:
+		"Top-up resmi bergaransi OpenAI / Codex & panduan dari nol (Go / Plus / Pro)",
+	[Key.shopOfferTools]: "Email & verifikasi SMS · Panduan & sumber gratis",
+	[Key.shopOfferDirect]:
+		"Tersedia faktur · Kontak QQ langsung bebas biaya admin",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "Salin",
+	[Key.shopCopyQqAria]: "Salin QQ {qq}",
+	[Key.shopQqCopied]: "Tersalin",
+	[Key.shopQqCopiedToast]: "QQ {qq} disalin",
+	[Key.shopVisit]: "Kunjungi Toko",
 };

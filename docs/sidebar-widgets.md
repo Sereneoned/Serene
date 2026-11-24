@@ -21,6 +21,7 @@ SideBar 通过 `src/config/sidebarConfig.ts` 中的 `components` 数组动态编
 | `announcement` | `Announcement` | top | 独立公告卡片（由 `announcementConfig.ts` 驱动） |
 | `stats` | `SiteStats` | top | 站点统计规格表 |
 | `calendar` | `Calendar` | sticky | 月度文章历（SSR 直出 + 水合岛） |
+| `shop` | `PersonalShop` | top | 个人小店展示卡（`shopConfig` 驱动，多语言 i18n、支持 QQ 一键复制与进店按钮） |
 | `music` | `MusicSidebar` | top | 持久音乐播放器（全局配置 + widget 双开关，默认关闭） |
 | `toc` | `SidebarTOC` | sticky | 当前文章目录（通常只在文章页显示） |
 
@@ -129,7 +130,17 @@ interface SidebarWidgetBase {
 
 ---
 
-## 12. 新增 widget 的设计约束
+## 12. PersonalShop — 个人小店
+
+- **数据源**：`src/config/shopConfig.ts` 中的 `shopConfig`（店铺名、店铺链接、直联 QQ）；
+- **渲染**：`WidgetLayout` 外壳 + 品牌标识与官方质保徽标 + `MetaIcon` 服务概览列表 + QQ 一键复制按钮（带 Snackbar 提示与状态切换）+ `Button` 外链按钮（`target="_blank" rel="noopener noreferrer"`）；
+- **多语言**：所有可见文案与无障碍标签绑定 `I18nKey` 与 `data-ui-i18n`，支持顶栏中英文即时切换及全站 10 种语言；
+- **零额外负担**：`shopConfig.url` 为空或侧栏禁用时不输出任何 DOM；
+- **页面范围**：默认放置于副栏 `slot: "top"` 日历下方，全页面通用且不与文章页 sticky 目录争抢高度。
+
+---
+
+## 13. 新增 widget 的设计约束
 
 1. **外观语言**：优先复用既有原子——`MetaIcon`（单图标徽标）、`Chip` / `Button` / `Card`、`WidgetLayout`（标题外壳）、`AccentBar`；不要自创新的徽标/容器风格；
 2. **外壳取舍**：短消息类（如公告）不用 `WidgetLayout`；有明确"分组 + 列表"语义的（分类/标签/统计），以及音乐等需要统一侧栏标题的有机体使用；

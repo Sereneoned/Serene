@@ -386,4 +386,19 @@ export const vi: Translation = {
 	[Key.interactionLike]: "Thích",
 	[Key.interactionLiked]: "Đã thích",
 	[Key.interactionViews]: "Lượt xem",
+
+	[Key.shop]: "Cửa hàng cá nhân",
+	[Key.shopBadge]: "Chính hãng",
+	[Key.shopOfferTopup]:
+		"Nạp chính hãng OpenAI / Codex & hỗ trợ từ đầu (Go / Plus / Pro)",
+	[Key.shopOfferTools]:
+		"Email & công cụ nhận mã · Hướng dẫn & tài nguyên miễn phí",
+	[Key.shopOfferDirect]:
+		"Hỗ trợ xuất hóa đơn · Liên hệ QQ trực tiếp miễn phí sàn",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "Sao chép",
+	[Key.shopCopyQqAria]: "Sao chép QQ {qq}",
+	[Key.shopQqCopied]: "Đã sao chép",
+	[Key.shopQqCopiedToast]: "Đã sao chép QQ {qq}",
+	[Key.shopVisit]: "Vào cửa hàng",
 };

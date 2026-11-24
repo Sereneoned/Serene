@@ -386,4 +386,19 @@ export const es: Translation = {
 	[Key.interactionLike]: "Me gusta",
 	[Key.interactionLiked]: "Te gusta",
 	[Key.interactionViews]: "Vistas",
+
+	[Key.shop]: "Tienda personal",
+	[Key.shopBadge]: "Oficial",
+	[Key.shopOfferTopup]:
+		"Recargas oficiales OpenAI / Codex y soporte desde cero (Go / Plus / Pro)",
+	[Key.shopOfferTools]:
+		"Correo y verificación SMS · Guía previa y recursos gratis",
+	[Key.shopOfferDirect]:
+		"Factura disponible · Contacto directo por QQ sin comisiones",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "Copiar",
+	[Key.shopCopyQqAria]: "Copiar QQ {qq}",
+	[Key.shopQqCopied]: "Copiado",
+	[Key.shopQqCopiedToast]: "QQ {qq} copiado",
+	[Key.shopVisit]: "Ir a la tienda",
 };

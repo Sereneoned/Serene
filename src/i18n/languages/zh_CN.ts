@@ -373,4 +373,17 @@ export const zh_CN: Translation = {
 	[Key.interactionLike]: "赞",
 	[Key.interactionLiked]: "已赞",
 	[Key.interactionViews]: "浏览",
+
+	[Key.shop]: "个人小店",
+	[Key.shopBadge]: "官方质保",
+	[Key.shopOfferTopup]:
+		"OpenAI / Codex 官方质保代充 & 从 0 包售后教学（Go / Plus / Pro）",
+	[Key.shopOfferTools]: "邮箱与接码等配套渠道 · 购前须知与免费资源",
+	[Key.shopOfferDirect]: "支持开发票 · 联系 QQ 直购免手续费",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "复制",
+	[Key.shopCopyQqAria]: "复制 QQ 号 {qq}",
+	[Key.shopQqCopied]: "已复制",
+	[Key.shopQqCopiedToast]: "已复制 QQ {qq}",
+	[Key.shopVisit]: "进入小店",
 };

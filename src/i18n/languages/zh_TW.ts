@@ -372,4 +372,17 @@ export const zh_TW: Translation = {
 	[Key.interactionLike]: "讚",
 	[Key.interactionLiked]: "已讚",
 	[Key.interactionViews]: "瀏覽",
+
+	[Key.shop]: "個人小店",
+	[Key.shopBadge]: "官方質保",
+	[Key.shopOfferTopup]:
+		"OpenAI / Codex 官方質保代充 & 從 0 包售後教學（Go / Plus / Pro）",
+	[Key.shopOfferTools]: "信箱與接碼等配套管道 · 購前須知與免費資源",
+	[Key.shopOfferDirect]: "支援開立發票 · 聯繫 QQ 直購免手續費",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "複製",
+	[Key.shopCopyQqAria]: "複製 QQ 號 {qq}",
+	[Key.shopQqCopied]: "已複製",
+	[Key.shopQqCopiedToast]: "已複製 QQ {qq}",
+	[Key.shopVisit]: "前往小店",
 };

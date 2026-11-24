@@ -384,4 +384,18 @@ export const en: Translation = {
 	[Key.interactionLike]: "Like",
 	[Key.interactionLiked]: "Liked",
 	[Key.interactionViews]: "Views",
+
+	[Key.shop]: "Personal Shop",
+	[Key.shopBadge]: "Official",
+	[Key.shopOfferTopup]:
+		"OpenAI / Codex official top-ups & 0-to-1 support (Go / Plus / Pro)",
+	[Key.shopOfferTools]:
+		"Email & SMS verification tools · Pre-order guide & freebies",
+	[Key.shopOfferDirect]: "Invoice supported · Direct QQ order saves fees",
+	[Key.shopQqLabel]: "QQ",
+	[Key.shopCopyQq]: "Copy",
+	[Key.shopCopyQqAria]: "Copy QQ {qq}",
+	[Key.shopQqCopied]: "Copied",
+	[Key.shopQqCopiedToast]: "Copied QQ {qq}",
+	[Key.shopVisit]: "Visit Shop",
 };
