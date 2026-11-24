@@ -127,8 +127,8 @@ flowchart TD
 4. **“入队容量”和“真实并发”必须解耦**：允许 Codex 在同一轮一次扇出最多 `AGY_MAX_QUEUE=32` 个子任务，但调度线程会严格把底层的活跃 `agy` 进程上限卡在 `AGY_MAX_CONCURRENT=5`（支持 `1~16`），相邻启动强制插入 `AGY_STAGGER_SEC=1.5` 秒错峰抖动；万一遇到 429 或 auth 错误，按 `15s` 基数指数退避（上限 `180s`），绝不无脑死循环重试。
 :::
 
-:::note[关于安全边界与使用习惯的一条提醒]
-本项目 **100% 通过官方 `agy` CLI 正常无头参数**（`agy -p --output-format stream-json --disable-slash-commands ...`）工作，不抓包、不读取也不转发任何 OAuth Token，没有任何绕过风控或刷号逻辑。如果你同时使用多号切换工具管理 Antigravity 账号，建议**不要在 Codex 后台仍有并发 `agy` 子代理执行时中途切号**，以免覆盖本地共享凭证导致正在进行的会话鉴权中断或 `--conversation` 续聊失效。
+:::tip[多账号切换注意]
+如果你使用多号工具管理 Antigravity 账号，注意**不要在后台仍有并发 `agy` 子代理执行时中途切号**，以免覆盖本地共享凭证导致正在运行的 `--conversation` 续聊中断。
 :::
 
 ---

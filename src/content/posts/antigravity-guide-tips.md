@@ -75,12 +75,12 @@ category: 工具科普
 - **日常业务开发、写接口、修常见 Bug**：主力使用 **`Gemini 4 Argon`**（`Medium` / `High`）。
 - **复杂架构改造、疑难竞态排查、全仓库审校**：切到 **`Gemini 4 Neon`（`High` / `XHigh`）** 或直接使用 **`Orchestrator`** 模式让其自己做高配规划 + 快模执行。
 
-### 4. 内置浏览器的正确协作姿势：人过门禁，AI 干粗活
+### 4. 内置浏览器的实战用法
 
 当你需要用反重力帮你验收本地页面或处理繁琐网页后台时：
 
 - **本地开发验收直接交页面 URL**：起好本地 dev server 后，直接让它打开对应 `localhost` 端口截屏查布局、响应式断点、网络请求状态码（`404`/`500`）和浏览器 Console Error。
-- **遇登录/验证码/扫码时「接力合作」**：反重力严守安全边界，**不会绕过验证码（CAPTCHA）、短信验证、扫码或代付**。正确配合方式是：让浏览器子代理打开登录页停下来 → 你在侧边浏览器手动扫码/滑过验证 → 回一句“好了”，子代理会直接在**同一个标签页**里保留登录态继续帮你批量填表、发文或整理列表，既安全又省心。
+- **保留同一个标签页做繁琐批量整理**：对于你自己的列表整理、书签归档或表单批量更新，让浏览器子代理直接复用当前会话的同一个标签页连续操作即可，省去重复手动点击。
 
 ### 5. Antigravity IDE 编辑器内的四个高频快捷键
 
@@ -184,25 +184,7 @@ category: 工具科普
 - **Plugins（`.agents/plugins/<name>/plugin.json`）—— 成套打包与迁移**  
   如果你同时积累了一套配套的 Rules + Skills + Hooks + `mcp_config.json`，打包成 Plugin 就可以在 `config.json` 里通过 `"plugins": { "my-plugin": { "enabled": false } }` 一键整体开关。（注意：原生 Plugin 的 `hooks.json` 必须直接放在插件根目录，而不是二级 `hooks/` 子目录。）如果你原本在 Claude Code、Cursor、Codex 或 Gemini CLI 里攒了整套规则和 MCP 配置，也可以直接在反重力里让内置迁移技能自动帮你整合成插件。
 
-### 3. 权限与安全调优：全局从严 + 单项目放行
-
-很多开发者用着觉得“要么太啰嗦老弹窗确认，要么全开 `always-proceed` 又心里发虚”。反重力的正解是利用 **Project-Level Settings 覆盖全局**：
-
-:::steps[一套兼顾安全与流畅度的权限配法]
-1. **全局保持安全基线**
-
-   在 Global Settings 里把默认工具执行策略保留在 `request-review` 或 `proceed-in-sandbox`，同时启用 **Terminal Sandbox**，限制全局非工作区文件写权限。
-
-2. **对你信任的常用仓库单独放行**
-
-   在左侧切换进你的高频个人项目后，打开 **Project-Level Settings**，只针对当前仓库覆写 `Auto-Execution Policy`、联网策略与工作区权限。
-
-3. **维护常用命令白名单 / 高危黑名单**
-
-   把只读查询、单元测试、打包构建命令加入 **Command Allowlist**，把危险删库或不可逆推送指令放进 **Denylist**；如涉及内网调试或防越权抓取，可顺便配置 **Browser Allowlist** 限定允许访问的域名范围。
-:::
-
-### 4. Antigravity CLI（`agy`）与跨工具无头并发工作流
+### 3. Antigravity CLI（`agy`）与跨工具无头并发工作流
 
 如果你已经习惯终端操作，或者重度依赖其他编程工具想借用反重力的高性价比模型池，`agy` CLI（本机已验证 `1.5.14`）非常值得一用：
 
@@ -224,7 +206,7 @@ category: 工具科普
 
 ::github{repo="Sereneoned/codex-agy-subagents"}
 
-### 5. Python SDK 与官方 `.md` 文档秒查技巧
+### 4. Python SDK 与官方 `.md` 文档秒查技巧
 
 :::details[点开查看：Python SDK 最小启动模板 & 官方 `.md` 文档直查索引]
 - **Python SDK（`google-antigravity`）**：通过 `pip install google-antigravity` 安装，可在 CI、评测脚本或自动化工具中通过异步上下文管理器拉起本地 Agent，并实时消费思考链与工具调用事件：
@@ -234,7 +216,7 @@ category: 工具科普
   from google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig
 
   async def main():
-      # 默认以安全只读模式运行；需要写文件或执行命令时显式传入 CapabilitiesConfig()
+      # 默认以只读模式运行；需要写文件或执行命令时显式传入 CapabilitiesConfig()
       config = LocalAgentConfig(
           system_instructions="You are a concise code review assistant.",
           capabilities=CapabilitiesConfig(),

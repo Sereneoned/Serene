@@ -117,10 +117,10 @@ Antigravity Desktop App（宿主）
 
 当生成出来的 `full` 记忆正文超过 **24,000 字符** 时，为了防止首轮提示词臃肿拖垮响应速度，`build_fork_payload` 会自动切换到 **目录索引 + 近期完整轮次 + 文件落盘交接** 模式：先在首条消息里给出全轮次索引和改动文件汇总，再引导新对话优先调用 `read_file` 读取已保存到 `${PLUGIN_DATA}/forks/<fork_id>.md` 的无损完整快照文件，真正兼顾首轮轻量与零信息丢失。
 
-### 3. 零运行时依赖与 CSP 沙箱合规
+### 3. 零运行时依赖与单文件内联打包
 
-- **终端用户无需安装 Node.js**：仓库中已经内置前端源码预编译产物 `ui/dist/app.html`，所有 TypeScript 与 CSS 全部内联进单个 HTML 资源，**不请求任何外部 `http(s)://` 脚本、样式或字体**，完整契合 MCP Apps 的 `default-src 'none'` 内容安全策略；后端完全使用 **Python 3.10+ 标准库** 构建 MCP stdio 服务。
-- **不依赖浏览器存储**：面板全程不读写 `localStorage`、`IndexedDB` 或 Cookie，所有分叉快照与 `index.json` 谱系状态均由服务端工具经过严格 `fork_id` 正则校验（`^[a-zA-Z0-9_-]{4,64}$`）后落盘到插件数据目录。
+- **终端用户无需安装 Node.js**：仓库中已经内置前端源码预编译产物 `ui/dist/app.html`，所有 TypeScript 与 CSS 全部内联进单个 HTML 资源，不请求任何外部 `http(s)://` 脚本、样式或字体；后端完全使用 **Python 3.10+ 标准库** 构建 MCP stdio 服务。
+- **独立插件数据目录落盘**：面板不依赖 `localStorage`、`IndexedDB` 或 Cookie，所有分叉快照与 `index.json` 谱系状态直接持久化在插件数据目录 `${PLUGIN_DATA}/forks/` 下，跨会话视图打开也完全同步。
 
 ---
 
@@ -166,7 +166,7 @@ python -m unittest discover -s tests -v
 ```
 :::
 
-:::details[高频避坑 FAQ（全局入口差异 / CLI 支持 / 原会话安全性 / 卸载方式）]
+:::details[高频避坑 FAQ（全局入口差异 / CLI 支持 / 原会话只读 / 卸载方式）]
 1. **为什么从最左侧全局导航入口打开时，按钮变成「生成并复制分叉提示词」而不是直接建新对话？**
    - 这是 Antigravity 宿主的视图边界决定的：全局左侧入口不归属于任何具体项目对话，宿主不会提供 `ui/message`（`target: "new"`）权限。在**具体项目的某条对话内部**点击右上角 **Side Pane `+`** 打开插件，就会自动开启一键同项目建新对话能力；而全局入口的「复制分叉提示词」模式则非常适合跨项目搬运或更换账号后手动粘贴。
 2. **能读取终端 `agy` CLI 跑出来的对话吗？**
