@@ -9,9 +9,19 @@ declare global {
 		_fromCache?: boolean;
 	}
 
+	interface OddmiscQueryOptions {
+		startAt?: number;
+		endAt?: number;
+	}
+
 	interface OddmiscBrowserClient {
-		getSiteStats: () => Promise<OddmiscStatsResult>;
-		getPageStats: (path: string) => Promise<OddmiscStatsResult>;
+		getSiteStats: (
+			options?: OddmiscQueryOptions,
+		) => Promise<OddmiscStatsResult>;
+		getPageStats: (
+			path: string,
+			options?: OddmiscQueryOptions,
+		) => Promise<OddmiscStatsResult>;
 		clearCache: () => void;
 	}
 

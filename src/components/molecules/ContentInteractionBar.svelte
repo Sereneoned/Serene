@@ -3,6 +3,11 @@ import Icon from "@components/atoms/display/Icon.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { t } from "@i18n/runtime.ts";
 import {
+	fetchUmamiPageStats,
+	isUmamiRuntimeEnabled,
+	resolvePostViewCount,
+} from "@utils/umami-stats";
+import {
 	fetchWalineBatchCounters,
 	hasLikedWalinePath,
 	recordWalineViewOnce,
@@ -85,30 +90,59 @@ function handleCommentClick() {
 onMount(() => {
 	liked = hasLikedWalinePath(path);
 	const controller = new AbortController();
+	const umamiActive = variant === "post" && isUmamiRuntimeEnabled();
+	let umamiStats: OddmiscStatsResult | null = null;
+	let umamiSettled = !umamiActive;
+	let walineViews = stats?.views ?? 0;
+
+	const syncViews = () => {
+		const fallback = walineViews || views;
+		views =
+			variant === "post"
+				? resolvePostViewCount(umamiStats, fallback)
+				: fallback;
+	};
 
 	if (autoFetch) {
 		void fetchWalineBatchCounters(serverURL, [path], controller.signal)
 			.then((map) => {
+				if (controller.signal.aborted) return;
 				const counts = map.get(path);
 				if (!counts) return;
 				if (!hasLocalLikeChange) likes = counts.likes;
-				if (!hasLocalViewChange) views = counts.views;
+				walineViews = counts.views;
+				if (umamiSettled && !hasLocalViewChange) {
+					syncViews();
+				}
 				comments = counts.comments;
 			})
 			.catch(() => {});
 	}
 
+	if (umamiActive) {
+		void fetchUmamiPageStats(path, controller.signal).then((result) => {
+			if (controller.signal.aborted) return;
+			umamiSettled = true;
+			umamiStats = result;
+			syncViews();
+		});
+	}
+
 	const triggerView = () => {
 		void recordWalineViewOnce(serverURL, path).then((nextViews) => {
-			if (nextViews !== null) {
-				hasLocalViewChange = true;
-				views = nextViews;
+			if (controller.signal.aborted || nextViews === null) return;
+			hasLocalViewChange = true;
+			walineViews = nextViews;
+			if (umamiSettled) {
+				syncViews();
 			}
 		});
 	};
 
 	let observer: IntersectionObserver | undefined;
-	if (rootEl && "IntersectionObserver" in window) {
+	if (variant === "post") {
+		triggerView();
+	} else if (rootEl && "IntersectionObserver" in window) {
 		observer = new IntersectionObserver(
 			(entries) => {
 				if (!entries.some((entry) => entry.isIntersecting)) return;

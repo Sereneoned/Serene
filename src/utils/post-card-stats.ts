@@ -1,8 +1,13 @@
 import {
+	fetchUmamiPageStats,
+	isUmamiRuntimeEnabled,
+	resolvePostViewCount,
+} from "./umami-stats.ts";
+import {
 	fetchWalineBatchCounters,
 	hasLikedWalinePath,
 	toggleWalineLike,
-} from "./waline-interactions";
+} from "./waline-interactions.ts";
 
 let activeAbortController: AbortController | null = null;
 
@@ -36,8 +41,9 @@ function syncLikeButtonState(
 }
 
 /**
- * Hydrates preview PostCard stats (views, comments, likes) in a single batched
- * request per Waline server URL, and wires direct like-button toggling.
+ * Hydrates preview PostCard stats: syncs views from Umami pageviews when active
+ * (with Waline fallback), loads comments/likes in one batched Waline request
+ * per server URL, and wires direct like-button toggling.
  */
 export function bindPostCardStats(root: ParentNode = document): void {
 	if (typeof window === "undefined") return;
@@ -51,13 +57,43 @@ export function bindPostCardStats(root: ParentNode = document): void {
 	const controller = new AbortController();
 	activeAbortController = controller;
 
+	const umamiEnabled = isUmamiRuntimeEnabled();
 	const byServer = new Map<string, HTMLElement[]>();
+	const cardsByPath = new Map<string, HTMLElement[]>();
+	const pathsWithServer = new Set<string>();
+	const umamiSettledPaths = new Set<string>();
+	const umamiStatsByPath = new Map<string, OddmiscStatsResult | null>();
+	const walineViewsByPath = new Map<string, number>();
+
+	const updatePathViews = (path: string) => {
+		const pathCards = cardsByPath.get(path);
+		if (!pathCards) return;
+		const count = resolvePostViewCount(
+			umamiStatsByPath.get(path),
+			walineViewsByPath.get(path) ?? 0,
+		);
+		for (const container of pathCards) {
+			if (!container.isConnected) continue;
+			const viewsEl = container.querySelector("[data-stat-views]");
+			if (!viewsEl) continue;
+			const viewsWrapper = viewsEl.parentElement;
+			const label = viewsWrapper?.getAttribute("data-stat-label") ?? undefined;
+			setMetricMeta(viewsWrapper, viewsEl, count, label);
+		}
+	};
 
 	for (const container of containers) {
 		const serverURL = container.dataset.serverUrl?.trim() ?? "";
 		const path = container.dataset.statPath?.trim() ?? "";
-		if (!serverURL || !path) continue;
+		if (!path) continue;
 
+		const pathCards = cardsByPath.get(path) ?? [];
+		pathCards.push(container);
+		cardsByPath.set(path, pathCards);
+
+		if (!serverURL) continue;
+
+		pathsWithServer.add(path);
 		const list = byServer.get(serverURL) ?? [];
 		list.push(container);
 		byServer.set(serverURL, list);
@@ -113,6 +149,23 @@ export function bindPostCardStats(root: ParentNode = document): void {
 		}
 	}
 
+	if (umamiEnabled) {
+		for (const path of cardsByPath.keys()) {
+			void fetchUmamiPageStats(path, controller.signal).then((stats) => {
+				if (controller.signal.aborted) return;
+				umamiStatsByPath.set(path, stats);
+				umamiSettledPaths.add(path);
+				if (
+					(stats && stats.pageviews > 0) ||
+					walineViewsByPath.has(path) ||
+					!pathsWithServer.has(path)
+				) {
+					updatePathViews(path);
+				}
+			});
+		}
+	}
+
 	for (const [serverURL, group] of byServer.entries()) {
 		const uniquePaths = Array.from(
 			new Set(
@@ -130,12 +183,9 @@ export function bindPostCardStats(root: ParentNode = document): void {
 					const stats = map.get(path);
 					if (!stats) continue;
 
-					const viewsEl = container.querySelector("[data-stat-views]");
-					if (viewsEl) {
-						const viewsWrapper = viewsEl.parentElement;
-						const label =
-							viewsWrapper?.getAttribute("data-stat-label") ?? undefined;
-						setMetricMeta(viewsWrapper, viewsEl, stats.views, label);
+					walineViewsByPath.set(path, stats.views);
+					if (!umamiEnabled || umamiSettledPaths.has(path)) {
+						updatePathViews(path);
 					}
 
 					const commentsEl = container.querySelector("[data-stat-comments]");
@@ -155,7 +205,11 @@ export function bindPostCardStats(root: ParentNode = document): void {
 				}
 			})
 			.catch(() => {
-				// Leave fallback zeros when network or aborted navigation occurs.
+				if (controller.signal.aborted) return;
+				for (const path of uniquePaths) {
+					if (!walineViewsByPath.has(path)) walineViewsByPath.set(path, 0);
+					if (umamiSettledPaths.has(path)) updatePathViews(path);
+				}
 			});
 	}
 }

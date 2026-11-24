@@ -315,6 +315,7 @@ import { initLastUpdatedNotices } from "../utils/last-updated-notice";
 import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
 import { WALLPAPER_MODE_CHANGE_EVENT, BANNER_HEIGHT, BANNER_HEIGHT_EXTEND } from "../constants/constants";
 import { copyPageLink } from "../utils/copy-page-link";
+import { resetUmamiStatsPromises } from "../utils/umami-stats";
 
 function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener('click', event => {
@@ -367,6 +368,7 @@ const setup = () => {
 		window.clearTimeout(finishTimer);
 		visitActive = true;
 		scrollStarted = false;
+		resetUmamiStatsPromises();
 		document.getElementById('page-height-extend')?.classList.remove('hidden');
 	});
 	window.swup.hooks.on('visit:end', () => { if (!scrollStarted) finishVisit(); });

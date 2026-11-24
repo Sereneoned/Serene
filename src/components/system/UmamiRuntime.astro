@@ -147,7 +147,7 @@
 					const key = path ? `page:${path}` : "site";
 					const request =
 						promises[key] ??=
-							path ? client.getPageStats(path) : client.getSiteStats();
+							path ? client.getPageStats(path, { endAt: Date.now() }) : client.getSiteStats({ endAt: Date.now() });
 
 					try {
 						let stats = await request;
@@ -158,8 +158,8 @@
 						) {
 							client.clearCache();
 							const refreshed = path
-								? client.getPageStats(path)
-								: client.getSiteStats();
+								? client.getPageStats(path, { endAt: Date.now() })
+								: client.getSiteStats({ endAt: Date.now() });
 							promises[key] = refreshed;
 							stats = await refreshed;
 						}

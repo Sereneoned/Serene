@@ -681,6 +681,7 @@ test.describe("Admin mode & zero-burden public pages", () => {
 			});
 		});
 
+		let mockPostPageviews = 42;
 		await page.route("https://cloud.umami.is/**", async (route) => {
 			const reqUrl = route.request().url();
 			if (reqUrl.endsWith("script.js")) {
@@ -701,11 +702,16 @@ test.describe("Admin mode & zero-burden public pages", () => {
 				});
 			}
 			if (reqUrl.includes("/stats")) {
+				const parsed = new URL(reqUrl);
+				const pathParam = parsed.searchParams.get("path") ?? "";
+				const pv = pathParam.includes("如何进行科学上网")
+					? mockPostPageviews
+					: 42;
 				return route.fulfill({
 					status: 200,
 					contentType: "application/json",
 					body: JSON.stringify({
-						pageviews: 42,
+						pageviews: pv,
 						visitors: 18,
 						visits: 24,
 					}),
@@ -737,11 +743,11 @@ test.describe("Admin mode & zero-burden public pages", () => {
 		await expect(firstCard.locator("shirone-waline .wl-mock")).toBeVisible();
 		await expect(page.locator("shirone-waline")).toHaveCount(1);
 
-		// Homepage post preview cards directly show views, comments, and interactive likes
+		// Homepage post preview cards sync views with Umami pageviews alongside Waline comments & likes
 		await page.goto(withBase("/"), { waitUntil: "domcontentloaded" });
 		const previewStats = page.locator("[data-post-card-stats]").first();
 		await expect(previewStats).toBeVisible();
-		await expect(previewStats.locator("[data-stat-views]")).toHaveText("6");
+		await expect(previewStats.locator("[data-stat-views]")).toHaveText("42");
 		await expect(previewStats.locator("[data-stat-comments]")).toHaveText("1");
 		const previewLikeBtn = previewStats.locator("[data-stat-like-btn]");
 		await expect(previewLikeBtn).toContainText("2");
@@ -753,6 +759,23 @@ test.describe("Admin mode & zero-burden public pages", () => {
 			waitUntil: "domcontentloaded",
 		});
 		await expect(page.locator("[data-content-interactions]")).toHaveCount(1);
+		await expect(
+			page.locator(
+				"[data-content-interactions] .content-interaction-bar__metric em",
+			),
+		).toHaveText("42");
 		await expect(page.locator("shirone-waline")).toHaveCount(1);
+
+		// Navigating back home via Swup refreshes PostCard views instead of serving stale cached counts
+		mockPostPageviews = 43;
+		await page.waitForFunction(() => Boolean(window.swup?.navigate));
+		await page.evaluate(
+			(homeUrl) => window.swup?.navigate(homeUrl),
+			withBase("/"),
+		);
+		const updatedPostCard = page.locator(
+			'[data-post-card-stats][data-stat-path$="/posts/如何进行科学上网/"]',
+		);
+		await expect(updatedPostCard.locator("[data-stat-views]")).toHaveText("43");
 	});
 });
