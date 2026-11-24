@@ -126,6 +126,12 @@ export const ja: Translation = {
 	[Key.albumsCounts]: "個のアルバム",
 	[Key.albumsBack]: "アルバムに戻る",
 	[Key.albumsPhotos]: "枚",
+	[Key.albumDownloadAll]: "アルバムを一括ダウンロード",
+	[Key.albumDownloading]: "作成中",
+	[Key.albumDownloadPhoto]: "画像をダウンロード",
+	[Key.albumDownloadComplete]: "アルバムをダウンロードしました",
+	[Key.albumDownloadPartial]: "一部外部画像を除きダウンロードしました",
+	[Key.albumDownloadFailed]: "ダウンロードに失敗しました",
 	[Key.albumPasswordTitle]: "このアルバムは保護されています",
 	[Key.albumPasswordDescription]:
 		"写真を見るにはパスワードを入力してください。",

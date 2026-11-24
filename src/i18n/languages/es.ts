@@ -130,6 +130,13 @@ export const es: Translation = {
 	[Key.albumsCounts]: "álbumes",
 	[Key.albumsBack]: "Volver a álbumes",
 	[Key.albumsPhotos]: "fotos",
+	[Key.albumDownloadAll]: "Descargar álbum",
+	[Key.albumDownloading]: "Empaquetando",
+	[Key.albumDownloadPhoto]: "Descargar foto",
+	[Key.albumDownloadComplete]: "Álbum descargado",
+	[Key.albumDownloadPartial]:
+		"Álbum descargado; se omitieron algunas imágenes externas",
+	[Key.albumDownloadFailed]: "Error al descargar, inténtalo de nuevo",
 	[Key.albumPasswordTitle]: "Este álbum está protegido",
 	[Key.albumPasswordDescription]: "Introduce la contraseña para ver sus fotos.",
 	[Key.albumPasswordLabel]: "Contraseña",

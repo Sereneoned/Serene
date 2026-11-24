@@ -95,6 +95,8 @@ if (resolvedAlbum.password) {
 		<div class:list={["album-detail__gallery", payload && "album-detail__gallery--protected"]}>
 			{payload ? (
 				<ProtectedAlbum
+					albumId={resolvedAlbum.id}
+					albumTitle={resolvedAlbum.title}
 					payload={payload}
 					scope={scope}
 					hint={resolvedAlbum.passwordHint}
@@ -104,6 +106,8 @@ if (resolvedAlbum.password) {
 				/>
 			) : (
 				<AlbumGallery
+					albumId={resolvedAlbum.id}
+					albumTitle={resolvedAlbum.title}
 					photos={resolvedAlbum.photos}
 					layout={resolvedAlbum.layout}
 					columns={resolvedAlbum.columns}

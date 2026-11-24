@@ -132,6 +132,13 @@ export const id: Translation = {
 	[Key.albumsCounts]: "album",
 	[Key.albumsBack]: "Kembali ke album",
 	[Key.albumsPhotos]: "foto",
+	[Key.albumDownloadAll]: "Unduh album",
+	[Key.albumDownloading]: "Mengemas",
+	[Key.albumDownloadPhoto]: "Unduh foto",
+	[Key.albumDownloadComplete]: "Album selesai diunduh",
+	[Key.albumDownloadPartial]:
+		"Album diunduh; sebagian gambar eksternal dilewati",
+	[Key.albumDownloadFailed]: "Gagal mengunduh, silakan coba lagi",
 	[Key.albumPasswordTitle]: "Album ini dilindungi",
 	[Key.albumPasswordDescription]: "Masukkan kata sandi untuk melihat fotonya.",
 	[Key.albumPasswordLabel]: "Kata sandi",

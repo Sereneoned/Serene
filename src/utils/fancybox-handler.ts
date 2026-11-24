@@ -13,6 +13,13 @@ import {
 // below-inlining chunk that is not published, causing a first-open 404.
 import "../styles/fancybox-custom.css";
 
+export interface FancyboxGalleryItem {
+	src: string;
+	caption?: string;
+	downloadSrc?: string;
+	downloadFilename?: string;
+}
+
 // Fancybox 模块类型
 // biome-ignore lint/suspicious/noExplicitAny: Fancybox 模块动态加载，无精确类型
 type FancyboxModule = any;
@@ -92,7 +99,7 @@ export class FancyboxHandler {
 	 * 与委托绑定互不影响；未加载过模块时先按需加载。
 	 */
 	async showGallery(
-		items: { src: string; caption?: string }[],
+		items: FancyboxGalleryItem[],
 		startIndex = 0,
 	): Promise<void> {
 		if (!this.Fancybox) {
@@ -233,7 +240,7 @@ export function cleanupFancybox(): void {
  * 以编程方式打开灯箱轮播（便捷函数）
  */
 export async function openFancyboxGallery(
-	items: { src: string; caption?: string }[],
+	items: FancyboxGalleryItem[],
 	startIndex = 0,
 ): Promise<void> {
 	await getFancyboxHandler().showGallery(items, startIndex);

@@ -1,17 +1,20 @@
 <script lang="ts">
 import AlbumGallery from "@components/organisms/AlbumGallery.svelte";
 import PasswordGate from "@components/organisms/PasswordGate.svelte";
-import { parseProtectedPayload } from "@utils/password-protection";
 import type { AlbumLayout, AlbumPhoto } from "@/types/album";
 import type { ProtectedPayload } from "@/types/protectedContent";
 
 let {
+	albumId = "",
+	albumTitle = "",
 	payload,
 	scope,
 	hint = "",
 	layout = "masonry" as AlbumLayout,
 	columns = 3,
 }: {
+	albumId?: string;
+	albumTitle?: string;
 	payload: ProtectedPayload;
 	scope: string;
 	hint?: string;
@@ -36,7 +39,7 @@ function unlock(content: string) {
 </script>
 
 {#if photos}
-	<AlbumGallery {photos} {layout} {columns} />
+	<AlbumGallery {albumId} {albumTitle} {photos} {layout} {columns} />
 {:else if parseError}
 	<PasswordGate {payload} {scope} {hint} onunlocked={unlock} />
 {:else}

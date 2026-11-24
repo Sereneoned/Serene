@@ -27,7 +27,7 @@ export const getDefaultFancyboxConfig = (): FancyboxConfig => ({
 					"flipY",
 					"reset",
 				],
-				right: ["autoplay", "fullscreen", "thumbs", "close"],
+				right: ["download", "autoplay", "fullscreen", "thumbs", "close"],
 			},
 		},
 		Zoomable: {
