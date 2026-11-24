@@ -204,7 +204,7 @@ const titleLabel =
 					alt={imageAlt}
 					loading="lazy"
 					decoding="async"
-					onload="this.parentElement?.previousElementSibling?.classList.add('m3-blog-postcard__cover-loading--done')"
+					onload="this.parentElement?.previousElementSibling?.classList.add('m3-blog-postcard__cover-loading--done');if(this.naturalWidth&&this.naturalHeight&&this.naturalWidth/this.naturalHeight<1.35){this.dataset.coverFit='contain';}"
 					onerror="this.parentElement?.previousElementSibling?.classList.add('m3-blog-postcard__cover-loading--done')"
 				/>
 			</picture>
@@ -418,15 +418,23 @@ const titleLabel =
 		> picture > img
 			object-fit: cover
 			position: relative
+		> picture > img[data-cover-fit="contain"]
+			object-fit: contain
+			padding: 0.5rem
+			background: var(--card-bg)
 
 		@media (min-width: bp-md)
 			position: absolute
-			top: 0.75rem
+			top: 50%
 			right: 0.75rem
-			bottom: 0.75rem
-			width: 28%
+			bottom: auto
+			transform: translateY(-50%)
+			width: clamp(12rem, 34%, 19rem)
+			aspect-ratio: 16 / 9
 			height: auto
-			border-radius: var(--shape-corner-s)
+			border-radius: var(--shape-corner-m)
+			border: 1px solid var(--outline-variant)
+			background: var(--surface-container-low)
 			overflow: hidden
 
 	/* 封面触摸箭头：卡片 hover 时深色遮罩 + 白色大箭头（与原版封面一致） */
@@ -493,8 +501,10 @@ const titleLabel =
 	   不能写 @media (--m3e-bp-md)：CSS 变量无法作 media 条件，该写法整块失效） */
 	@media (min-width: bp-md)
 		flex-direction: column
+		&--cover
+			min-height: 12.25rem
 		&--cover &__body
-			padding-right: calc(28% + 1.5rem)
+			padding-right: calc(clamp(12rem, 34%, 19rem) + 1.5rem)
 		/* 无封面时给右侧进入按钮（3.25rem + 0.75rem 边距）预留空间，描述提前换行 */
 		&:not(.m3-blog-postcard--cover) &__body
 			padding-right: 4.75rem
@@ -505,12 +515,13 @@ const titleLabel =
 		.m3-blog-postcard__title :global(.m3-accent-bar)
 			display: none
 
-		/* 封面内缩置顶：四周留 1rem、2:1 宽比、0.75rem 圆角 */
+		/* 封面内缩置顶：四周留 1rem、16:9 宽比对齐横版封面、0.75rem 圆角 */
 		&__cover
 			width: auto
-			aspect-ratio: 2 / 1
+			aspect-ratio: 16 / 9
 			margin: 1rem 1rem 0
 			border-radius: var(--shape-corner-m)
+			border: 1px solid var(--outline-variant)
 			> picture,
 			> picture > img
 				width: 100%
@@ -546,11 +557,13 @@ const titleLabel =
 		:global({shell-selector} .m3e-post-list--grid) &__cover
 			position: relative
 			inset: auto
+			transform: none
 			width: auto
 			height: auto
 			aspect-ratio: 16 / 9
 			margin: var(--m3e-space-4) var(--m3e-space-4) 0
 			border-radius: var(--shape-corner-m)
+			border: 1px solid var(--outline-variant)
 
 		/* 显式加入卡片根类，提高优先级并覆写 list 的封面让位内边距。 */
 		:global({shell-selector} .m3e-post-list--grid .m3-blog-postcard) &__body
@@ -590,5 +603,5 @@ const titleLabel =
 
 		:global(.m3e-post-list--cover-left) &--cover &__body
 			padding-right: 1.5rem
-			padding-left: calc(28% + 1.5rem)
+			padding-left: calc(clamp(12rem, 34%, 19rem) + 1.5rem)
 </style>
