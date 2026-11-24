@@ -152,6 +152,9 @@ const waveB = buildWavePath({
 	.banner-waves
 		height: clamp(calc(var(--m3e-space-10) + var(--m3e-space-8)), 15vh, calc(var(--m3e-space-10) + var(--m3e-space-10) + var(--m3e-space-10) + var(--m3e-space-8)))
 
+	:global(body:not([data-current-page="home"])) .banner-waves
+		height: clamp(2.75rem, 8vh, 4.75rem)
+
 :global(html.motion-reduced) .banner-waves__layer
 	animation: none
 

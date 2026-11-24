@@ -3,8 +3,36 @@
 @import "./markdown/disclosures.css";
 
 .custom-md {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+
+  > section {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  p,
+  li,
+  blockquote,
+  dd,
+  dt {
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  p,
+  li {
+    line-height: 1.78;
+  }
+
   h1 {
     @apply text-3xl;
+  }
+
+  h2 {
+    padding-bottom: 0.375rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--outline-variant) 55%, transparent);
   }
 
   h1,
@@ -50,7 +78,7 @@
   }
 
   code {
-    @apply bg-[var(--inline-code-bg)] text-[var(--inline-code-color)] px-1 py-0.5 rounded-md overflow-hidden;
+    @apply bg-[var(--inline-code-bg)] text-[var(--inline-code-color)] px-1 py-0.5 rounded-md;
 
     font-family:
       var(--m3e-font-mono-family),
@@ -85,6 +113,13 @@
     }
   }
 
+  :not(pre) > code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
   ul,
   ol {
     li::marker {
@@ -93,17 +128,28 @@
   }
 
   blockquote {
-    @apply not-italic border-transparent relative;
+    @apply not-italic border-0 relative;
     font-weight: inherit;
+    padding: var(--m3e-space-3) var(--m3e-space-4) var(--m3e-space-3) calc(var(--m3e-space-4) + var(--m3e-space-1));
+    border-radius: var(--shape-corner-m);
+    background: color-mix(in oklab, var(--surface-container-low) 82%, transparent);
 
     &:before {
-      @apply content-[''] absolute -left-1 block transition bg-[var(--primary)] h-full w-1 rounded-full;
+      @apply content-[''] absolute left-0 top-2.5 bottom-2.5 block transition bg-[var(--primary)] w-1 rounded-full;
     }
 
     /* Remove the double quotes from default styles */
     p:before,
     p:after {
       @apply content-none;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
     }
   }
 
@@ -112,6 +158,11 @@
     max-width: 100%;
     height: auto;
     margin-inline: auto;
+  }
+
+  :not(.image-grid__link) > img {
+    border: 1px solid color-mix(in oklab, var(--outline-variant) 42%, transparent);
+    box-shadow: var(--m3e-elevation-1);
   }
 
   /* --- M3 表格：容器圆角 + 表头表面分层 + outline-variant 分隔线 --- */
@@ -172,13 +223,18 @@
 
     td {
       @apply text-[var(--on-surface-variant)];
-      padding: var(--m3e-space-2) var(--m3e-space-4) !important;
+      padding: var(--m3e-space-3) var(--m3e-space-4) !important;
     }
 
     th,
     td {
       @apply border-b border-[var(--outline-variant)];
-      white-space: nowrap;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: break-word;
+      line-height: 1.65;
+      vertical-align: top;
+      min-width: 5.5rem;
     }
 
     tr:last-child td {
@@ -197,7 +253,8 @@
       font-weight: inherit !important;
       font-style: inherit !important;
       letter-spacing: 0;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: break-word;
       box-decoration-break: clone;
       -webkit-box-decoration-break: clone;
     }
@@ -205,7 +262,7 @@
 
   /* !important boundary: Tailwind Typography owns prose table margins; the scroll wrapper owns table spacing. */
   .markdown-table-scroll > table {
-    width: max-content;
+    width: 100%;
     min-width: 100%;
     max-width: none;
     margin: 0 !important;

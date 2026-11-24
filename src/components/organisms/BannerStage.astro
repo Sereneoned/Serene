@@ -15,6 +15,7 @@ interface Props {
 	description?: string;
 	descriptionKey?: I18nKey;
 	date?: string;
+	category?: string;
 }
 
 const {
@@ -24,12 +25,17 @@ const {
 	description = "",
 	descriptionKey,
 	date = "",
+	category = "",
 } = Astro.props;
+const isPostPage = page === "post";
 const normalizedTitle = title.trim();
 const normalizedDescription = description.trim();
 const initialSupportingText =
-	normalizedDescription !== normalizedTitle ? normalizedDescription : "";
+	!isPostPage && normalizedDescription !== normalizedTitle
+		? normalizedDescription
+		: "";
 const initialDate = date.trim();
+const initialCategory = category.trim();
 const initialCopyMode =
 	page === "home" ? "home" : page && normalizedTitle ? "context" : "none";
 const initialLabel =
@@ -186,6 +192,7 @@ const initialMobileBanner = page === "home";
 	id="banner-wrapper"
 	class="banner-stage"
 	aria-label={initialLabel}
+	data-page={page || ""}
 	data-copy-mode={initialCopyMode}
 	data-context-motion="idle"
 	data-desktop-images={JSON.stringify(desktopImages)}
@@ -255,21 +262,28 @@ const initialMobileBanner = page === "home";
 		</div>
 	)}
 	<div class="banner-stage__copy banner-stage__copy--context" data-banner-context>
-		<div class="banner-stage__context-title" data-banner-context-title data-ui-i18n={titleKey}>
-			{normalizedTitle}
-		</div>
-		<div
-			class="banner-stage__context-details"
-			data-banner-context-details
-			hidden={!initialSupportingText && !initialDate}
-		>
-			<span class="banner-stage__context-divider" aria-hidden="true"></span>
-			<p data-banner-context-description data-ui-i18n={initialSupportingText ? descriptionKey : undefined} hidden={!initialSupportingText}>
-				{initialSupportingText}
-			</p>
-			<div class="banner-stage__context-meta" data-banner-context-meta hidden={!initialDate}>
-				<Icon icon="material-symbols:calendar-today-rounded" aria-hidden="true" />
-				<time data-banner-context-date datetime={initialDate}>{initialDate}</time>
+		<div class="banner-stage__context-panel">
+			<div class="banner-stage__context-title" data-banner-context-title data-ui-i18n={titleKey}>
+				{normalizedTitle}
+			</div>
+			<div
+				class="banner-stage__context-details"
+				data-banner-context-details
+				hidden={!initialSupportingText && !initialDate && !initialCategory}
+			>
+				<span class="banner-stage__context-divider" aria-hidden="true"></span>
+				<p data-banner-context-description data-ui-i18n={initialSupportingText ? descriptionKey : undefined} hidden={!initialSupportingText}>
+					{initialSupportingText}
+				</p>
+				<div class="banner-stage__context-meta" data-banner-context-meta hidden={!initialDate && !initialCategory}>
+					<span class="banner-stage__context-category" data-banner-context-category hidden={!initialCategory}>
+						{initialCategory}
+					</span>
+					<span class="banner-stage__context-date-wrap" data-banner-context-date-wrap hidden={!initialDate}>
+						<Icon icon="material-symbols:calendar-today-rounded" aria-hidden="true" />
+						<time data-banner-context-date datetime={initialDate}>{initialDate}</time>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -338,6 +352,12 @@ const initialMobileBanner = page === "home";
 	);
 	const contextMeta = stage?.querySelector<HTMLElement>(
 		"[data-banner-context-meta]",
+	);
+	const contextCategory = stage?.querySelector<HTMLElement>(
+		"[data-banner-context-category]",
+	);
+	const contextDateWrap = stage?.querySelector<HTMLElement>(
+		"[data-banner-context-date-wrap]",
 	);
 	const contextDate = stage?.querySelector<HTMLTimeElement>(
 		"[data-banner-context-date]",
@@ -793,8 +813,8 @@ const initialMobileBanner = page === "home";
 		stage!.dataset.contextMotion = "out";
 		runtime.contextAnimation = copy.animate(
 			[
-				{ opacity: 1, transform: "translate(-50%, -50%) translateY(0)" },
-				{ opacity: 0, transform: "translate(-50%, -50%) translateY(-0.25rem)" },
+				{ opacity: 1, transform: "translateY(0)" },
+				{ opacity: 0, transform: "translateY(-0.25rem)" },
 			],
 			{
 				duration: readMotionDuration("--m3e-duration-short", 150),
@@ -817,8 +837,8 @@ const initialMobileBanner = page === "home";
 		stage!.dataset.contextMotion = "in";
 		runtime.contextAnimation = copy.animate(
 			[
-				{ opacity: 0, transform: "translate(-50%, -50%) translateY(0.25rem)" },
-				{ opacity: 1, transform: "translate(-50%, -50%) translateY(0)" },
+				{ opacity: 0, transform: "translateY(0.25rem)" },
+				{ opacity: 1, transform: "translateY(0)" },
 			],
 			{
 				duration: readMotionDuration("--m3e-duration-medium", 250),
@@ -834,6 +854,10 @@ const initialMobileBanner = page === "home";
 	function fitContextTitle() {
 		if (!contextTitle || !stage || stage.dataset.copyMode !== "context") return;
 		contextTitle.style.removeProperty("font-size");
+		if (stage.dataset.page === "post") {
+			contextTitle.dataset.titleFit = "wrapped";
+			return;
+		}
 		contextTitle.dataset.titleFit = "full";
 		if (contextTitle.scrollWidth <= contextTitle.clientWidth) return;
 
@@ -841,7 +865,7 @@ const initialMobileBanner = page === "home";
 			getComputedStyle(document.documentElement).fontSize,
 		);
 		const maximum = Number.parseFloat(getComputedStyle(contextTitle).fontSize);
-		const minimum = Number.isFinite(rootFontSize) ? rootFontSize * 2.25 : 36;
+		const minimum = Number.isFinite(rootFontSize) ? rootFontSize * 1.75 : 28;
 		let lower = Math.min(minimum, maximum);
 		let upper = maximum;
 
@@ -854,7 +878,7 @@ const initialMobileBanner = page === "home";
 		}
 		contextTitle.style.fontSize = `${lower}px`;
 		if (contextTitle.scrollWidth > contextTitle.clientWidth) {
-			contextTitle.style.removeProperty("font-size");
+			contextTitle.style.fontSize = `${minimum}px`;
 			contextTitle.dataset.titleFit = "wrapped";
 		}
 	}
@@ -875,6 +899,7 @@ const initialMobileBanner = page === "home";
 		description: string;
 		descriptionKey: string;
 		date: string;
+		category: string;
 	}
 
 	function readContext(): BannerContext {
@@ -885,10 +910,11 @@ const initialMobileBanner = page === "home";
 			description: container?.dataset.bannerDescription?.trim() || "",
 			descriptionKey: container?.dataset.bannerDescriptionKey?.trim() || "",
 			date: container?.dataset.bannerDate?.trim() || "",
+			category: container?.dataset.currentPostCategory?.trim() || "",
 		};
 	}
 
-	function syncContext(context: BannerContext) {
+	function syncContext(context: BannerContext, page?: SidebarPage) {
 		if (
 			!stage ||
 			!contextTitle ||
@@ -898,16 +924,18 @@ const initialMobileBanner = page === "home";
 			!contextDate
 		)
 			return false;
+		const isPostPage = page === "post";
 		const title = context.titleKey
 			? i18n(context.titleKey as I18nKey)
 			: context.title;
 		const rawDesc = context.descriptionKey
 			? i18n(context.descriptionKey as I18nKey)
 			: context.description;
-		const description = rawDesc !== title ? rawDesc : "";
+		const description = !isPostPage && rawDesc !== title ? rawDesc : "";
 		const date = context.date;
+		const category = context.category;
 		contextTitle.style.removeProperty("font-size");
-		contextTitle.dataset.titleFit = "full";
+		contextTitle.dataset.titleFit = isPostPage ? "wrapped" : "full";
 		if (context.titleKey) contextTitle.dataset.uiI18n = context.titleKey;
 		else delete contextTitle.dataset.uiI18n;
 		if (description && context.descriptionKey) {
@@ -918,10 +946,17 @@ const initialMobileBanner = page === "home";
 		contextTitle.textContent = title;
 		contextDescription.textContent = description;
 		contextDescription.hidden = !description;
+		if (contextCategory) {
+			contextCategory.textContent = category;
+			contextCategory.hidden = !category;
+		}
+		if (contextDateWrap) {
+			contextDateWrap.hidden = !date;
+		}
 		contextDate.textContent = date;
 		contextDate.dateTime = date;
-		contextMeta.hidden = !date;
-		contextDetails.hidden = !description && !date;
+		contextMeta.hidden = !date && !category;
+		contextDetails.hidden = !description && !date && !category;
 		scheduleContextTitleFit();
 		return Boolean(title);
 	}
@@ -958,9 +993,11 @@ const initialMobileBanner = page === "home";
 		document.body.dataset.bannerVisible = String(state.visible);
 		document.body.dataset.bannerLayout = state.contentLayout;
 		document.body.dataset.bannerTopAppBar = String(state.transparentTopAppBar);
+		stage.dataset.page = page || "";
 		stage.hidden = !state.visible;
 		const hasContext =
-			state.copyMode === "context" && syncContext(contextOverride ?? readContext());
+			state.copyMode === "context" &&
+			syncContext(contextOverride ?? readContext(), page);
 		const copyMode = state.copyMode === "home" ? "home" : hasContext ? "context" : "none";
 		stage.dataset.copyMode = copyMode;
 		stage.setAttribute(
@@ -1111,17 +1148,21 @@ const initialMobileBanner = page === "home";
 			text-shadow: 0 2px 12px rgba(0, 0, 0, 0.48)
 			pointer-events: none
 
-		.banner-stage__copy h1,
-		.banner-stage__context-title
+		.banner-stage__copy h1
 			margin: 0
 			font: var(--m3e-type-headline-medium)
 			font-weight: 700
 			letter-spacing: 0
 			line-height: 1.1
-
-		.banner-stage__copy h1,
-		.banner-stage__context-title
 			font-size: clamp(2.5rem, 5rem, 5rem)
+
+		.banner-stage__context-title
+			margin: 0
+			font: var(--m3e-type-headline-medium)
+			font-weight: 700
+			letter-spacing: 0
+			line-height: 1.25
+			font-size: clamp(1.75rem, 3.2vw, 2.75rem)
 
 		.banner-stage__copy p
 			margin-top: 0.75rem
@@ -1138,14 +1179,23 @@ const initialMobileBanner = page === "home";
 				animation: banner-subtitle-caret var(--m3e-duration-long) steps(1, end) infinite
 
 		.banner-stage__copy--context
-			inset: 50% auto auto 50%
-			width: min(calc(100% - var(--m3e-space-12)), 64rem)
-			min-height: calc(var(--m3e-space-12) * 2)
-			padding: var(--m3e-space-6) var(--m3e-space-8)
+			inset: 4.5rem 0 var(--banner-context-safe-bottom, 5rem)
+			width: min(calc(100% - 2.5rem), 54rem)
+			margin-inline: auto
+			padding: 0
 			align-items: center
 			justify-content: center
 			text-align: center
-			transform: translate(-50%, -50%)
+
+		.banner-stage__context-panel
+			display: flex
+			flex-direction: column
+			align-items: center
+			justify-content: center
+			width: 100%
+			max-width: 100%
+			max-height: 100%
+			overflow: hidden
 
 		.banner-stage__context-title,
 		.banner-stage__context-details
@@ -1165,37 +1215,98 @@ const initialMobileBanner = page === "home";
 			display: flex
 			flex-direction: column
 			align-items: center
-			width: min(100%, 48rem)
-			margin-top: var(--m3e-space-5)
+			width: min(100%, 44rem)
+			margin-top: var(--m3e-space-4)
 
 		.banner-stage__context-divider
 			width: var(--m3e-space-12)
 			height: 1px
-			background: rgba(21, 50, 91, 0.42)
+			background: rgba(21, 50, 91, 0.35)
 		:global(html.dark) .banner-stage__context-divider
-			background: rgba(255, 255, 255, 0.72)
+			background: rgba(255, 255, 255, 0.55)
 
 		.banner-stage__copy--context p
-			margin: var(--m3e-space-4) 0 0
-			font: var(--m3e-type-headline-small)
+			margin: var(--m3e-space-3) 0 0
+			font: var(--m3e-type-title-medium)
+			font-weight: 400
 			line-height: 1.5
-			opacity: 0.9
+			opacity: 0.88
 			overflow-wrap: anywhere
 			text-wrap: pretty
+			display: -webkit-box
+			-webkit-line-clamp: 2
+			-webkit-box-orient: vertical
+			overflow: hidden
 
 		.banner-stage__context-meta
 			display: flex
 			align-items: center
 			justify-content: center
-			gap: var(--m3e-space-2)
+			flex-wrap: wrap
+			gap: var(--m3e-space-2) var(--m3e-space-3)
 			margin-top: var(--m3e-space-3)
 			font: var(--m3e-type-label-large)
 			font-variant-numeric: tabular-nums
-			opacity: 0.8
+			opacity: 0.85
+
+		.banner-stage__context-category
+			display: inline-flex
+			align-items: center
+			padding: 0.125rem 0.625rem
+			border-radius: var(--shape-corner-full)
+			background: unquote("color-mix(in oklab, var(--primary-container) 78%, transparent)")
+			color: var(--on-primary-container)
+			font: var(--m3e-type-label-medium)
+			font-weight: 600
+
+		.banner-stage__context-date-wrap
+			display: inline-flex
+			align-items: center
+			gap: 0.375rem
 
 			> :global(svg)
-				width: var(--m3e-space-5)
-				height: var(--m3e-space-5)
+				width: 1rem
+				height: 1rem
+
+		.banner-stage[data-page="post"]
+			--banner-context-safe-bottom: 5.25rem
+
+			.banner-stage__context-panel
+				width: fit-content
+				min-width: min(100%, 22rem)
+				max-width: min(100%, 48rem)
+				padding: 1.125rem clamp(1.5rem, 3.5vw, 2.75rem)
+				border-radius: var(--shape-corner-xl)
+				background: rgba(255, 255, 255, 0.78)
+				border: 1px solid rgba(21, 50, 91, 0.12)
+				box-shadow: 0 10px 32px rgba(21, 50, 91, 0.08)
+				backdrop-filter: blur(14px) saturate(1.15)
+				-webkit-backdrop-filter: blur(14px) saturate(1.15)
+				text-shadow: none
+
+			.banner-stage__context-title
+				width: auto
+				max-width: 100%
+				font-size: clamp(1.375rem, 2vw, 1.75rem)
+				line-height: 1.4
+				white-space: normal
+				overflow-wrap: anywhere
+				text-wrap: balance
+				display: -webkit-box
+				-webkit-line-clamp: 3
+				-webkit-box-orient: vertical
+				overflow: hidden
+
+			.banner-stage__context-details
+				margin-top: var(--m3e-space-3)
+
+			.banner-stage__context-meta
+				margin-top: var(--m3e-space-2)
+
+		:global(html.dark) .banner-stage[data-page="post"] .banner-stage__context-panel
+			background: rgba(24, 20, 32, 0.64)
+			border-color: rgba(255, 255, 255, 0.16)
+			box-shadow: 0 12px 32px rgba(0, 0, 0, 0.34)
 
 		.banner-stage__copy--context [hidden]
 			display: none

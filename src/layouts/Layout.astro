@@ -291,6 +291,10 @@ const adminGithubUrl =
 		.navbar-hidden { opacity: 0; transform: translateY(-4rem); }
 	}
 	@media (min-width: 1024px) {
+		body:not([data-current-page="home"]) {
+			--banner-stage-height: clamp(20.5rem, 42vh, 25rem);
+			--banner-content-top: calc(var(--banner-stage-height) - var(--banner-panel-overlap));
+		}
 		html[data-wallpaper-mode="banner"] body[data-banner-has-desktop="true"] #main-layout { top: var(--banner-content-top); }
 		html[data-wallpaper-mode="banner"] body[data-banner-has-desktop="true"] #top-row { height: calc(var(--banner-stage-height) - 4.5rem); }
 	}
