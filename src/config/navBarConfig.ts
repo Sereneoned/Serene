@@ -161,20 +161,13 @@ const defaultNavBarConfig: NavBarConfig = {
 		LinkPresets.Anime,
 		LinkPresets.Compass,
 		LinkPresets.Albums,
-		{
-			name: i18n(I18nKey.more),
-			nameKey: I18nKey.more,
-			icon: "material-symbols:apps-rounded",
-			children: [
-				LinkPresets.Timeline,
-				LinkPresets.Projects,
-				LinkPresets.Games,
-				// 分类/标签入口不进导航菜单（避免菜单项过多），预设已登记指向独立页面，
-				// 需要时取消注释即可
-				// LinkPresets.Categories,
-				// LinkPresets.Tags,
-			],
-		},
+		LinkPresets.Projects,
+		LinkPresets.Timeline,
+		LinkPresets.Games,
+		// 分类/标签入口不进导航菜单（避免菜单项过多），预设已登记指向独立页面，
+		// 需要时取消注释即可
+		// LinkPresets.Categories,
+		// LinkPresets.Tags,
 	],
 };
 

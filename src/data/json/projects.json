@@ -2,7 +2,7 @@
 	{
 		"key": "codex-agy-subagents",
 		"title": "codex-agy-subagents",
-		"summary": "零第三方依赖的本地 MCP Server：将 Google Antigravity CLI (agy) 封装为与 OpenAI Codex 原生 1:1 对称的主用 / 溢流异步子代理池，支持 AGY-FIRST 自动调度、Git Worktree 写隔离与 429 熔断兜底。",
+		"summary": "为 OpenAI Codex 接入本地 Antigravity 子代理池，突破 6 路并发上限；支持异步并行、多轮续聊、Worktree 隔离与限流回退。",
 		"category": "ai-tools",
 		"phase": "shipped",
 		"technologies": [
@@ -23,7 +23,7 @@
 	{
 		"key": "antigravity-conversation-forker",
 		"title": "antigravity-conversation-forker",
-		"summary": "零客户端魔改的 Antigravity 官方 MCP App 插件：在桌面端右侧栏嵌入可视化时间线，支持按任意轮次 Turn 1..K 硬切片继承记忆（Smart / Compact / Full），一键在同项目内拉起二次对话并落盘可追溯分叉谱系。",
+		"summary": "为 Antigravity 桌面端提供可视化对话分叉：按任意历史轮次切片回档，继承此前记忆并剥离后续试错，一键创建同项目新对话。",
 		"category": "ai-tools",
 		"phase": "shipped",
 		"technologies": [
