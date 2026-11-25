@@ -1,5 +1,26 @@
 [
 	{
+		"key": "wechat-readonly-mcp",
+		"title": "wechat-readonly-mcp",
+		"summary": "让 AI Agent 本地只读直连微信 4.x：支持实时 WAL 增量同步、PDF/Office/ZIP 直读、V2/WXGF 图片解密与离线语音转文字。",
+		"category": "ai-tools",
+		"phase": "shipped",
+		"technologies": [
+			"Python",
+			"MCP",
+			"SQLCipher 4",
+			"SenseVoice",
+			"Google Antigravity"
+		],
+		"icon": "material-symbols:chat-outline-rounded",
+		"cover": "/assets/projects/wechat-readonly-mcp.webp",
+		"coverAlt": "wechat-readonly-mcp 架构视觉图",
+		"featured": true,
+		"website": "https://sereneoned.github.io/Serene/posts/wechat-readonly-mcp/",
+		"repository": "https://github.com/Sereneoned/wechat-readonly-mcp",
+		"year": "2026"
+	},
+	{
 		"key": "codex-agy-subagents",
 		"title": "codex-agy-subagents",
 		"summary": "为 OpenAI Codex 接入本地 Antigravity 子代理池，突破 6 路并发上限；支持异步并行、多轮续聊、Worktree 隔离与限流回退。",
