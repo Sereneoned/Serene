@@ -1,5 +1,27 @@
 [
 	{
+		"key": "omni-im-readonly-mcp",
+		"title": "omni-im-readonly-mcp",
+		"summary": "个人版三合一严格只读 IM MCP：零公司管理员打通微信 4.x + QQ + 飞书，支持跨平台检索、云文档直读与离线语音转写。",
+		"category": "ai-tools",
+		"phase": "shipped",
+		"technologies": [
+			"Python",
+			"MCP",
+			"WeChat 4.x",
+			"QQ NTQQ",
+			"Feishu CLI",
+			"SenseVoice"
+		],
+		"icon": "material-symbols:hub-outline-rounded",
+		"cover": "/assets/projects/omni-im-readonly-mcp.webp",
+		"coverAlt": "omni-im-readonly-mcp 三合一架构视觉图",
+		"featured": true,
+		"website": "https://sereneoned.github.io/Serene/posts/omni-im-readonly-mcp/",
+		"repository": "https://github.com/Sereneoned/omni-im-readonly-mcp",
+		"year": "2026"
+	},
+	{
 		"key": "wechat-readonly-mcp",
 		"title": "wechat-readonly-mcp",
 		"summary": "让 AI Agent 本地只读直连微信 4.x：支持实时 WAL 增量同步、PDF/Office/ZIP 直读、V2/WXGF 图片解密与离线语音转文字。",
